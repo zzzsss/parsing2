@@ -7,8 +7,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "tools/CONLLReader.h"
-#include "tools/DependencyInstance.h"
+#include "CONLLReader.h"
+#include "DependencyInstance.h"
 using namespace std;
 
 //step0: get_input

@@ -6,7 +6,7 @@
  */
 
 #include "Dict.h"
-#include <algorithm>
+
 
 string Dict::POS_START = "<pos-s>";
 string Dict::POS_END = "<pos-e>";
@@ -16,8 +16,8 @@ string Dict::WORD_END = "<w-e>";
 string Dict::WORD_UNK = "<w-unk>";
 string Dict::WORD_BACKOFF_POS_PREFIX = "_sth_";
 
-Dict::Dict(int remove,int stat,int dsize,int size){
-	maps = new HashMap(size);
+Dict::Dict(int remove,int stat,int dsize){
+	maps = new HashMap(CONS_dict_map_size);
 	statistic_info = stat;
 	remove_single = remove;
 	distance_max = dsize;
@@ -62,9 +62,19 @@ int Dict::get_index(string* word,string* backoff_pos)
 				i = maps->find(&WORD_UNK)->second;
 			else
 				i = iter2->second;
+			delete temp;
 			return i;
 		}
 	}
+	else
+		return iter->second;
+}
+
+int Dict::get_word_index(string* word)
+{
+	HashMap::iterator iter = maps->find(word);
+	if(iter == maps->end())
+		return -1;
 	else
 		return iter->second;
 }
@@ -185,4 +195,39 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	}
 	printf("--Final finish dictionary building, all is %d,distance %d,pos %d,words %d.\n",
 				dict_num,num_distance,num_pos,num_words);
+}
+
+//io
+void Dict::write(string file)
+{
+	//warning when error
+	printf("-Writing dict to %s.\n",file.c_str());
+	ofstream fout(file);
+	fout << dict_num << distance_max;
+	string* all = new string[dict_num];
+	for(HashMap::iterator i = maps->begin();i!=maps->end();i++){
+		if(i->second >= dict_num){
+			//error
+			fprintf(stderr,"Error with dictionary size...\n");
+		}
+		all[i->second] = i->first;
+	}
+	for(int i=0;i<dict_num;i++)
+		fout << *(all[i]) << "\n";
+	fout.close();
+	printf("-Writing finished.\n");
+}
+
+Dict* Dict::Dict(string file)
+{
+	maps = new HashMap(CONS_dict_map_size);
+	printf("-Reading dict from %s.\n",file.c_str());
+	ifstream fin(file);
+	fin >> dict_num >> distance_max;
+	for(int i=0;i<dict_num;i++){
+		string t;
+		fin >> t;
+		maps->insert(pair<string*, int>(new string(t),i));
+	}
+	printf("-Reading dict finished.\n",file.c_str());
 }
