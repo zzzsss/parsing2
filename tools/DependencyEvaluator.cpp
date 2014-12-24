@@ -219,6 +219,13 @@ void DependencyEvaluator::evaluate(std::string &act_file, std::string &pred_file
 
 double DependencyEvaluator::evaluate(std::string &act_file, std::string &pred_file, std::string &format, bool labeled){
 
+	set<string> punctSet = set<string>();
+	punctSet.insert("_pos_''");
+	punctSet.insert("_pos_``");
+	punctSet.insert("_pos_.");
+	punctSet.insert("_pos_:");
+	punctSet.insert("_pos_,");
+
 	CONLLReader* goldReader = new CONLLReader();
 	goldReader->startReading(act_file.c_str());
 
@@ -266,7 +273,7 @@ double DependencyEvaluator::evaluate(std::string &act_file, std::string &pred_fi
 		vector<int>* predHeads = predInstance->heads;
 		//vector<string*>* predLabels = predInstance->deprels;
 
-		//vector<string*>* pos = goldInstance->postags;
+		vector<string*>* pos = goldInstance->postags;
 
 		bool whole = true;
 		bool wholeL = true;
@@ -309,7 +316,7 @@ double DependencyEvaluator::evaluate(std::string &act_file, std::string &pred_fi
 				whole = false;
 				wholeL = false;
 			}
-			/*
+
 			if(punctSet.count(*((*pos)[i])) <= 0){
 				totalNoPunc++;
 				if((*goldHeads)[i] == 0){
@@ -326,6 +333,7 @@ double DependencyEvaluator::evaluate(std::string &act_file, std::string &pred_fi
 					else{
 						corrNoPunc_non_root++;
 					}
+					/*
 					if(labeled){
 						if((*(*predLabels)[i]) == (*(*goldLabels)[i])){
 							corrLNoPunc++;
@@ -340,12 +348,13 @@ double DependencyEvaluator::evaluate(std::string &act_file, std::string &pred_fi
 							wholeLNP = false;
 						}
 					}
+					*/
 				}
 				else{
 					wholeNP = false;
 					wholeLNP = false;
 				}
-			}*/
+			}
 		}
 		total += instanceLength - 1;
 		if(whole){
@@ -396,7 +405,7 @@ double DependencyEvaluator::evaluate(std::string &act_file, std::string &pred_fi
 	}
 
 	printf("\n");
-	/*
+
 	printf("Tokens No Punc: %d\n", totalNoPunc);
 	printf("Correct No Punc: %d\n", corrNoPunc);
 	printf("Unlabeled Accuracy No Punc: %.2lf%%\n", ((double)corrNoPunc) * 100 / totalNoPunc);
@@ -422,7 +431,8 @@ double DependencyEvaluator::evaluate(std::string &act_file, std::string &pred_fi
 	printf("Unlabeled Accuracy No Punc Non Root: %.2lf%%\n", ((double)corrNoPunc_non_root) * 100 / totalNoPunc_non_root);
 	if(labeled){
 		printf("Labeled Accuracy No Punc Non Root: %.2lf%%\n", ((double)corrLNoPunc_non_root) * 100 / totalNoPunc_non_root);
-	}*/
+	}
+
 	goldReader->finishReading();
 	predictedReader->finishReading();
 	delete(goldReader);

@@ -20,4 +20,9 @@ public:
 	void finishReading();
 	DependencyInstance* getNext();
 };
+
+//read and write corpus
+extern vector<DependencyInstance*>* read_corpus(string file);
+extern void write_corpus(vector<DependencyInstance*>* instances,string file);
+
 #endif
