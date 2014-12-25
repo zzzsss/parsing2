@@ -13,7 +13,10 @@
 #include <string>
 using namespace std;
 
+//well, maybe bad design, but convenient, ???
 namespace parsing_conf{
+//1.0
+extern int CONF_method;	//which method
 //1.1-files
 extern string CONF_train_file;	//the training file
 extern string CONF_dev_file;	//testing files

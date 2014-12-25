@@ -6,6 +6,8 @@ void DependencyInstance::init(){
 	forms = NULL;
 	heads = NULL;
 	postags = NULL;
+	index_forms = NULL;
+	index_pos = NULL;
 	//combined_feats = NULL;
 }
 DependencyInstance::DependencyInstance(){
@@ -51,6 +53,8 @@ DependencyInstance::~DependencyInstance(){
 	delete(postags);
 	delete(forms);
 	delete(heads);
+	delete(index_forms);
+	delete(index_pos);
 	forms = NULL;
 	heads = NULL;
 }

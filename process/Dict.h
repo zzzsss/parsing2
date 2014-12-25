@@ -45,6 +45,8 @@ public:
 	void write(string file);
 	static Dict* read(string file);
 
+	int get_count(){return dict_num;}
+
 	Dict(string file);
 	Dict(int remove,int stat=1,int dist=CONS_distance_max);
 	~Dict(){

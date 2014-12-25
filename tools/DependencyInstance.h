@@ -23,6 +23,11 @@ public:
 	//vector<string*>* deprels;
 	//vector<RelationalFeature*>* relFeats;
 	//vector<string*>* combined_feats;	//combined features when considering POS
+
+	//used when decoding --- set later
+	vector<int>* index_forms;
+	vector<int>* index_pos;
+
 	DependencyInstance();
 	DependencyInstance(vector<string*>* forms, vector<string*>* postags,vector<int>* heads);
 	~DependencyInstance();

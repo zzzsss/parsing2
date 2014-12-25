@@ -9,7 +9,12 @@
 #define PROCESS_H_
 
 #include "Parameters.h"
+#include "../features/FeatureGen.h"
+#include "../features/FeatureGenO1.h"
+#include "../tools/Eisner.h"
 #include "../tools/CONLLReader.h"
+#include "../cslm/Mach.h"
+#include "../cslm/MachConfig.h"
 #include <cstdlib>
 using namespace parsing_conf;
 
@@ -19,6 +24,7 @@ protected:
 	//corpus
 	vector<DependencyInstance*>* training_corpus;
 	vector<DependencyInstance*>* dev_test_corpus;
+	FeatureGen* feat_gen;
 	Dict* dict;
 
 	//read from restart file or from scratch
@@ -30,10 +36,18 @@ protected:
 	Mach *mach;
 	void set_lrate();
 	void nn_train_one_iter();
-	void nn_dev_test(string to_test,string output,string gold);
+	double nn_dev_test(string to_test,string output,string gold);
 
 	//virtual functions for different methods
 	virtual void each_write_mach_conf()=0;
+	virtual void each_prepare_data_oneiter()=0;
+	virtual REAL* each_next_data(int*)=0;
+	virtual REAL* each_get_grad(int)=0;
+
+	virtual vector<int>* each_test_one(DependencyInstance* x){
+		//for now
+		return parse_o1(x);
+	}
 
 	//restart files
 	void read_restart_conf();
@@ -41,8 +55,19 @@ protected:
 	void delete_restart_conf();
 public:
 	void train();
-	void test();
+	void test(Mach*,Dict*);
 	virtual ~Process(){}
+
+	//help
+	static void shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int times);
+	static void set_softmax_gradient(const REAL* s_target,const REAL* s_output,REAL* s_gradient,int bsize,int c);
+
+protected:
+	//useful functions
+	//parsing
+	vector<int>* parse_o1(DependencyInstance*);
+	//write nn_conf
+	void write_conf(int c);
 };
 
 #endif /* PROCESS_H_ */

@@ -22,7 +22,6 @@
  */
 
 #include <math.h>
-#include <stdio.h>
 
 // basic implementation of fucntions on vectors
 // It is more efficient to use vectorized functions, for instance those available in MKL
@@ -30,15 +29,6 @@
 
 void atlas_vtanh(int *n, float *d) {int i;  for (i=0; i<*n; i++, d++) *d = tanh(*d); } 
 void atlas_vlog(int *n, float *d) {int i;  for (i=0; i<*n; i++, d++) *d = log(*d); } 
-void atlas_vexp(int *n, float *d) {
-	int i;
-	for (i=0; i<*n; i++, d++){
-		if(*d > 87){
-			printf("Warning :%g\n",(double)*d);
-			fflush(stdout);
-		}
-		*d = exp(*d);
-	}
-}
+void atlas_vexp(int *n, float *d) {int i;  for (i=0; i<*n; i++, d++) *d = exp(*d); } 
 void atlas_vsqr(int *n, float *d) {int i;  for (i=0; i<*n; i++, d++) *d *= *d; } 
 

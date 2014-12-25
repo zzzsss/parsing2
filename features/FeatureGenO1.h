@@ -12,7 +12,8 @@
 class FeatureGenO1: public FeatureGen{
 public:
 	FeatureGenO1(Dict* d,int w,int di);
-	virtual int fill_one(int*,DependencyInstance*,int head,int mod);
+	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod);
+	virtual void deal_with_corpus(vector<DependencyInstance*>*);
 	virtual ~FeatureGenO1(){}
 };
 

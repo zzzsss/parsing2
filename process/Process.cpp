@@ -29,6 +29,11 @@ void Process::train()
 		dict->write(CONF_dict_file);
 	}
 
+	//3.5
+	// here only the order1 features
+	feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance);
+	feat_gen->deal_with_corpus(training_corpus);
+
 	//4. get machine
 	string mach_cur_name = CONF_mach_name+CONF_mach_cur_suffix;
 	if(CTL_continue){
@@ -79,8 +84,10 @@ void Process::train()
 	}
 }
 
-void Process::test()
+void Process::test(Mach* m,Dict* d)
 {
+	mach = m;
+	dict = d;
 	nn_dev_test(CONF_test_file,CONF_output_file,CONF_gold_file);
 }
 
@@ -94,7 +101,7 @@ void Process::set_lrate()
   lrate = lrate_beg - mach->GetNbForw() * lrate_mult;
 #else
   if (CONF_NN_LMULT>0)
-	  cur_lrate = CONF_NN_LRATE / (1.0 + mach->GetNbForw() * CONF_NN_LMULT);		// quadratic decrease
+	  cur_lrate = CONF_NN_LRATE / (1.0 + mach->GetNbBackw() * CONF_NN_LMULT);		// quadratic decrease
   else
 	  cur_lrate = CONF_NN_LRATE; // lrate_beg it will be modified in function of the performance on the development data
 #endif
@@ -116,9 +123,10 @@ void Process::nn_train_one_iter()
 		if(xinput){
 			mach->SetDataIn(xinput);
 			mach->Forw(n_size);
-			REAL* gradient = each_get_grad(mach->GetDataOut(),n_size);	/*************virtual****************/
-			set_lrate();
+			//gradient for mach already set when prepare data
+			each_get_grad(n_size);	/*************virtual****************/
 			mach->Backw(cur_lrate, CONF_NN_WD, n_size);
+			set_lrate();
 		}
 		else
 			break;
@@ -133,6 +141,11 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 {
 	//also assuming test-file itself is gold file(this must be true with dev file)
 	dev_test_corpus = read_corpus(to_test);
+	if(! feat_gen){	//when testing
+		feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance);
+	}
+	feat_gen->deal_with_corpus(dev_test_corpus);
+
 	int token_num = 0;	//token number
 	int miss_count = 0;
 	for(int i=0;i<dev_test_corpus->size();i++){
@@ -186,4 +199,67 @@ void Process::delete_restart_conf()
 	cmd += CONF_restart_file;
 	cmd += ";";
 	system(cmd.c_str());
+}
+
+vector<int>* Process::parse_o1(DependencyInstance* x)
+{
+	int idim = feat_gen->get_xdim();
+	int odim = mach->GetOdim();
+	//default order1 parsing
+	int length = x->forms->size();
+	double *tmp_scores = new double[length*length*2];
+	//construct scores using nn
+	int num_pair = length*(length-1);	//2 * (0+(l-1))*l/2
+	REAL *mach_x = new REAL[num_pair*idim];
+	REAL *mach_y = new REAL[num_pair*odim];
+	REAL* assign_x = mach_x;
+	for(int ii=0;ii<length;ii++){
+		for(int j=ii+1;j<length;j++){
+			for(int lr=0;lr<2;lr++){
+				//build mach_x
+				if(lr==E_RIGHT)
+					feat_gen->fill_one(assign_x,x,ii,j);
+				else
+					feat_gen->fill_one(assign_x,x,j,ii);
+				assign_x += idim;
+			}
+		}
+	}
+	//mach evaluate
+	int remain = num_pair;
+	int bsize = mach->GetBsize();
+	REAL* xx = mach_x;
+	REAL* yy = mach_y;
+	while(remain > 0){
+		int n=0;
+		if(remain >= bsize)
+			n = bsize;
+		else
+			n = remain;
+		remain -= bsize;
+		mach->SetDataIn(xx);
+		mach->Forw(n);
+		memcpy(yy, mach->data_out, odim*sizeof(REAL)*n);
+		yy += n*odim;
+		xx += n*idim;
+	}
+	REAL* assign_y = mach_y;
+	for(int ii=0;ii<length;ii++){
+		for(int j=ii+1;j<length;j++){
+			for(int lr=0;lr<2;lr++){
+				int index = get_index2(length,ii,j,lr);
+				//important ...
+				double temp = 0;
+				if(odim > 1){
+					for(int c=0;c<odim;c++)
+						temp += (*assign_y++)*c;
+					tmp_scores[index] = temp;
+				}
+				else
+					tmp_scores[index] = *assign_y++;
+			}
+		}
+	}
+	vector<int> *ret = decodeProjective(length,tmp_scores);
+	return ret;
 }
