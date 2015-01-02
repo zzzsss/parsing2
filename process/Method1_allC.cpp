@@ -33,11 +33,11 @@ void Method1_allC::each_prepare_data_oneiter()
 	//-- generate all
 	data = new REAL[num_pairs*mach->GetIdim()];
 	target = new REAL[num_pairs];
+	REAL* assign_x = data;
+	REAL* assign_y = target;
 	for(int i=0;i<sentences;i++){
 		DependencyInstance* x = training_corpus->at(i);
 		int length = x->length();
-		REAL* assign_x = data;
-		REAL* assign_y = target;
 		for(int ii=0;ii<length;ii++){
 			for(int j=ii+1;j<length;j++){
 				for(int lr=0;lr<2;lr++){

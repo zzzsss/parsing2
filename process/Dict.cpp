@@ -182,8 +182,6 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 					maps->insert(pair<string*, int>(real_words[i],dict_num++));
 				}
 			}
-			delete [] real_words;
-			delete [] real_words_count;
 			printf("-Remove single count words %d:\n",to_remove);
 			printf("--Final finish dictionary building, all is %d,distance %d,pos %d,words %d.\n",
 						dict_num,num_distance,num_pos,num_words-to_remove);
@@ -195,8 +193,6 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	for(int i=0;i<real_words.size();i++){
 		maps->insert(pair<string*, int>(real_words[i],dict_num++));
 	}
-	delete [] real_words;
-	delete [] real_words_count;
 	printf("--Final finish dictionary building, all is %d,distance %d,pos %d,words %d.\n",
 				dict_num,num_distance,num_pos,num_words);
 }

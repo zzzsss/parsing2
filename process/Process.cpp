@@ -24,7 +24,7 @@ void Process::train()
 	}
 	else{
 		cout << "3.get dict from scratch:" << endl;
-		dict = new Dict(CONF_add_distance,1);
+		dict = new Dict(CONF_dict_remove,1);
 		dict->construct_dictionary(training_corpus);
 		dict->write(CONF_dict_file);
 	}

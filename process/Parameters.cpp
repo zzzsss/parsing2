@@ -88,7 +88,7 @@ void init_configurations(string conf_file)
 	printf("NN: lrate(%g),iters(%d),lmult(%g),wdecay(%g),hidden_por(%g),word_esize(%d),plus_layers(%d),resample(%g),bsize(%d)",
 			CONF_NN_LRATE,CONF_NN_ITER,CONF_NN_LMULT,CONF_NN_WD,CONF_NN_hidden_size_portion,CONF_NN_we,CONF_NN_plus_layers,
 			CONF_NN_resample,CONF_NN_BS);
-	printf("Feature: xwindow(%d),distance(%d),removes(%d)",CONF_x_window,CONF_add_distance,CONF_dict_remove);
+	printf("Feature: xwindow(%d),distance(%d),removes(%d)\n",CONF_x_window,CONF_add_distance,CONF_dict_remove);
 }
 
 };

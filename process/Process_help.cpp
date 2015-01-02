@@ -51,18 +51,22 @@ void Process::shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int t
 	cout << "--shuffle data " << times << " times.";
 	REAL* tx = new REAL[xs];
 	REAL* ty = new REAL[ys];
+	int xcopy_size = xs*sizeof(REAL);
+	int ycopy_size = ys*sizeof(REAL);
 	for(int i=0;i<times;i++){
 		for(int t=0;t<num;t++){
 			int which = t+(rand()%(num-t));
+			if(which==t)
+				continue;
 			//t->temp
-			memcpy(tx,x+t*xs,xs);
-			memcpy(ty,y+t*ys,ys);
+			memcpy(tx,x+t*xs,xcopy_size);
+			memcpy(ty,y+t*ys,ycopy_size);
 			//which->t
-			memcpy(x+t*xs,x+which*xs,xs);
-			memcpy(y+t*ys,y+which*ys,ys);
+			memcpy(x+t*xs,x+which*xs,xcopy_size);
+			memcpy(y+t*ys,y+which*ys,ycopy_size);
 			//temp->which
-			memcpy(x+which*xs,tx,xs);
-			memcpy(y+which*ys,ty,ys);
+			memcpy(x+which*xs,tx,xcopy_size);
+			memcpy(y+which*ys,ty,ycopy_size);
 		}
 	}
 	delete [] tx;
