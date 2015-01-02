@@ -20,7 +20,7 @@ void Process::train()
 	//3. get dictionary --- whether continue to train
 	if(CTL_continue){
 		cout << "3.get dict from file "<< CONF_dict_file << endl;
-		dict = Dict(CONF_dict_file);
+		dict = new Dict(CONF_dict_file);
 	}
 	else{
 		cout << "3.get dict from scratch:" << endl;
@@ -50,7 +50,7 @@ void Process::train()
 		//for mach_config
 		char *argv[2];
 		argv[0] = "nn";
-		argv[1] = CONF_mach_conf_name.c_str();
+		argv[1] = (char*)CONF_mach_conf_name.c_str();
 		mach_config.parse_options(2,argv);
 	    mach = mach_config.get_machine();
 	    if(mach == 0)
@@ -64,7 +64,7 @@ void Process::train()
 		write_restart_conf();
 
 		nn_train_one_iter();
-		double this_result = nn_dev_test(CONF_dev_file,CONF_output_file+"dev",CONF_dev_file);
+		double this_result = nn_dev_test(CONF_dev_file,CONF_output_file+".dev",CONF_dev_file);
 
 		//write curr mach
 		ofstream fs;
@@ -164,6 +164,12 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 	string ttt;
 	cout << "Evaluate:" << (token_num-miss_count) << "/" << token_num << endl;
 	DependencyEvaluator::evaluate(gold,output,ttt,false);
+
+	//clear
+	for(int i=0;i<dev_test_corpus->size();i++){
+		delete dev_test_corpus->at(i);
+	}
+	delete dev_test_corpus;
 	return (double)(token_num-miss_count) / token_num;
 }
 
@@ -171,7 +177,7 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 //restart conf files and also set sth
 void Process::read_restart_conf()
 {
-	ifstream ifs(CONF_restart_file);
+	ifstream ifs(CONF_restart_file.c_str());
 	if(!ifs){
 		CTL_continue = 0;
 		cur_iter = 0;
@@ -188,8 +194,8 @@ void Process::read_restart_conf()
 
 void Process::write_restart_conf()
 {
-	ofstream ofs(CONF_restart_file);
-	ofs << cur_iter << cur_lrate;
+	ofstream ofs(CONF_restart_file.c_str());
+	ofs << cur_iter << " " << cur_lrate << "\n";
 	ofs.close();
 }
 
@@ -239,7 +245,7 @@ vector<int>* Process::parse_o1(DependencyInstance* x)
 		remain -= bsize;
 		mach->SetDataIn(xx);
 		mach->Forw(n);
-		memcpy(yy, mach->data_out, odim*sizeof(REAL)*n);
+		memcpy(yy, mach->GetDataOut(), odim*sizeof(REAL)*n);
 		yy += n*odim;
 		xx += n*idim;
 	}

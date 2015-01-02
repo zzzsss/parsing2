@@ -9,13 +9,15 @@
 #define PROCESS_H_
 
 #include "Parameters.h"
-#include "../features/FeatureGen.h"
-#include "../features/FeatureGenO1.h"
+#include "FeatureGen.h"
+#include "FeatureGenO1.h"
 #include "../tools/Eisner.h"
 #include "../tools/CONLLReader.h"
+#include "../tools/DependencyEvaluator.h"
 #include "../cslm/Mach.h"
 #include "../cslm/MachConfig.h"
 #include <cstdlib>
+#include <cstring>
 using namespace parsing_conf;
 
 //this base class is coupled with configurations
@@ -42,7 +44,7 @@ protected:
 	virtual void each_write_mach_conf()=0;
 	virtual void each_prepare_data_oneiter()=0;
 	virtual REAL* each_next_data(int*)=0;
-	virtual REAL* each_get_grad(int)=0;
+	virtual void each_get_grad(int)=0;
 
 	virtual vector<int>* each_test_one(DependencyInstance* x){
 		//for now

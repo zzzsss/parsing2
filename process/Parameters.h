@@ -49,7 +49,7 @@ extern int CONF_add_distance;	//whether add distance
 extern int CONF_dict_remove;	//remove words appears only once
 
 //others
-extern void init_configurations();
+extern void init_configurations(string);
 
 };
 

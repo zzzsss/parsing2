@@ -6,6 +6,8 @@
  */
 
 #include "Parameters.h"
+#include <fstream>
+#include <cstdio>
 
 namespace parsing_conf{
 //1.0
@@ -45,7 +47,7 @@ int CONF_dict_remove=0;	//remove words appears only once
 void init_configurations(string conf_file)
 {
 #define DATA_LINE_LEN 10000
-	ifstream fin(conf_file);
+	ifstream fin(conf_file.c_str());
 	cout << "Dealing configure file '" << conf_file << "'" << endl;
 	fin >> CONF_method;
 	while(!fin.eof()){
@@ -80,7 +82,7 @@ void init_configurations(string conf_file)
 	}
 
 	//the configurations
-	printf("Final configurations:\n");
+	printf("The configurations:\n");
 	printf("Data files: %s,%s,%s,%s,%s\n",CONF_train_file.c_str(),CONF_dev_file.c_str(),
 			CONF_test_file.c_str(),CONF_output_file.c_str(),CONF_gold_file.c_str());
 	printf("NN: lrate(%g),iters(%d),lmult(%g),wdecay(%g),hidden_por(%g),word_esize(%d),plus_layers(%d),resample(%g),bsize(%d)",

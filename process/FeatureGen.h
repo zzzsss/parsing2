@@ -9,8 +9,10 @@
 #define FEATUREGEN_H_
 #include "Dict.h"
 #include "../tools/DependencyInstance.h"
+#include "../cslm/Mach.h"
 
 class FeatureGen{
+protected:
 	Dict* dictionary;
 	int window_size;
 	int distance;	//whether add distance feature

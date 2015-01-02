@@ -8,6 +8,7 @@
 #ifndef DICT_H_
 #define DICT_H_
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 #include <string>
 #include <algorithm>

@@ -11,7 +11,7 @@
 
 void Process::write_conf(int c)
 {
-	ofstream fout(CONF_mach_conf_name);
+	ofstream fout(CONF_mach_conf_name.c_str());
 	fout << "block-size = 128\n";
 	int xdim = feat_gen->get_xdim();
 	int width = xdim*CONF_NN_we;
@@ -48,7 +48,7 @@ void Process::shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int t
 	if(num!=num2 || xall%xs!=0 || yall%ys!=0)
 		Error("Illegal size when shuffle");
 	//shuffle 10 times
-	cout << "--shuffle data "+times+" times.";
+	cout << "--shuffle data " << times << " times.";
 	REAL* tx = new REAL[xs];
 	REAL* ty = new REAL[ys];
 	for(int i=0;i<times;i++){
@@ -73,9 +73,9 @@ void Process::shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int t
 // d(E)/d(zi) = (if i is target) ? 1-zi : -zi
 void Process::set_softmax_gradient(const REAL* s_target,const REAL* s_output,REAL* s_gradient,int bsize,int c)
 {
-	REAL *optr=s_output;
+	const REAL *optr=s_output;
 	REAL *gptr=s_gradient;
-	REAL *tptr=s_target;
+	const REAL *tptr=s_target;
 	int n = bsize*c;
 	REAL f1=-1.0;
 	memcpy(s_gradient,s_output,n*sizeof(REAL));

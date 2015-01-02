@@ -182,6 +182,8 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 					maps->insert(pair<string*, int>(real_words[i],dict_num++));
 				}
 			}
+			delete [] real_words;
+			delete [] real_words_count;
 			printf("-Remove single count words %d:\n",to_remove);
 			printf("--Final finish dictionary building, all is %d,distance %d,pos %d,words %d.\n",
 						dict_num,num_distance,num_pos,num_words-to_remove);
@@ -193,6 +195,8 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	for(int i=0;i<real_words.size();i++){
 		maps->insert(pair<string*, int>(real_words[i],dict_num++));
 	}
+	delete [] real_words;
+	delete [] real_words_count;
 	printf("--Final finish dictionary building, all is %d,distance %d,pos %d,words %d.\n",
 				dict_num,num_distance,num_pos,num_words);
 }
@@ -202,9 +206,10 @@ void Dict::write(string file)
 {
 	//warning when error
 	printf("-Writing dict to %s.\n",file.c_str());
-	ofstream fout(file);
-	fout << dict_num << distance_max;
-	string* all = new string[dict_num];
+	ofstream fout;
+	fout.open(file.c_str(),ofstream::out);
+	fout << dict_num << " " << distance_max << "\n";
+	string** all = new string*[dict_num];
 	for(HashMap::iterator i = maps->begin();i!=maps->end();i++){
 		if(i->second >= dict_num){
 			//error
@@ -215,14 +220,16 @@ void Dict::write(string file)
 	for(int i=0;i<dict_num;i++)
 		fout << *(all[i]) << "\n";
 	fout.close();
+	delete []all;
 	printf("-Writing finished.\n");
 }
 
-Dict* Dict::Dict(string file)
+Dict::Dict(string file)
 {
 	maps = new HashMap(CONS_dict_map_size);
 	printf("-Reading dict from %s.\n",file.c_str());
-	ifstream fin(file);
+	ifstream fin;
+	fin.open(file.c_str(),ifstream::in);
 	fin >> dict_num >> distance_max;
 	for(int i=0;i<dict_num;i++){
 		string t;
