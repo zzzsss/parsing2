@@ -59,6 +59,11 @@ public:
 	void train();
 	void test(Mach*,Dict*);
 	virtual ~Process(){}
+	Process(){
+		feat_gen = 0;
+		mach = 0;
+		dict = 0;
+	}
 
 	//help
 	static void shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int times);

@@ -64,6 +64,7 @@ void Process::train()
 		write_restart_conf();
 
 		nn_train_one_iter();
+		cout << "-- Iter done, waiting for test dev:" << endl;
 		double this_result = nn_dev_test(CONF_dev_file,CONF_output_file+".dev",CONF_dev_file);
 
 		//write curr mach
@@ -86,6 +87,7 @@ void Process::train()
 
 void Process::test(Mach* m,Dict* d)
 {
+	cout << "----- Testing -----" << endl;
 	mach = m;
 	dict = d;
 	nn_dev_test(CONF_test_file,CONF_output_file,CONF_gold_file);
@@ -112,11 +114,11 @@ void Process::nn_train_one_iter()
 {
 	time_t now;
 	time(&now); //ctime is not rentrant ! use ctime_r() instead if needed
-	cout << "*** Start training for iter " << cur_iter << " at " << ctime(&now) << endl;
+	cout << "##*** Start training for iter " << cur_iter << " at " << ctime(&now) << std::flush;
 	each_prepare_data_oneiter();	/*************virtual****************/
 	Timer ttrain;		// total training time
 	ttrain.start();
-	do{
+	while(1){
 		int n_size = mach->GetBsize();
 		/*************virtual****************/
 		REAL* xinput = each_next_data(&n_size);	//this may change n_size, all memory managed not here
@@ -130,11 +132,11 @@ void Process::nn_train_one_iter()
 		}
 		else
 			break;
-	}while(1);
+	}
 
 	ttrain.stop();
 	ttrain.disp(" - training time: ");
-	printf("\n");
+	cout << "\n";
 }
 
 double Process::nn_dev_test(string to_test,string output,string gold)
@@ -162,7 +164,9 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 	}
 	write_corpus(dev_test_corpus,output);
 	string ttt;
-	cout << "Evaluate:" << (token_num-miss_count) << "/" << token_num << endl;
+	double rate = (double)(token_num-miss_count) / token_num;
+	cout << "Evaluate:" << (token_num-miss_count) << "/" << token_num
+			<< "(" << rate << ")" << endl;
 	DependencyEvaluator::evaluate(gold,output,ttt,false);
 
 	//clear
@@ -170,7 +174,7 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 		delete dev_test_corpus->at(i);
 	}
 	delete dev_test_corpus;
-	return (double)(token_num-miss_count) / token_num;
+	return rate;
 }
 
 
