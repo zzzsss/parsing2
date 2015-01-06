@@ -286,6 +286,9 @@ vector<int>* Process::parse_o1(DependencyInstance* x)
 					}
 					if(!feat_o1->allowed_pair(x->index_pos->at(head),x->index_pos->at(modif))){
 						tmp_scores[index] = DOUBLE_LARGENEG;	//is this neg enough??
+						//skip forward
+						for(int c=0;c<odim;c++)
+							assign_y++;
 						continue;
 					}
 				}
@@ -304,5 +307,6 @@ vector<int>* Process::parse_o1(DependencyInstance* x)
 	vector<int> *ret = decodeProjective(length,tmp_scores);
 	delete []mach_x;
 	delete []mach_y;
+	delete []tmp_scores;
 	return ret;
 }
