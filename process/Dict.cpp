@@ -232,5 +232,5 @@ Dict::Dict(string file)
 		fin >> t;
 		maps->insert(pair<string*, int>(new string(t),i));
 	}
-	printf("-Reading dict finished.\n",file.c_str());
+	printf("-Reading dict finished.\n");
 }

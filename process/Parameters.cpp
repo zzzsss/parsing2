@@ -26,13 +26,14 @@ string CONF_mach_conf_name="nn.conf";	//nn.conf
 string CONF_mach_cur_suffix=".curr";
 string CONF_mach_best_suffix=".best";
 string CONF_restart_file="nn.restart";		//recording the training iters
+string CONF_feature_file="nn.feat";
 
 //1.3-for nn
 double CONF_NN_LRATE=0.045;
 int CONF_NN_ITER=20;
 double CONF_NN_LMULT=1e-9;
 double CONF_NN_WD=3e-5;
-double CONF_NN_hidden_size_portion=0.7;	//how much is hidden size
+double CONF_NN_hidden_size_portion=0.2;	//how much is hidden size
 int CONF_NN_we=50;						//word-embedding size
 int CONF_NN_plus_layers=0;				//plus number of layers(plus from base)
 double CONF_NN_resample=1.0;				//re-sample rate
@@ -40,8 +41,9 @@ int CONF_NN_BS=128;						//block-size
 
 //1.4-for parsing basis
 int CONF_x_window=5;	//word and pos window size
-int CONF_add_distance=0;	//whether add distance
+int CONF_add_distance=1;	//whether add distance
 int CONF_dict_remove=0;	//remove words appears only once
+int CONF_pos_filter=0;		//add filters, with pairs seen before
 
 //others
 void init_configurations(string conf_file)
@@ -77,6 +79,7 @@ void init_configurations(string conf_file)
 		else if(buf=="f_xwin") 	fin >> CONF_x_window;
 		else if(buf=="f_distance") fin >> CONF_add_distance;
 		else if(buf=="f_removes") fin >> CONF_dict_remove;
+		else if(buf=="f_filter") fin >> CONF_pos_filter;
 		else
 			cout << "Unknown conf " << buf << endl;
 	}
@@ -88,7 +91,8 @@ void init_configurations(string conf_file)
 	printf("NN: lrate(%g),iters(%d),lmult(%g),wdecay(%g),hidden_por(%g),word_esize(%d),plus_layers(%d),resample(%g),bsize(%d)",
 			CONF_NN_LRATE,CONF_NN_ITER,CONF_NN_LMULT,CONF_NN_WD,CONF_NN_hidden_size_portion,CONF_NN_we,CONF_NN_plus_layers,
 			CONF_NN_resample,CONF_NN_BS);
-	printf("Feature: xwindow(%d),distance(%d),removes(%d)\n",CONF_x_window,CONF_add_distance,CONF_dict_remove);
+	printf("Feature: xwindow(%d),distance(%d),removes(%d),filter(%d)\n",
+			CONF_x_window,CONF_add_distance,CONF_dict_remove,CONF_pos_filter);
 }
 
 };

@@ -28,6 +28,11 @@ public:
 	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod)=0;
 	virtual void deal_with_corpus(vector<DependencyInstance*>*)=0;
 	FeatureGen(Dict* d,int w,int di):dictionary(d),window_size(w),distance(di),xdim(0){}
+
+	//for extra information(1.filter )
+	virtual void add_filter(vector<DependencyInstance*>*)=0;
+	virtual void read_extra_info(string f)=0;
+	virtual void write_extra_info(string f)=0;
 };
 
 #endif /* FEATUREGEN_H_ */

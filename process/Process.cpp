@@ -33,6 +33,10 @@ void Process::train()
 	// here only the order1 features
 	feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance);
 	feat_gen->deal_with_corpus(training_corpus);
+	if(CONF_pos_filter){
+		feat_gen->add_filter(training_corpus);
+		feat_gen->write_extra_info(CONF_feature_file);
+	}
 
 	//4. get machine
 	string mach_cur_name = CONF_mach_name+CONF_mach_cur_suffix;
@@ -63,7 +67,8 @@ void Process::train()
 	string mach_best_name = CONF_mach_name+CONF_mach_best_suffix;
 	double * dev_results = new double[CONF_NN_ITER];
 	for(int i=cur_iter;i<CONF_NN_ITER;i++){
-		write_restart_conf();
+		if(cur_iter>0)
+			write_restart_conf();
 
 		nn_train_one_iter();
 		cout << "-- Iter done, waiting for test dev:" << endl;
@@ -155,6 +160,9 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 	dev_test_corpus = read_corpus(to_test);
 	if(! feat_gen){	//when testing
 		feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance);
+		if(CONF_pos_filter){
+			feat_gen->read_extra_info(CONF_feature_file);
+		}
 	}
 	feat_gen->deal_with_corpus(dev_test_corpus);
 
@@ -200,8 +208,6 @@ void Process::read_restart_conf()
 	else{
 		CTL_continue = 1;
 		ifs >> cur_iter >> cur_lrate;
-		if(cur_iter == 0)
-			CTL_continue = 0;	//no previous result, restart
 	}
 	printf("-- %d %d %g",CTL_continue,cur_iter,(double)cur_lrate);
 	ifs.close();
@@ -266,10 +272,23 @@ vector<int>* Process::parse_o1(DependencyInstance* x)
 		xx += n*idim;
 	}
 	REAL* assign_y = mach_y;
+	FeatureGenO1* feat_o1 = (FeatureGenO1*)feat_gen;	//force it
 	for(int ii=0;ii<length;ii++){
 		for(int j=ii+1;j<length;j++){
 			for(int lr=0;lr<2;lr++){
 				int index = get_index2(length,ii,j,lr);
+				//if filter --- this is the easy way(but waste computation)
+				if(CONF_pos_filter){
+					int head = ii, modif = j;
+					if(lr==E_LEFT){
+						head = j;
+						modif = ii;
+					}
+					if(!feat_o1->allowed_pair(x->index_pos->at(head),x->index_pos->at(modif))){
+						tmp_scores[index] = DOUBLE_LARGENEG;	//is this neg enough??
+						continue;
+					}
+				}
 				//important ...
 				double temp = 0;
 				if(odim > 1){

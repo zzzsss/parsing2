@@ -31,6 +31,7 @@ extern string CONF_mach_conf_name;	//nn.conf
 extern string CONF_mach_cur_suffix;
 extern string CONF_mach_best_suffix;
 extern string CONF_restart_file;		//recording the training iters
+extern string CONF_feature_file;
 
 //1.3-for nn
 extern double CONF_NN_LRATE;
@@ -47,11 +48,13 @@ extern int CONF_NN_BS;						//block-size
 extern int CONF_x_window;	//word and pos window size
 extern int CONF_add_distance;	//whether add distance
 extern int CONF_dict_remove;	//remove words appears only once
+extern int CONF_pos_filter;		//add filters, with pairs seen before
 
 //others
 extern void init_configurations(string);
 
 };
 
+#define DOUBLE_LARGENEG -10000000.0		//maybe it is enough
 
 #endif /* COMMON_H_ */

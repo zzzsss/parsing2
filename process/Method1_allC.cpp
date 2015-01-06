@@ -31,10 +31,12 @@ void Method1_allC::each_prepare_data_oneiter()
 		num_pairs += length*(length-1);
 	}
 	//-- generate all
+	int real_num_pairs = 0;
 	data = new REAL[num_pairs*mach->GetIdim()];
 	target = new REAL[num_pairs];
 	REAL* assign_x = data;
 	REAL* assign_y = target;
+	FeatureGenO1* feat_o1 = (FeatureGenO1*)feat_gen;	//force it
 	for(int i=0;i<sentences;i++){
 		DependencyInstance* x = training_corpus->at(i);
 		int length = x->length();
@@ -43,25 +45,30 @@ void Method1_allC::each_prepare_data_oneiter()
 				for(int lr=0;lr<2;lr++){
 					//build mach_x
 					REAL t = 0;
-					if(lr==E_RIGHT){
-						feat_gen->fill_one(assign_x,x,ii,j);
-						if(x->heads->at(j)==ii)
-							t=1;
+					int head = ii, mod = j;
+					if(lr==E_LEFT){
+						head = j;
+						mod = ii;
 					}
-					else{
-						feat_gen->fill_one(assign_x,x,j,ii);
-						if(x->heads->at(ii)==j)
-							t=1;
+					//check filter if set
+					if(CONF_pos_filter){
+						if(!feat_o1->allowed_pair(x->index_pos->at(head),x->index_pos->at(mod)))
+							continue;
 					}
+					feat_gen->fill_one(assign_x,x,head,mod);
+					if(x->heads->at(mod)==head)
+						t=1;
+
 					*assign_y = t;
 					assign_x += mach->GetIdim();
 					assign_y += 1;
+					real_num_pairs++;
 				}
 			}
 		}
 	}
 	current = 0;
-	end = num_pairs;
+	end = real_num_pairs;
 	//shuffle
 	shuffle_data(data,target,mach->GetIdim(),1,num_pairs*mach->GetIdim(),num_pairs,10);
 	//sample
