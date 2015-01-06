@@ -58,14 +58,17 @@ void Process::train()
 	}
 
 	//5. main training
+	cout << "5.start training: " << endl;
 	double best_result = 0;
 	string mach_best_name = CONF_mach_name+CONF_mach_best_suffix;
+	double * dev_results = new double[CONF_NN_ITER];
 	for(int i=cur_iter;i<CONF_NN_ITER;i++){
 		write_restart_conf();
 
 		nn_train_one_iter();
 		cout << "-- Iter done, waiting for test dev:" << endl;
 		double this_result = nn_dev_test(CONF_dev_file,CONF_output_file+".dev",CONF_dev_file);
+		dev_results[cur_iter] = this_result;
 
 		//write curr mach
 		ofstream fs;
@@ -74,6 +77,7 @@ void Process::train()
 		fs.close();
 		//possible write best mach
 		if(this_result > best_result){
+			cout << "-- get better result, write to " << mach_best_name << endl;
 			best_result = this_result;
 			fs.open(mach_best_name.c_str(),ios::binary);
 			mach->Write(fs);
@@ -83,6 +87,12 @@ void Process::train()
 		cur_iter++;
 		delete_restart_conf();
 	}
+
+	//6.results
+	cout << "6.training finished with dev results: " << endl;
+	for(int i=0;i<CONF_NN_ITER;i++)
+		cout << dev_results[i] << " ";
+	cout << endl;
 }
 
 void Process::test(Mach* m,Dict* d)
@@ -190,6 +200,8 @@ void Process::read_restart_conf()
 	else{
 		CTL_continue = 1;
 		ifs >> cur_iter >> cur_lrate;
+		if(cur_iter == 0)
+			CTL_continue = 0;	//no previous result, restart
 	}
 	printf("-- %d %d %g",CTL_continue,cur_iter,(double)cur_lrate);
 	ifs.close();
@@ -271,5 +283,7 @@ vector<int>* Process::parse_o1(DependencyInstance* x)
 		}
 	}
 	vector<int> *ret = decodeProjective(length,tmp_scores);
+	delete []mach_x;
+	delete []mach_y;
 	return ret;
 }
