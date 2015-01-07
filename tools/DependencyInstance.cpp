@@ -27,19 +27,21 @@ DependencyInstance::DependencyInstance(std::vector<string*> *forms,
 int DependencyInstance::length(){
 	return (int)(forms->size());
 }
-string* DependencyInstance::toString(){
-	string tmp = string("[");
-	string* sb = new string(tmp);
-	vector<string*>::iterator iter;
-	for(iter = forms->begin(); iter != forms->end(); iter++){
-		if(iter != forms->begin()){
-			sb->append(", ");
-		}
-		string* s = *iter;
-		sb->append(*s);
+
+//printing
+string DependencyInstance::toString(){
+	string tmp = string();
+	for(int i=0;i<length();i++){
+		tmp += i;
+		tmp += ":";
+		tmp += *forms->at(i);
+		tmp += "/";
+		tmp += *postags->at(i);
+		tmp += "/";
+		tmp += heads->at(i);
+		tmp += ";";
 	}
-	sb->append("]\n");
-	return sb;
+	return tmp;
 }
 
 DependencyInstance::~DependencyInstance(){

@@ -33,7 +33,7 @@ public:
 	~DependencyInstance();
 	//void setFeatureVector(FeatureVector* fv);
 	int length();
-	string* toString();
+	string toString();
 	//void writeObject(ObjectWriter &out);
 	//void readObject(ObjectReader &in);
 };
