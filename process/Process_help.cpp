@@ -74,7 +74,8 @@ void Process::shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int t
 	cout << " -- Done." << endl;
 }
 
-// d(E)/d(zi) = (if i is target) ? 1-zi : -zi
+//error function(mininize); get -1 * gradient
+// -d(E)/d(zi) = (if i is target) ? 1-zi : -zi
 void Process::set_softmax_gradient(const REAL* s_target,const REAL* s_output,REAL* s_gradient,int bsize,int c)
 {
 	const REAL *optr=s_output;
@@ -90,5 +91,23 @@ void Process::set_softmax_gradient(const REAL* s_target,const REAL* s_output,REA
 		gptr[tidx] += 1.0;
 		gptr+=c;
 		optr+=c;
+	}
+}
+
+//E=max(0,1+f(-)-f(+));  -dE/dz = 0 / 1 / -1;bsize must be even
+void Process::set_pair_gradient(const REAL* s_output,REAL* s_gradient,int bsize)
+{
+	const REAL *optr = s_output;
+	REAL *gptr = s_gradient;
+	for(int b=0; b<bsize; b += 2) {
+		*gptr = 0;
+		*(gptr+1) = 0;
+		//first right then wrong
+		if((1 + *(optr+1) - (*optr)) > 0){
+			*gptr = 1;
+			*(gptr+1) = -1;
+		}
+		gptr += 2;
+		optr += 2;
 	}
 }

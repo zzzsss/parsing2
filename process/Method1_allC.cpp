@@ -70,7 +70,7 @@ void Method1_allC::each_prepare_data_oneiter()
 	current = 0;
 	end = real_num_pairs;
 	//shuffle
-	shuffle_data(data,target,mach->GetIdim(),1,num_pairs*mach->GetIdim(),num_pairs,10);
+	shuffle_data(data,target,mach->GetIdim(),1,real_num_pairs*mach->GetIdim(),real_num_pairs,10);
 	//sample
 	cout << "--Data for this iter: samples all " << end << " resample: " << (int)(end*CONF_NN_resample) << endl;
 	end = (int)(end*CONF_NN_resample);

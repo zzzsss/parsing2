@@ -8,6 +8,7 @@
 //main one
 #include "process/Process.h"
 #include "process/Method1_allC.h"
+#include "process/Method2_pairs.h"
 
 //usage: command conf_file ...
 
@@ -22,6 +23,9 @@ int main(int argc,char **argv)
 	switch(CONF_method){
 	case 1:
 		x = new Method1_allC();
+		break;
+	case 2:
+		x = new Method2_pairs();
 		break;
 	}
 	if(argc == 2){

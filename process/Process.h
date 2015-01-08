@@ -68,6 +68,7 @@ public:
 	//help
 	static void shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int times);
 	static void set_softmax_gradient(const REAL* s_target,const REAL* s_output,REAL* s_gradient,int bsize,int c);
+	static void set_pair_gradient(const REAL* s_output,REAL* s_gradient,int bsize);
 
 protected:
 	//useful functions
