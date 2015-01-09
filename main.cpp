@@ -9,6 +9,7 @@
 #include "process/Process.h"
 #include "process/Method1_allC.h"
 #include "process/Method2_pairs.h"
+#include "process/Method3_online.h"
 
 //usage: command conf_file ...
 
@@ -26,6 +27,9 @@ int main(int argc,char **argv)
 		break;
 	case 2:
 		x = new Method2_pairs();
+		break;
+	case 3:
+		x= new Method3_online();
 		break;
 	}
 	if(argc == 2){
