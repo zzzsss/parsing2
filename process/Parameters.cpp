@@ -45,6 +45,9 @@ int CONF_add_distance=1;	//whether add distance
 int CONF_dict_remove=0;	//remove words appears only once
 int CONF_pos_filter=0;		//add filters, with pairs seen before
 
+//1.5-others
+int CONF_random_seed=12345;
+
 //others
 void init_configurations(string conf_file)
 {
@@ -80,6 +83,8 @@ void init_configurations(string conf_file)
 		else if(buf=="f_distance") fin >> CONF_add_distance;
 		else if(buf=="f_removes") fin >> CONF_dict_remove;
 		else if(buf=="f_filter") fin >> CONF_pos_filter;
+		//1.5
+		else if(buf=="o_srand") fin >> CONF_random_seed;
 		else
 			cout << "Unknown conf " << buf << endl;
 	}

@@ -12,7 +12,7 @@
 void Process::write_conf(int c)
 {
 	ofstream fout(CONF_mach_conf_name.c_str());
-	fout << "block-size = 128\n";
+	fout << "block-size = " << CONF_NN_BS << "\n";
 	int xdim = feat_gen->get_xdim();
 	int width = xdim*CONF_NN_we;
 	//projection layer

@@ -6,6 +6,7 @@
  */
 
 //main one
+#include <cstdlib>
 #include "process/Process.h"
 #include "process/Method1_allC.h"
 #include "process/Method2_pairs.h"
@@ -16,6 +17,7 @@
 int main(int argc,char **argv)
 {
 	using namespace parsing_conf;
+	srand(CONF_random_seed);
 	if(argc < 2){
 		Error("Not enough parameters for cmd.");
 	}

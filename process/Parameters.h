@@ -50,6 +50,9 @@ extern int CONF_add_distance;	//whether add distance
 extern int CONF_dict_remove;	//remove words appears only once
 extern int CONF_pos_filter;		//add filters, with pairs seen before
 
+//1.5-others
+extern int CONF_random_seed;
+
 //others
 extern void init_configurations(string);
 
