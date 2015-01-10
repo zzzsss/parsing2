@@ -39,6 +39,8 @@ int CONF_NN_plus_layers=0;				//plus number of layers(plus from base)
 double CONF_NN_resample=1.0;				//re-sample rate
 int CONF_NN_BS=128;						//block-size
 
+int* CONF_NN_h_size = 0;
+
 //1.4-for parsing basis
 int CONF_x_window=5;	//word and pos window size
 int CONF_add_distance=1;	//whether add distance
@@ -78,6 +80,12 @@ void init_configurations(string conf_file)
 		else if(buf=="nn_plusl") fin >> CONF_NN_plus_layers;
 		else if(buf=="nn_resample") fin >> CONF_NN_resample;
 		else if(buf=="nn_bs") 	 fin >> CONF_NN_BS;
+		else if(buf=="nn_hsize"){
+			//here no checking
+			CONF_NN_h_size = new int[1+CONF_NN_plus_layers];
+			for(int i=0;i<1+CONF_NN_plus_layers;i++)
+				fin >> CONF_NN_h_size[i];
+		}
 		//1.4
 		else if(buf=="f_xwin") 	fin >> CONF_x_window;
 		else if(buf=="f_distance") fin >> CONF_add_distance;

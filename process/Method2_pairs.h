@@ -13,7 +13,7 @@
 #include "Process.h"
 
 class Method2_pairs: public Process{
-private:
+protected:
 	REAL* data;
 	//REAL* target;		--- don't need it
 	int current;

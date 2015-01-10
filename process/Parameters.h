@@ -44,6 +44,8 @@ extern int CONF_NN_plus_layers;				//plus number of layers(plus from base)
 extern double CONF_NN_resample;				//re-sample rate
 extern int CONF_NN_BS;						//block-size
 
+extern int* CONF_NN_h_size;				//hidden-size(ignore h_portion)
+
 //1.4-for parsing basis
 extern int CONF_x_window;	//word and pos window size
 extern int CONF_add_distance;	//whether add distance

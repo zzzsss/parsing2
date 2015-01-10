@@ -20,13 +20,24 @@ void Process::write_conf(int c)
 	for(int i=0;i<xdim;i++)
 		fout << "Tab = " << dict->get_count() << "x" << CONF_NN_we << "\n";
 	fout << "#End\n";
-	//hidden layer1
-	fout << "Tanh = " << width << "x" << width*CONF_NN_hidden_size_portion << " fanio-init-weights=1.0\n";
-	width = width*CONF_NN_hidden_size_portion;
-	//more hidden layers??
-	for(int i=0;i<CONF_NN_plus_layers;i++){
+	if(CONF_NN_h_size==0){
+		//hidden layer1
 		fout << "Tanh = " << width << "x" << width*CONF_NN_hidden_size_portion << " fanio-init-weights=1.0\n";
 		width = width*CONF_NN_hidden_size_portion;
+		//more hidden layers??
+		for(int i=0;i<CONF_NN_plus_layers;i++){
+			fout << "Tanh = " << width << "x" << width*CONF_NN_hidden_size_portion << " fanio-init-weights=1.0\n";
+			width = width*CONF_NN_hidden_size_portion;
+		}
+	}
+	else{
+		//hidden layer1
+		fout << "Tanh = " << width << "x" << CONF_NN_h_size[0] << " fanio-init-weights=1.0\n";
+		//more hidden layers??
+		for(int i=0;i<CONF_NN_plus_layers;i++){
+			fout << "Tanh = " << CONF_NN_h_size[i] << "x" << CONF_NN_h_size[i+1] << " fanio-init-weights=1.0\n";
+		}
+		width = CONF_NN_h_size[CONF_NN_plus_layers];
 	}
 	if(c>1){
 		//output multiclass-class(0 or 1)
