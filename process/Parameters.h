@@ -45,6 +45,7 @@ extern double CONF_NN_resample;				//re-sample rate
 extern int CONF_NN_BS;						//block-size
 
 extern int* CONF_NN_h_size;				//hidden-size(ignore h_portion)
+extern double CONF_NN_drop;				//drop-out
 
 //1.4-for parsing basis
 extern int CONF_x_window;	//word and pos window size

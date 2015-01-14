@@ -11,6 +11,7 @@
 #include "process/Method1_allC.h"
 #include "process/Method2_pairs.h"
 #include "process/Method3_online.h"
+#include "process/Method4_random.h"
 
 //usage: command conf_file ...
 
@@ -32,6 +33,9 @@ int main(int argc,char **argv)
 		break;
 	case 3:
 		x= new Method3_online();
+		break;
+	case 4:
+		x = new Method4_random();
 		break;
 	}
 	if(argc == 2){

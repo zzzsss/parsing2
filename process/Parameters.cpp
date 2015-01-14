@@ -40,6 +40,7 @@ double CONF_NN_resample=1.0;				//re-sample rate
 int CONF_NN_BS=128;						//block-size
 
 int* CONF_NN_h_size = 0;
+double CONF_NN_drop = -1;
 
 //1.4-for parsing basis
 int CONF_x_window=5;	//word and pos window size
@@ -86,6 +87,7 @@ void init_configurations(string conf_file)
 			for(int i=0;i<1+CONF_NN_plus_layers;i++)
 				fin >> CONF_NN_h_size[i];
 		}
+		else if(buf=="nn_drop")	fin >> CONF_NN_drop;
 		//1.4
 		else if(buf=="f_xwin") 	fin >> CONF_x_window;
 		else if(buf=="f_distance") fin >> CONF_add_distance;
@@ -101,9 +103,10 @@ void init_configurations(string conf_file)
 	printf("The configurations:\n");
 	printf("Data files: %s,%s,%s,%s,%s\n",CONF_train_file.c_str(),CONF_dev_file.c_str(),
 			CONF_test_file.c_str(),CONF_output_file.c_str(),CONF_gold_file.c_str());
-	printf("NN: lrate(%g),iters(%d),lmult(%g),wdecay(%g),hidden_por(%g),word_esize(%d),plus_layers(%d),resample(%g),bsize(%d)",
+	printf("NN: lrate(%g),iters(%d),lmult(%g),wdecay(%g),hidden_por(%g),"
+			"word_esize(%d),plus_layers(%d),resample(%g),bsize(%d),drop_out(%g)",
 			CONF_NN_LRATE,CONF_NN_ITER,CONF_NN_LMULT,CONF_NN_WD,CONF_NN_hidden_size_portion,CONF_NN_we,CONF_NN_plus_layers,
-			CONF_NN_resample,CONF_NN_BS);
+			CONF_NN_resample,CONF_NN_BS,CONF_NN_drop);
 	printf("Feature: xwindow(%d),distance(%d),removes(%d),filter(%d)\n",
 			CONF_x_window,CONF_add_distance,CONF_dict_remove,CONF_pos_filter);
 }

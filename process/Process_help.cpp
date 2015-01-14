@@ -13,6 +13,8 @@ void Process::write_conf(int c)
 {
 	ofstream fout(CONF_mach_conf_name.c_str());
 	fout << "block-size = " << CONF_NN_BS << "\n";
+	if(CONF_NN_drop>0)
+		fout << "drop-out = " << CONF_NN_drop << "\n";
 	int xdim = feat_gen->get_xdim();
 	int width = xdim*CONF_NN_we;
 	//projection layer
@@ -22,12 +24,12 @@ void Process::write_conf(int c)
 	fout << "#End\n";
 	if(CONF_NN_h_size==0){
 		//hidden layer1
-		fout << "Tanh = " << width << "x" << width*CONF_NN_hidden_size_portion << " fanio-init-weights=1.0\n";
-		width = width*CONF_NN_hidden_size_portion;
+		fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
+		width = (int)(width*CONF_NN_hidden_size_portion);
 		//more hidden layers??
 		for(int i=0;i<CONF_NN_plus_layers;i++){
-			fout << "Tanh = " << width << "x" << width*CONF_NN_hidden_size_portion << " fanio-init-weights=1.0\n";
-			width = width*CONF_NN_hidden_size_portion;
+			fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
+			width = (int)(width*CONF_NN_hidden_size_portion);
 		}
 	}
 	else{
