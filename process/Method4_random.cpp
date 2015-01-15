@@ -15,13 +15,14 @@ void Method4_random::each_write_mach_conf()
 }
 
 #define GET_MAX_ONE(a,b) (((a)>(b))?(a):(b))
+#define GET_MIN_ONE(a,b) (((a)>(b))?(b):(a))
 void Method4_random::each_prepare_data_oneiter()
 {
 	//only shuffle the corpus(here we ignore resample)
 	//simple method --- once one sentence
 
 	if(temp_data == 0){
-		temp_data = new REAL[1000*mach->GetIdim()];	//1000 should be enough
+		temp_data = new REAL[100000*mach->GetIdim()];	//100000 should be enough??
 		gradient = new REAL[mach->GetBsize()*mach->GetOdim()];
 		mach->SetGradOut(gradient);
 		cout << "--Ok, ready." << endl;
@@ -51,21 +52,38 @@ REAL* Method4_random::each_next_data(int* size)
 		if(x->length() <= 2)
 			continue;
 
-		for(int i=1;i<x->length();i++){
+		//multiple use of CONF_NN_resample
+		int one_len = x->length();
+		int one_sample = (one_len-2)*CONF_NN_resample;
+		if(CONF_NN_resample > 0.9999)//well...
+			one_sample = (int)(CONF_NN_resample+0.01);
+		else if(one_sample==0)
+			one_sample = 1;	//at least one
+		one_sample = GET_MIN_ONE(one_sample,one_len-2);
+
+		bool *one_already = new bool[one_len];
+		for(int i=1;i<one_len;i++){
 			int guess = i;
 			int right = x->heads->at(i);
-			while(guess==i || guess==right)
-				guess = rand()%(x->length());	//waht if only one token, nope?? --- yes
+			for(int j=0;j<one_len;j++)
+				one_already[j] = false;
+			int one_sample_get = 0;
 
-			if(1){
+			while(one_sample_get < one_sample ){
+				guess = rand()%(one_len);
+				while(one_already[guess] || guess==i || guess==right)
+					guess = rand()%(one_len);	//what if only one token, nope?? --- yes
 				//no filter here
 				feat_gen->fill_one(assign_x,x,right,i);
 				assign_x += mach->GetIdim();
 				feat_gen->fill_one(assign_x,x,guess,i);
 				assign_x += mach->GetIdim();
 				this_num += 2;
+				one_sample_get++;
+				one_already[guess] = true;
 			}
 		}
+		delete []one_already;
 		break;
 	}
 	//get data

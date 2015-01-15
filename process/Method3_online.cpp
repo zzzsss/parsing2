@@ -21,34 +21,23 @@ void Method3_online::each_prepare_data_oneiter()
 	//simple method --- once one sentence
 
 	if(temp_data == 0){
-		//first iter is method2
-		Method2_pairs::each_prepare_data_oneiter();
+		temp_data = new REAL[1000*mach->GetIdim()];	//1000 should be enough
+		gradient = new REAL[mach->GetBsize()*mach->GetOdim()];
+		mach->SetGradOut(gradient);
+		cout << "--Ok, ready." << endl;
 	}
-	else{
+
 		//nothing
 		this_num = curr_num = 0;
 		curr_sentence = 0;
 		all_sentence = training_corpus->size();
 		all_tokens = correct_tokens = 0;
-	}
 }
 
 REAL* Method3_online::each_next_data(int* size)
 {
-	//first iter is method2
-	if(temp_data == 0){
-		REAL* result = Method2_pairs::each_next_data(size);
-		if(result==0){
-			//prepare next iters --- no counting, no shuffle
-			delete []data;
-			temp_data = new REAL[1000*mach->GetIdim()];	//1000 should be enough
-			cout << "--Switch to Method3." << endl;
-		}
-		return result;
-	}
-
 	//later iters --- depend on vars of Method3
-	if(this_num <= 0){
+	while(this_num <= 0){
 		//get new sentence
 		if(curr_sentence >= all_sentence){
 			//stat for training corpus
@@ -78,9 +67,9 @@ REAL* Method3_online::each_next_data(int* size)
 				correct_tokens++;
 		}
 		delete res;
-		//if lucky to get all right --- use tail recursion
-		if(this_num==0)
-			return each_next_data(size);
+		if(this_num <= 0)
+			continue;
+		break;
 	}
 	//get data
 	if(curr_num + *size >= this_num){	//maybe most will hit here unless quite long sentences
@@ -94,5 +83,8 @@ REAL* Method3_online::each_next_data(int* size)
 	}
 }
 
-
+void Method3_online::each_get_grad(int size)
+{
+	set_pair_gradient(mach->GetDataOut(),gradient,size);
+}
 
