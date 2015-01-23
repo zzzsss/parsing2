@@ -95,6 +95,7 @@ void Process::train()
 
 	//6.results
 	cout << "6.training finished with dev results: " << endl;
+	cout << "zzzzz ";
 	for(int i=0;i<CONF_NN_ITER;i++)
 		cout << dev_results[i] << " ";
 	cout << endl;

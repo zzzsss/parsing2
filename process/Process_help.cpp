@@ -24,12 +24,20 @@ void Process::write_conf(int c)
 	fout << "#End\n";
 	if(CONF_NN_h_size==0){
 		//hidden layer1
-		fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
-		width = (int)(width*CONF_NN_hidden_size_portion);
-		//more hidden layers??
-		for(int i=0;i<CONF_NN_plus_layers;i++){
+		if(CONF_NN_hidden_size_portion <= 1){
 			fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
 			width = (int)(width*CONF_NN_hidden_size_portion);
+			//more hidden layers??
+			for(int i=0;i<CONF_NN_plus_layers;i++){
+				fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
+				width = (int)(width*CONF_NN_hidden_size_portion);
+			}
+		}
+		else{
+			fout << "Tanh = " << width << "x" << (int)(CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
+			width = CONF_NN_hidden_size_portion;
+			for(int i=0;i<CONF_NN_plus_layers;i++)
+				fout << "Tanh = " << width << "x" << width << " fanio-init-weights=1.0\n";
 		}
 	}
 	else{
