@@ -52,8 +52,8 @@ protected:
 	}
 
 	//restart files
-	void read_restart_conf();
-	void write_restart_conf();
+	void read_restart_conf(double*);
+	void write_restart_conf(double*);
 	void delete_restart_conf();
 public:
 	void train();

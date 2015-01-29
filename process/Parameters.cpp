@@ -6,6 +6,7 @@
  */
 
 #include "Parameters.h"
+#include "../cslm/Tools.h"
 #include <fstream>
 #include <cstdio>
 
@@ -33,7 +34,7 @@ double CONF_NN_LRATE=0.045;
 int CONF_NN_ITER=20;
 double CONF_NN_LMULT=1e-9;
 double CONF_NN_WD=3e-5;
-double CONF_NN_hidden_size_portion=0.2;	//how much is hidden size
+double CONF_NN_hidden_size_portion=100;	//how much is hidden size
 int CONF_NN_we=50;						//word-embedding size
 int CONF_NN_plus_layers=0;				//plus number of layers(plus from base)
 double CONF_NN_resample=1.0;				//re-sample rate
@@ -57,7 +58,13 @@ void init_configurations(string conf_file)
 #define DATA_LINE_LEN 10000
 	ifstream fin(conf_file.c_str());
 	cout << "Dealing configure file '" << conf_file << "'" << endl;
+	// Method config
+	string temp_for_m;
+	fin >> temp_for_m;
+	if(temp_for_m != "M")
+		Error("First of conf-file must be M.");
 	fin >> CONF_method;
+	//
 	while(!fin.eof()){
 		string buf;
 		char line[DATA_LINE_LEN];
@@ -86,6 +93,16 @@ void init_configurations(string conf_file)
 			CONF_NN_h_size = new int[1+CONF_NN_plus_layers];
 			for(int i=0;i<1+CONF_NN_plus_layers;i++)
 				fin >> CONF_NN_h_size[i];
+		}
+		//these two specified for 2 hidden layers
+		else if(buf=="nn_hsize1"){
+			//here no checking
+			CONF_NN_h_size = new int[2];
+			fin >> CONF_NN_h_size[0];
+		}
+		else if(buf=="nn_hsize2"){
+			//must after nn_hsize1
+			fin >> CONF_NN_h_size[1];
 		}
 		else if(buf=="nn_drop")	fin >> CONF_NN_drop;
 		//1.4

@@ -9,13 +9,16 @@
 
 void Process::train()
 {
+	//record the results for each iter
+	double * dev_results = new double[CONF_NN_ITER];
+
 	//2. get corpus
 	cout << "2.read-corpus:" << endl;
 	training_corpus = read_corpus(CONF_train_file);
 
 	//2.5 if continue/restart --- also init some values
 	cout << "2.5:let's see whether to continue" << endl;
-	read_restart_conf();
+	read_restart_conf(dev_results);
 
 	//3. get dictionary --- whether continue to train
 	if(CTL_continue){
@@ -65,10 +68,10 @@ void Process::train()
 	cout << "5.start training: " << endl;
 	double best_result = 0;
 	string mach_best_name = CONF_mach_name+CONF_mach_best_suffix;
-	double * dev_results = new double[CONF_NN_ITER];
+
 	for(int i=cur_iter;i<CONF_NN_ITER;i++){
 		if(cur_iter>0)
-			write_restart_conf();
+			write_restart_conf(dev_results);
 
 		nn_train_one_iter();
 		cout << "-- Iter done, waiting for test dev:" << endl;
@@ -88,9 +91,9 @@ void Process::train()
 			mach->Write(fs);
 			fs.close();
 		}
-
+		if(cur_iter>0)
+			delete_restart_conf();
 		cur_iter++;
-		delete_restart_conf();
 	}
 
 	//6.results
@@ -130,7 +133,8 @@ void Process::nn_train_one_iter()
 {
 	time_t now;
 	time(&now); //ctime is not rentrant ! use ctime_r() instead if needed
-	cout << "##*** Start training for iter " << cur_iter << " at " << ctime(&now) << std::flush;
+	cout << "##*** Start training for iter " << cur_iter << " at " << ctime(&now)
+			<< "with lrate " << cur_lrate << std::flush;
 	each_prepare_data_oneiter();	/*************virtual****************/
 	Timer ttrain;		// total training time
 	ttrain.start();
@@ -198,7 +202,7 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 
 
 //restart conf files and also set sth
-void Process::read_restart_conf()
+void Process::read_restart_conf(double *res)
 {
 	ifstream ifs(CONF_restart_file.c_str());
 	if(!ifs){
@@ -209,16 +213,20 @@ void Process::read_restart_conf()
 	else{
 		CTL_continue = 1;
 		ifs >> cur_iter >> cur_lrate;
+		for(int i=0;i<cur_iter;i++)
+			ifs >> res[i];
 	}
 	printf("-- %d %d %g",CTL_continue,cur_iter,(double)cur_lrate);
 	ifs.close();
 	cout << endl;
 }
 
-void Process::write_restart_conf()
+void Process::write_restart_conf(double *res)
 {
 	ofstream ofs(CONF_restart_file.c_str());
 	ofs << cur_iter << " " << cur_lrate << "\n";
+	for(int i=0;i<cur_iter;i++)
+		ofs << res[i] << "\n";
 	ofs.close();
 }
 

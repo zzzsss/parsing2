@@ -3,6 +3,7 @@
 from threading import Thread,Lock
 import os
 import time
+import random
 
 #files 
 file_template="ttemplate.txt"	#tuning template
@@ -28,16 +29,19 @@ ct_specific_task=None
 class specific_task:
     def execute(self,iden):
         pass
+    def high_order(self,s1,s2):
+        pass
  
 class one_task(Thread):
     def __init__(self,iden):
         Thread.__init__(self)
         self.iden = iden	#frozenset of configures
-        self.result = -1	#if result > 0, then it is done
+        self.result = [ -1 for i in range(20) ] 	#if result > 0, then it is done
     def set_result(self,s):
         self.result = s
     def __lt__(self,v):
-        return self.result>v.result	#high first
+	global ct_specific_task
+        return ct_specific_task.high_order(self.result,v.result)   #high first
     #def __str___(self):
     #    return "%s-%s" % (self.iden,self.result)
     def run(self):
@@ -57,11 +61,14 @@ class one_task(Thread):
         ct_sorted_tasks=sorted(ct_sorted_tasks)
         f = open(file_process,"w")
         for x in ct_sorted_tasks:
-            if(x.result < 0):
+            if(x.result[0] < 0):
                 break;
-            for i in x.iden:
-                f.write(i+" ")
-            f.write("%g\n" % (x.result))
+            for i in sorted(x.iden):
+                f.write("%s " % str(i))
+            f.write(" -- ")
+            for i in x.result:
+                f.write("%s " % str(i))
+            f.write("\n")
         f.close()
         ct_lock.release()		#####LOCK_RELEASE#####
     
@@ -114,10 +121,12 @@ def ct_init():
     try:
         fp = open(file_process,"r")
         for line in fp:
-            tmp_l = line.split()	#first idens last one score
+	    two_part = line.split("--")
+            tmp_l = two_part[0].split()
+            tmp_s = two_part[1].split()
             if(len(tmp_l) > 0):
-                tmp_iden = frozenset(tmp_l[:-1])
-                tmp_score = float(tmp_l[-1])
+                tmp_iden = frozenset(tmp_l)
+                tmp_score = [float(i) for i in tmp_s]
                 ct_tasks_table[tmp_iden].set_result(tmp_score)
                 ct_num_done += 1
         fp.close()
@@ -142,8 +151,10 @@ def ct_main(ttt):
     
     ct_specific_task=ttt
     os.system("touch %s"%file_maxfile)
-    for one in ct_tasks_table.keys():
-        if(ct_tasks_table[one].result > 0):
+    keys_l = list(ct_tasks_table.keys())
+    random.shuffle(keys_l)
+    for one in keys_l:
+        if(ct_tasks_table[one].result[0] > 0):
             continue	#done
         #can we add one task
         stay_here = True

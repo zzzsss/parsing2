@@ -6,13 +6,18 @@ import re
 class nn_task(control_grid.specific_task):
     def execute(self,iden):
         iden_all = dict()
-        for i in iden:
+        string_dir = "t_";
+        for i in sorted(iden):
             s = (i.split(":"))[0]
             iden_all[s] = (i.split(":"))[1]
+            string_dir += (i.split(":"))[1]
+            string_dir += "_"
+        string_dir += str(hash(iden))[-3:]
+        
         #the dir
-        system("mkdir ../t_%s" % hash(iden))
+        system("mkdir ../%s" % string_dir)
         #write conf file
-        conf_f = open("../t_%s/conf" % hash(iden),"w")
+        conf_f = open("../%s/conf" % string_dir,"w")
         template_f = open(control_grid.file_template,"r");
         for line in template_f:
             x = line.split()
@@ -24,14 +29,23 @@ class nn_task(control_grid.specific_task):
         conf_f.close()
         template_f.close()
         #execute 
-        system("cd ../t_%s;../ztrain conf >> log.test" % hash(iden))
-        #system("cd ../t_%s;echo zzzzz %s %s %s %s %s %s > log.test;sleep %s" % (hash(iden),1,1,1,1,1,random.random(),random.randint(5,10))) #onlyfortesing
+        system("cd ../%s;../ztrain conf >> log.test" % string_dir)
+        #system("cd ../%s;echo zzzzz %s %s %s %s %s %s > log.test;sleep %s" % string_dir,1,1,1,1,1,random.random(),random.randint(5,10))) #onlyfortesing
         test_iter = 6  #iter6, which is the 7th iter
-        log_file = "../t_%s/log.test" % hash(iden);
-        #ret = popen("cat %s | grep '^zzzzz'" % log_file).read()
-        #res = float((ret.split())[1+test_iter])
+        log_file = "../%s/log.test" % string_dir;
         
+        
+        ret = popen("cat %s | grep '^zzzzz'" % log_file).read()
+        ret = ret.split()[1:]
+        
+        print ret
+        res = [float(i) for i in ret]
+        
+        #clean up
+        system("cd ../%s; rm *.mach.*; rm output.*" % string_dir)
+
         ##new test
+        '''
         pattern_iter = re.compile(r"Start training for iter %s" % test_iter)
         pattern_res = re.compile(r"Unlabeled Accuracy No Punc:[ \t]*([0-9]*.[0-9]*)")
         res = -1
@@ -48,8 +62,10 @@ class nn_task(control_grid.specific_task):
                     in_iter = True                    
         ff.close()
         print("Finish one of %s with %g" % (iden,res))
+        '''
         return res
-        	
+    def high_order(self,s1,s2):
+        return max(s1)>max(s2)
     
 
 if __name__ == "__main__":
