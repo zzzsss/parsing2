@@ -18,6 +18,7 @@ string Dict::WORD_BACKOFF_POS_PREFIX = "_sth_";
 
 Dict::Dict(int remove,int stat,int dsize){
 	maps = new HashMap(CONS_dict_map_size);
+	real_word_list = new vector<string*>;
 	statistic_info = stat;
 	remove_single = remove;
 	distance_max = dsize;
@@ -175,11 +176,12 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 		if(remove_single){
 			printf("--Trying to remove single count words:\n");
 			for(int i=0;i<real_words.size();i++){
-				if(real_words_count[i] == 1){
+				if(real_words_count[i] <= remove_single){
 					to_remove++;
 				}
 				else{
 					maps->insert(pair<string*, int>(real_words[i],dict_num++));
+					real_word_list->push_back(real_words[i]);
 				}
 			}
 			printf("-Remove single count words %d:\n",to_remove);
@@ -192,6 +194,7 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	//final adding
 	for(int i=0;i<real_words.size();i++){
 		maps->insert(pair<string*, int>(real_words[i],dict_num++));
+		real_word_list->push_back(real_words[i]);
 	}
 	printf("--Final finish dictionary building, all is %d,distance %d,pos %d,words %d.\n",
 				dict_num,num_distance,num_pos,num_words);
@@ -223,6 +226,7 @@ void Dict::write(string file)
 Dict::Dict(string file)
 {
 	maps = new HashMap(CONS_dict_map_size);
+	//here no need for real-word-list; only for init-build
 	printf("-Reading dict from %s.\n",file.c_str());
 	ifstream fin;
 	fin.open(file.c_str(),ifstream::in);

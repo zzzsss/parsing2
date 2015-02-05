@@ -25,12 +25,13 @@ class Dict{
 
 	HashMap* maps;	//feature maps
 	int dict_num;
+	vector<string*>* real_word_list;
 	//
 	int distance_max;
 
 	//used only when building
 	int statistic_info;	//whether gather statistic_info
-	int remove_single;	//remove single word -- backoff to pos
+	int remove_single;	//remove rare word -- backoff to pos -- indicate the number
 
 public:
 	//symbols
@@ -47,6 +48,7 @@ public:
 	static Dict* read(string file);
 
 	int get_count(){return dict_num;}
+	vector<string*>* get_real_words() {return real_word_list;}
 
 	Dict(string file);
 	Dict(int remove,int stat=1,int dist=CONS_distance_max);

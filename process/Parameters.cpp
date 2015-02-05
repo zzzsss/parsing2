@@ -43,6 +43,11 @@ int CONF_NN_BS=128;						//block-size
 int* CONF_NN_h_size = 0;
 double CONF_NN_drop = -1;
 
+//activation functions
+const char* NN_ACs[] = {"Tanh","LinRectif"};
+const char* CONF_NN_act = NN_ACs[0];
+
+
 //1.4-for parsing basis
 int CONF_x_window=5;	//word and pos window size
 int CONF_add_distance=1;	//whether add distance
@@ -105,6 +110,11 @@ void init_configurations(string conf_file)
 			fin >> CONF_NN_h_size[1];
 		}
 		else if(buf=="nn_drop")	fin >> CONF_NN_drop;
+		else if(buf=="nn_act"){
+			int type;
+			fin >> type;
+			CONF_NN_act = NN_ACs[type];
+		}
 		//1.4
 		else if(buf=="f_xwin") 	fin >> CONF_x_window;
 		else if(buf=="f_distance") fin >> CONF_add_distance;

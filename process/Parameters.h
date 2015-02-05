@@ -48,6 +48,8 @@ extern int CONF_NN_BS;						//block-size
 extern int* CONF_NN_h_size;				//hidden-size(ignore h_portion)
 extern double CONF_NN_drop;				//drop-out
 
+extern const char* CONF_NN_act;
+
 //1.4-for parsing basis
 extern int CONF_x_window;	//word and pos window size
 extern int CONF_add_distance;	//whether add distance
