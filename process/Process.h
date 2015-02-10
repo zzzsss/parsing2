@@ -51,6 +51,9 @@ protected:
 		return parse_o1(x);
 	}
 
+	//init embedings
+	virtual void init_embed();
+
 	//restart files
 	void read_restart_conf(double*);
 	void write_restart_conf(double*);

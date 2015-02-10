@@ -47,6 +47,11 @@ double CONF_NN_drop = -1;
 const char* NN_ACs[] = {"Tanh","LinRectif"};
 const char* CONF_NN_act = NN_ACs[0];
 
+//1.3.5 -- init embedings
+string CONF_NN_WL;
+string CONF_NN_EM;
+double CONF_NN_ISCALE=0.1;
+
 
 //1.4-for parsing basis
 int CONF_x_window=5;	//word and pos window size
@@ -115,6 +120,10 @@ void init_configurations(string conf_file)
 			fin >> type;
 			CONF_NN_act = NN_ACs[type];
 		}
+		//1.3.5
+		else if(buf=="nn_init_wl") fin >> CONF_NN_WL;
+		else if(buf=="nn_init_em") fin >> CONF_NN_EM;
+		else if(buf=="nn_init_scale") fin >> CONF_NN_ISCALE;
 		//1.4
 		else if(buf=="f_xwin") 	fin >> CONF_x_window;
 		else if(buf=="f_distance") fin >> CONF_add_distance;

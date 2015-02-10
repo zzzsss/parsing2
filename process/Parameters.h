@@ -50,6 +50,11 @@ extern double CONF_NN_drop;				//drop-out
 
 extern const char* CONF_NN_act;
 
+//1.3.5 -- init embedings
+extern string CONF_NN_WL;
+extern string CONF_NN_EM;
+extern double CONF_NN_ISCALE;
+
 //1.4-for parsing basis
 extern int CONF_x_window;	//word and pos window size
 extern int CONF_add_distance;	//whether add distance
@@ -65,5 +70,7 @@ extern void init_configurations(string);
 };
 
 #define DOUBLE_LARGENEG -10000000.0		//maybe it is enough
+
+#define INIT_EM_MAX_SIZE 1000000	//maybe enough
 
 #endif /* COMMON_H_ */

@@ -61,7 +61,10 @@ void Process::train()
 		mach_config.parse_options(2,argv);
 	    mach = mach_config.get_machine();
 	    if(mach == 0)
-	      Error(mach_config.get_error_string().c_str());
+	    	Error(mach_config.get_error_string().c_str());
+	    //if init embed
+	    if(CONF_NN_WL.length()>0 && CONF_NN_EM.length()>0)
+	    	init_embed();
 	}
 
 	//5. main training
