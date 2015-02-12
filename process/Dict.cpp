@@ -6,7 +6,8 @@
  */
 
 #include "Dict.h"
-
+#include "Parameters.h"
+using parsing_conf::CONF_add_distance;
 
 string Dict::POS_START = "<pos-s>";
 string Dict::POS_END = "<pos-e>";
@@ -27,7 +28,7 @@ Dict::Dict(int remove,int stat,int dsize){
 	dict_num = 0;
 }
 
-string* Dict::get_distance_str(int n)
+string* Dict::get_distance_str(int n,int way)
 {
 	char temp[100];
 	string prefix = "_distance_";
@@ -35,13 +36,26 @@ string* Dict::get_distance_str(int n)
 		n = distance_max;
 	else if(n<=-1*distance_max)
 		n = -1*distance_max;
+
+	//really really bad design...
+	switch(way){
+		case 1: break;
+		case 2: //same as the Mcd... ,5,10
+			if(n<distance_max && n>5)
+				n=5;
+			else if(n>-1*distance_max && n<-5)
+				n=-5;
+			break;
+		default:
+			break;
+	}
 	sprintf(temp,"_distance_%d",n);
 	return new string(temp);
 }
 
 int Dict::get_index(int d)
 {
-	string* temp = get_distance_str(d);
+	string* temp = get_distance_str(d,CONF_add_distance);
 	int x = maps->find(temp)->second;	//must exist
 	delete temp;
 	return x;

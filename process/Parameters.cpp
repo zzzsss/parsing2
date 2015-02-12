@@ -55,8 +55,8 @@ double CONF_NN_ISCALE=0.1;
 
 //1.4-for parsing basis
 int CONF_x_window=5;	//word and pos window size
-int CONF_add_distance=1;	//whether add distance
-int CONF_dict_remove=0;	//remove words appears only once
+int CONF_add_distance=1;	//whether add distance --- and for different ways
+int CONF_dict_remove=0;	//remove words appears only less than this times
 int CONF_pos_filter=0;		//add filters, with pairs seen before
 
 //1.5-others

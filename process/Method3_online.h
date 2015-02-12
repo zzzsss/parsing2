@@ -14,14 +14,13 @@
 
 class Method3_online: public Process{
 private:
-	//REAL* data;
+	REAL* data;
 	REAL* gradient;
-	REAL* temp_data;
+	REAL* temp_data;	//buffer
 	int curr_sentence;
 	int all_sentence;
 
-	int curr_num;	//current pointer for one sentence
-	int this_num;	//all for one sentence
+	int buffer_num;	//number in buffer
 
 	int all_tokens;
 	int correct_tokens;
@@ -34,7 +33,7 @@ protected:
 
 public:
 	Method3_online(){
-		//data = 0;
+		data = 0;
 		gradient = 0;
 		temp_data = 0;
 	}

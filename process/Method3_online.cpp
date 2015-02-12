@@ -17,18 +17,17 @@ void Method3_online::each_write_mach_conf()
 #define GET_MAX_ONE(a,b) (((a)>(b))?(a):(b))
 void Method3_online::each_prepare_data_oneiter()
 {
-	//only shuffle the corpus(here we ignore resample)
-	//simple method --- once one sentence
-
-	if(temp_data == 0){
+	//*** In order to fill the bsize, multiple sentence one time
+	if(data == 0){
 		temp_data = new REAL[1000*mach->GetIdim()];	//1000 should be enough
+		data = new REAL[1000*mach->GetIdim()];	//1000 should be enough, in fact should be bsize
 		gradient = new REAL[mach->GetBsize()*mach->GetOdim()];
 		mach->SetGradOut(gradient);
 		cout << "--Ok, ready." << endl;
 	}
 
 		//nothing
-		this_num = curr_num = 0;
+		buffer_num = 0;
 		curr_sentence = 0;
 		all_sentence = training_corpus->size();
 		all_tokens = correct_tokens = 0;
@@ -36,21 +35,17 @@ void Method3_online::each_prepare_data_oneiter()
 
 REAL* Method3_online::each_next_data(int* size)
 {
-	//later iters --- depend on vars of Method3
-	while(this_num <= 0){
+	//easy way --- every-time copy from buffer
+	int once_size = mach->GetIdim();
+	while(buffer_num < *size){
 		//get new sentence
-		if(curr_sentence >= all_sentence){
-			//stat for training corpus
-			printf("-For this:%d/%d - (%g),forward %d samples.\n",correct_tokens,all_tokens,
-					(double)(correct_tokens)/all_tokens,2*(all_tokens-correct_tokens));
-			return 0;
-		}
+		if(curr_sentence >= all_sentence)
+			break;
 		DependencyInstance* x = training_corpus->at(curr_sentence);
 		curr_sentence++;
-		this_num = curr_num = 0;
 		//decode that
 		vector<int>* res = each_test_one(x);
-		REAL* assign_x = temp_data;
+		REAL* assign_x = temp_data+buffer_num*once_size;
 		for(int i=1;i<x->length();i++){
 			all_tokens++;
 			int guess = res->at(i);
@@ -58,29 +53,34 @@ REAL* Method3_online::each_next_data(int* size)
 			if(guess != right){
 				//no filter here
 				feat_gen->fill_one(assign_x,x,right,i);
-				assign_x += mach->GetIdim();
+				assign_x += once_size;
 				feat_gen->fill_one(assign_x,x,guess,i);
-				assign_x += mach->GetIdim();
-				this_num += 2;
+				assign_x += once_size;
+				buffer_num += 2;
 			}
 			else
 				correct_tokens++;
 		}
 		delete res;
-		if(this_num <= 0)
-			continue;
-		break;
 	}
-	//get data
-	if(curr_num + *size >= this_num){	//maybe most will hit here unless quite long sentences
-		*size = this_num - curr_num;
-		this_num = -1;
-		return (temp_data+curr_num*mach->GetIdim());
+	if(buffer_num == 0){
+		//stat for training corpus
+		printf("-For this:%d/%d - (%g),forward %d samples.\n",correct_tokens,all_tokens,
+				(double)(correct_tokens)/all_tokens,2*(all_tokens-correct_tokens));
+		return 0;
+	}
+
+	//at lease return sth
+	memcpy(data,temp_data,(*size)*once_size*sizeof(REAL));
+	if(buffer_num <= *size){	//the one dance
+		*size = buffer_num;
+		buffer_num = 0;
 	}
 	else{
-		curr_num += *size;
-		return (temp_data+(curr_num-*size)*mach->GetIdim());
+		memcpy(temp_data,temp_data+(*size)*once_size,(buffer_num-*size)*once_size*sizeof(REAL));
+		buffer_num -= *size;
 	}
+	return data;
 }
 
 void Method3_online::each_get_grad(int size)

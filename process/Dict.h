@@ -39,7 +39,7 @@ public:
 	static string WORD_START,WORD_END,WORD_UNK;
 	static string WORD_BACKOFF_POS_PREFIX;
 
-	string* get_distance_str(int n);
+	string* get_distance_str(int n,int way=1);
 	int get_index(string* word,string* backoff_pos);	//word or pos
 	int get_index(int distance);						//distance
 	int get_word_index(string* word);	//for outer use
