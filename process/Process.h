@@ -36,7 +36,8 @@ protected:
 
 	//mach training
 	Mach *mach;
-	void set_lrate();
+	void set_lrate();					//no schedule, just decrease lrate
+	int set_lrate_one_iter(double*);	//lrate schedule
 	void nn_train_one_iter();
 	double nn_dev_test(string to_test,string output,string gold);
 

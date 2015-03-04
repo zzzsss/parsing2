@@ -94,6 +94,10 @@ void Process::train()
 			mach->Write(fs);
 			fs.close();
 		}
+
+		//lrate schedule
+		set_lrate_one_iter(dev_results);
+
 		if(cur_iter>0)
 			delete_restart_conf();
 		cur_iter++;
@@ -126,9 +130,20 @@ void Process::set_lrate()
 #else
   if (CONF_NN_LMULT>0)
 	  cur_lrate = CONF_NN_LRATE / (1.0 + mach->GetNbBackw() * CONF_NN_LMULT);		// quadratic decrease
-  else
-	  cur_lrate = CONF_NN_LRATE; // lrate_beg it will be modified in function of the performance on the development data
+  //else cur_lrate = CONF_NN_LRATE; // lrate_beg it will be modified in function of the performance on the development data, no change here
 #endif
+}
+
+int Process::set_lrate_one_iter(double* devr)
+{
+	if(CONF_NN_LMULT<0 && cur_iter>0){
+		//special schedule in (-1,0)
+		if(CONF_NN_LMULT > -1){
+			if(devr[cur_iter] < devr[cur_iter-1])
+				cur_lrate *= (-1 * CONF_NN_LMULT);
+		}
+	}
+	return 1;
 }
 
 //----------------- main training process

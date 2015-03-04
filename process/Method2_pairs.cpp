@@ -32,6 +32,9 @@ void Method2_pairs::each_prepare_data_oneiter()
 		// -- length-2 excludes self,real-head
 		num_pairs += (length-2)*(length-1)*2;
 	}
+	if(CONF_NN_example){
+		num_pairs *= 2;	//should be less, but for simplicity
+	}
 	//-- generate all
 	int real_num_pairs = 0;
 	data = new REAL[num_pairs*mach->GetIdim()];
@@ -56,6 +59,15 @@ void Method2_pairs::each_prepare_data_oneiter()
 				feat_gen->fill_one(assign_x,x,j,mod);
 				assign_x += mach->GetIdim();
 				real_num_pairs += 2;
+
+				//change the child, and keep the parent
+				if(CONF_NN_example && x->heads->at(j)!=head){
+					feat_gen->fill_one(assign_x,x,head,mod);
+					assign_x += mach->GetIdim();
+					feat_gen->fill_one(assign_x,x,head,j);
+					assign_x += mach->GetIdim();
+					real_num_pairs += 2;
+				}
 			}
 		}
 	}

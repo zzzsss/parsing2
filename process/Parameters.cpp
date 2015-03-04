@@ -32,7 +32,7 @@ string CONF_feature_file="nn.feat";
 //1.3-for nn
 double CONF_NN_LRATE=0.045;
 int CONF_NN_ITER=20;
-double CONF_NN_LMULT=1e-9;
+double CONF_NN_LMULT=1e-9;	//when >=0:as mult ; -1~0: schedule rate
 double CONF_NN_WD=3e-5;
 double CONF_NN_hidden_size_portion=100;	//how much is hidden size
 int CONF_NN_we=50;						//word-embedding size
@@ -46,6 +46,8 @@ double CONF_NN_drop = -1;
 //activation functions
 const char* NN_ACs[] = {"Tanh","LinRectif"};
 const char* CONF_NN_act = NN_ACs[0];
+
+int CONF_NN_example = 0;	//whether give training ones for wrong child
 
 //1.3.5 -- init embedings
 string CONF_NN_WL;
@@ -119,6 +121,9 @@ void init_configurations(string conf_file)
 			int type;
 			fin >> type;
 			CONF_NN_act = NN_ACs[type];
+		}
+		else if(buf=="nn_example"){
+			fin >> CONF_NN_example;
 		}
 		//1.3.5
 		else if(buf=="nn_init_wl") fin >> CONF_NN_WL;

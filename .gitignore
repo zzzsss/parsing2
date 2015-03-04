@@ -30,3 +30,6 @@
 #python
 *.pyc
 
+#no meta files
+.[^g]*
+

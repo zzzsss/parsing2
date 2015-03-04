@@ -12,6 +12,7 @@
 #include "process/Method2_pairs.h"
 #include "process/Method3_online.h"
 #include "process/Method4_random.h"
+#include "process/Method5_localMax.h"
 
 //usage: command conf_file ...
 
@@ -36,6 +37,9 @@ int main(int argc,char **argv)
 		break;
 	case 4:
 		x = new Method4_random();
+		break;
+	case 5:
+		x = new Method5_localMax();
 		break;
 	}
 	if(argc == 2){
