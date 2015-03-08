@@ -63,6 +63,9 @@ extern int CONF_add_distance;	//whether add distance
 extern int CONF_dict_remove;	//remove words appears only once
 extern int CONF_pos_filter;		//add filters, with pairs seen before
 
+extern int CONF_add_pos;		//whether add pos
+extern int CONF_oov_backoff;	//whether backoff to pos with oov
+
 //1.5-others
 extern int CONF_random_seed;
 

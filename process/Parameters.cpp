@@ -61,6 +61,9 @@ int CONF_add_distance=1;	//whether add distance --- and for different ways
 int CONF_dict_remove=0;	//remove words appears only less than this times
 int CONF_pos_filter=0;		//add filters, with pairs seen before
 
+int CONF_add_pos=1;		//whether add pos
+int CONF_oov_backoff=1;	//whether backoff to pos with oov
+
 //1.5-others
 int CONF_random_seed=12345;
 
@@ -134,6 +137,8 @@ void init_configurations(string conf_file)
 		else if(buf=="f_distance") fin >> CONF_add_distance;
 		else if(buf=="f_removes") fin >> CONF_dict_remove;
 		else if(buf=="f_filter") fin >> CONF_pos_filter;
+		else if(buf=="f_pos")	fin >> CONF_add_pos;
+		else if(buf=="f_oov_bo")	fin >> CONF_oov_backoff;
 		//1.5
 		else if(buf=="o_srand") fin >> CONF_random_seed;
 		else

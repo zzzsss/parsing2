@@ -13,7 +13,7 @@ class FeatureGenO1: public FeatureGen{
 private:
 	IntHashMap* filter_map;
 public:
-	FeatureGenO1(Dict* d,int w,int di);
+	FeatureGenO1(Dict* d,int w,int di,int apos);
 	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod);
 	virtual void deal_with_corpus(vector<DependencyInstance*>*);
 	virtual ~FeatureGenO1(){}

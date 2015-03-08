@@ -8,6 +8,7 @@
 #include "Dict.h"
 #include "Parameters.h"
 using parsing_conf::CONF_add_distance;
+using parsing_conf::CONF_oov_backoff;
 
 string Dict::POS_START = "<pos-s>";
 string Dict::POS_END = "<pos-e>";
@@ -63,13 +64,14 @@ int Dict::get_index(int d)
 
 int Dict::get_index(string* word,string* backoff_pos)
 {
+	//2 ways:(backoff_pos=0 for pos, else for word)
 	HashMap::iterator iter = maps->find(word);
 	if(iter == maps->end()){
 		if(backoff_pos == 0){
 			//for purely pos
 			return maps->find(&POS_UNK)->second;
 		}
-		else{
+		else if(CONF_oov_backoff){
 			int i;
 			string* temp = new string(WORD_BACKOFF_POS_PREFIX+*backoff_pos);
 			HashMap::iterator iter2 = maps->find(temp);
@@ -80,6 +82,8 @@ int Dict::get_index(string* word,string* backoff_pos)
 			delete temp;
 			return i;
 		}
+		else
+			return maps->find(&WORD_UNK)->second;
 	}
 	else
 		return iter->second;

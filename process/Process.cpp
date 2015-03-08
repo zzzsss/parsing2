@@ -34,7 +34,7 @@ void Process::train()
 
 	//3.5
 	// here only the order1 features
-	feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance);
+	feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance,CONF_add_pos);
 	feat_gen->deal_with_corpus(training_corpus);
 	if(CONF_pos_filter){
 		feat_gen->add_filter(training_corpus);
@@ -182,7 +182,7 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 	//also assuming test-file itself is gold file(this must be true with dev file)
 	dev_test_corpus = read_corpus(to_test);
 	if(! feat_gen){	//when testing
-		feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance);
+		feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance,CONF_add_pos);
 		if(CONF_pos_filter){
 			feat_gen->read_extra_info(CONF_feature_file);
 		}

@@ -7,9 +7,13 @@
 
 #include "FeatureGenO1.h"
 
-FeatureGenO1::FeatureGenO1(Dict* d,int w,int di):FeatureGen(d,w,di)
+FeatureGenO1::FeatureGenO1(Dict* d,int w,int di,int apos):FeatureGen(d,w,di,apos)
 {
-	xdim = (2+2)*w + ((di>0)?1:0);
+	xdim = 2*w;
+	if(apos)
+		xdim *= 2;
+	if(di)
+		xdim += 1;
 	filter_map = 0;
 }
 
@@ -37,6 +41,8 @@ int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mo
 			*to_fill = ins->index_forms->at(i);
 		to_fill ++;
 	}
+
+	if(pos_add){
 	//-pos
 	for(int i=head-backward;i<=head+backward;i++){
 		if(i<0)
@@ -56,6 +62,8 @@ int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mo
 			*to_fill = ins->index_pos->at(i);
 		to_fill ++;
 	}
+	}
+
 	//-maybe distance
 	if(distance){
 		*to_fill = dictionary->get_index(head-mod);

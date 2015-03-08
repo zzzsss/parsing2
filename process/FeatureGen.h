@@ -15,6 +15,7 @@ class FeatureGen{
 protected:
 	Dict* dictionary;
 	int window_size;
+	int pos_add;	//whether add pos
 	int distance;	//whether add distance feature
 
 protected:
@@ -27,7 +28,7 @@ public:
 	virtual ~FeatureGen(){}
 	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod)=0;
 	virtual void deal_with_corpus(vector<DependencyInstance*>*)=0;
-	FeatureGen(Dict* d,int w,int di):dictionary(d),window_size(w),distance(di),xdim(0){}
+	FeatureGen(Dict* d,int w,int di,int apos):dictionary(d),window_size(w),distance(di),xdim(0),pos_add(apos){}
 
 	//for extra information(1.filter )
 	virtual void add_filter(vector<DependencyInstance*>*)=0;
