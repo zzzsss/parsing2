@@ -18,6 +18,12 @@ string Dict::WORD_END = "<w-e>";
 string Dict::WORD_UNK = "<w-unk>";
 string Dict::WORD_BACKOFF_POS_PREFIX = "_sth_";
 
+string Dict::WORD_DUMMY_L = "<w-dl>";
+string Dict::WORD_DUMMY_R = "<pos-dr>";
+string Dict::POS_DUMMY_L = "<w-dl>";
+string Dict::POS_DUMMY_R = "<pos-dr>";
+string Dict::DISTANCE_DUMMY = "_distance_dummy_";
+
 Dict::Dict(int remove,int stat,int dsize){
 	maps = new HashMap(CONS_dict_map_size);
 	real_word_list = new vector<string*>;
@@ -103,6 +109,8 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	// !!When constructing the dictionary, includes all the features (no harm) ...
 	int num_distance=0,num_pos=0,num_words=0;
 	//1.first add distance words
+	maps->insert(pair<string*, int>(&DISTANCE_DUMMY,dict_num++));
+	num_distance++;
 	for(int i=-1*distance_max;i<=distance_max;i++){
 		string * dis = get_distance_str(i);
 		maps->insert(pair<string*, int>(dis,dict_num++));
@@ -114,7 +122,9 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	maps->insert(pair<string*, int>(&POS_START,dict_num++));
 	maps->insert(pair<string*, int>(&POS_END,dict_num++));
 	maps->insert(pair<string*, int>(&POS_UNK,dict_num++));
-	num_pos += 3;
+	maps->insert(pair<string*, int>(&POS_DUMMY_L,dict_num++));
+	maps->insert(pair<string*, int>(&POS_DUMMY_R,dict_num++));
+	num_pos += 5;
 	int corpus_size = corpus->size();
 	for(int i=0;i<corpus_size;i++){
 		DependencyInstance* one = corpus->at(i);
@@ -136,7 +146,9 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	maps->insert(pair<string*, int>(&WORD_START,dict_num++));
 	maps->insert(pair<string*, int>(&WORD_END,dict_num++));
 	maps->insert(pair<string*, int>(&WORD_UNK,dict_num++));
-	num_words += 3;
+	maps->insert(pair<string*, int>(&WORD_DUMMY_L,dict_num++));
+	maps->insert(pair<string*, int>(&WORD_DUMMY_R,dict_num++));
+	num_words += 5;
 	//3.2-backoff_pos
 	for(vector<string*>::iterator i=real_pos.begin();i!=real_pos.end();i++){
 		string* new_w = new string(WORD_BACKOFF_POS_PREFIX+(**i));

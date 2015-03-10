@@ -26,14 +26,14 @@ public:
 		return xdim;
 	}
 	virtual ~FeatureGen(){}
-	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod)=0;
-	virtual void deal_with_corpus(vector<DependencyInstance*>*)=0;
+	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center)=0;
+	virtual void deal_with_corpus(vector<DependencyInstance*>*);
 	FeatureGen(Dict* d,int w,int di,int apos):dictionary(d),window_size(w),distance(di),xdim(0),pos_add(apos){}
 
 	//for extra information(1.filter )
-	virtual void add_filter(vector<DependencyInstance*>*)=0;
-	virtual void read_extra_info(string f)=0;
-	virtual void write_extra_info(string f)=0;
+	virtual void add_filter(vector<DependencyInstance*>*){};
+	virtual void read_extra_info(string f){};
+	virtual void write_extra_info(string f){};
 };
 
 #endif /* FEATUREGEN_H_ */

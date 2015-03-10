@@ -38,6 +38,10 @@ public:
 	static string POS_START,POS_END,POS_UNK;
 	static string WORD_START,WORD_END,WORD_UNK;
 	static string WORD_BACKOFF_POS_PREFIX;
+	//for o2
+	// -- this is: h-dl-c(right-arc) or h-dr-c(left-arc)
+	static string WORD_DUMMY_L,WORD_DUMMY_R,POS_DUMMY_L,POS_DUMMY_R;
+	static string DISTANCE_DUMMY;
 
 	string* get_distance_str(int n,int way=1);
 	int get_index(string* word,string* backoff_pos);	//word or pos

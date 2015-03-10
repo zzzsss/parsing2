@@ -32,14 +32,8 @@ void Process::train()
 		dict->write(CONF_dict_file);
 	}
 
-	//3.5
-	// here only the order1 features
-	feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance,CONF_add_pos);
-	feat_gen->deal_with_corpus(training_corpus);
-	if(CONF_pos_filter){
-		feat_gen->add_filter(training_corpus);
-		feat_gen->write_extra_info(CONF_feature_file);
-	}
+	//3.5 get the feature generator
+	each_get_featgen(0);			/*************virtual****************/
 
 	//4. get machine
 	string mach_cur_name = CONF_mach_name+CONF_mach_cur_suffix;
@@ -181,13 +175,7 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 {
 	//also assuming test-file itself is gold file(this must be true with dev file)
 	dev_test_corpus = read_corpus(to_test);
-	if(! feat_gen){	//when testing
-		feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance,CONF_add_pos);
-		if(CONF_pos_filter){
-			feat_gen->read_extra_info(CONF_feature_file);
-		}
-	}
-	feat_gen->deal_with_corpus(dev_test_corpus);
+	each_get_featgen(1);	/*************virtual****************/
 
 	int token_num = 0;	//token number
 	int miss_count = 0;
@@ -256,84 +244,4 @@ void Process::delete_restart_conf()
 	system(cmd.c_str());
 }
 
-vector<int>* Process::parse_o1(DependencyInstance* x)
-{
-	int idim = feat_gen->get_xdim();
-	int odim = mach->GetOdim();
-	//default order1 parsing
-	int length = x->forms->size();
-	double *tmp_scores = new double[length*length*2];
-	//construct scores using nn
-	int num_pair = length*(length-1);	//2 * (0+(l-1))*l/2
-	REAL *mach_x = new REAL[num_pair*idim];
-	REAL *mach_y = new REAL[num_pair*odim];
-	REAL* assign_x = mach_x;
-	for(int ii=0;ii<length;ii++){
-		for(int j=ii+1;j<length;j++){
-			for(int lr=0;lr<2;lr++){
-				//build mach_x
-				if(lr==E_RIGHT)
-					feat_gen->fill_one(assign_x,x,ii,j);
-				else
-					feat_gen->fill_one(assign_x,x,j,ii);
-				assign_x += idim;
-			}
-		}
-	}
-	//mach evaluate
-	int remain = num_pair;
-	int bsize = mach->GetBsize();
-	REAL* xx = mach_x;
-	REAL* yy = mach_y;
-	while(remain > 0){
-		int n=0;
-		if(remain >= bsize)
-			n = bsize;
-		else
-			n = remain;
-		remain -= bsize;
-		mach->SetDataIn(xx);
-		mach->Forw(n);
-		memcpy(yy, mach->GetDataOut(), odim*sizeof(REAL)*n);
-		yy += n*odim;
-		xx += n*idim;
-	}
-	REAL* assign_y = mach_y;
-	FeatureGenO1* feat_o1 = (FeatureGenO1*)feat_gen;	//force it
-	for(int ii=0;ii<length;ii++){
-		for(int j=ii+1;j<length;j++){
-			for(int lr=0;lr<2;lr++){
-				int index = get_index2(length,ii,j,lr);
-				//if filter --- this is the easy way(but waste computation)
-				if(CONF_pos_filter){
-					int head = ii, modif = j;
-					if(lr==E_LEFT){
-						head = j;
-						modif = ii;
-					}
-					if(!feat_o1->allowed_pair(x->index_pos->at(head),x->index_pos->at(modif))){
-						tmp_scores[index] = DOUBLE_LARGENEG;	//is this neg enough??
-						//skip forward
-						for(int c=0;c<odim;c++)
-							assign_y++;
-						continue;
-					}
-				}
-				//important ...
-				double temp = 0;
-				if(odim > 1){
-					for(int c=0;c<odim;c++)
-						temp += (*assign_y++)*c;
-					tmp_scores[index] = temp;
-				}
-				else
-					tmp_scores[index] = *assign_y++;
-			}
-		}
-	}
-	vector<int> *ret = decodeProjective(length,tmp_scores);
-	delete []mach_x;
-	delete []mach_y;
-	delete []tmp_scores;
-	return ret;
-}
+

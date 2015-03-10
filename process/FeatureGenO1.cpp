@@ -17,7 +17,7 @@ FeatureGenO1::FeatureGenO1(Dict* d,int w,int di,int apos):FeatureGen(d,w,di,apos
 	filter_map = 0;
 }
 
-int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mod)
+int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mod,int mod_center)
 {
 	//head-w,mod-w,head-pos,mod-pos,distance
 	int backward = window_size/2;	//window_size should be odd...
@@ -69,23 +69,6 @@ int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mo
 		*to_fill = dictionary->get_index(head-mod);
 	}
 	return xdim;
-}
-
-void FeatureGenO1::deal_with_corpus(vector<DependencyInstance*>* c)
-{
-	if(c->at(0)->index_forms)
-		return;
-	int size = c->size();
-	for(int i=0;i<size;i++){
-		DependencyInstance* x = c->at(i);
-		int length = x->length();
-		x->index_forms = new vector<int>();
-		x->index_pos = new vector<int>();
-		for(int ii=0;ii<length;ii++){
-			(x->index_forms)->push_back(dictionary->get_index(x->forms->at(ii),x->postags->at(ii)));
-			(x->index_pos)->push_back(dictionary->get_index(x->postags->at(ii),0));
-		}
-	}
 }
 
 

@@ -46,15 +46,33 @@ protected:
 	virtual void each_prepare_data_oneiter()=0;
 	virtual REAL* each_next_data(int*)=0;
 	virtual void each_get_grad(int)=0;
-
 	virtual vector<int>* each_test_one(DependencyInstance* x){
-		//for now
+		//default o1
 		return parse_o1(x);
+	}
+	virtual void each_get_featgen(int if_testing){
+		// default only the order1 features
+		if(if_testing){
+			if(! feat_gen){	//when testing
+				feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance,CONF_add_pos);
+				if(CONF_pos_filter){
+					feat_gen->read_extra_info(CONF_feature_file);
+				}
+			}
+			feat_gen->deal_with_corpus(dev_test_corpus);
+		}
+		else{
+			feat_gen = new FeatureGenO1(dict,CONF_x_window,CONF_add_distance,CONF_add_pos);
+			feat_gen->deal_with_corpus(training_corpus);
+			if(CONF_pos_filter){
+				feat_gen->add_filter(training_corpus);
+				feat_gen->write_extra_info(CONF_feature_file);
+			}
+		}
 	}
 
 	//init embedings
 	virtual void init_embed();
-
 	//restart files
 	void read_restart_conf(double*);
 	void write_restart_conf(double*);
