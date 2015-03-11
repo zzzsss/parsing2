@@ -8,6 +8,7 @@
 #ifndef PROCESS_FEATUREGENO2SIB_H_
 #define PROCESS_FEATUREGENO2SIB_H_
 
+#include "FeatureGen.h"
 class FeatureGenO2sib: public FeatureGen{
 public:
 	FeatureGenO2sib(Dict* d,int w,int di,int apos);

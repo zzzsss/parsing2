@@ -34,11 +34,13 @@ int FeatureGenO2sib::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int
 	}
 	if(mod_center<0){
 		//use dummy
+		for(int i=mod_center-backward;i<=mod_center+backward;i++){	//**ONCE A BUG**
 		if(head < mod)
 			*to_fill = dictionary->get_index(&dictionary->WORD_DUMMY_L,0);
 		else
 			*to_fill = dictionary->get_index(&dictionary->WORD_DUMMY_R,0);
 		to_fill ++;
+		}
 	}
 	else{
 		for(int i=mod_center-backward;i<=mod_center+backward;i++){
@@ -74,11 +76,13 @@ int FeatureGenO2sib::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int
 	}
 	if(mod_center<0){
 		//use dummy
+		for(int i=mod_center-backward;i<=mod_center+backward;i++){		//**ONCE A BUG**
 		if(head < mod)
 			*to_fill = dictionary->get_index(&dictionary->POS_DUMMY_L,0);
 		else
 			*to_fill = dictionary->get_index(&dictionary->POS_DUMMY_R,0);
 		to_fill ++;
+		}
 	}
 	else{
 		for(int i=mod_center-backward;i<=mod_center+backward;i++){

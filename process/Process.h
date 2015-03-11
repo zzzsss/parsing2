@@ -11,6 +11,7 @@
 #include "Parameters.h"
 #include "FeatureGen.h"
 #include "FeatureGenO1.h"
+#include "FeatureGenO2sib.h"
 #include "../tools/Eisner.h"
 #include "../tools/CONLLReader.h"
 #include "../tools/DependencyEvaluator.h"

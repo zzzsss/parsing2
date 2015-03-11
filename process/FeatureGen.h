@@ -26,7 +26,7 @@ public:
 		return xdim;
 	}
 	virtual ~FeatureGen(){}
-	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center)=0;
+	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center=-1)=0;
 	virtual void deal_with_corpus(vector<DependencyInstance*>*);
 	FeatureGen(Dict* d,int w,int di,int apos):dictionary(d),window_size(w),distance(di),xdim(0),pos_add(apos){}
 

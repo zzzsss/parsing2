@@ -19,8 +19,8 @@ string Dict::WORD_UNK = "<w-unk>";
 string Dict::WORD_BACKOFF_POS_PREFIX = "_sth_";
 
 string Dict::WORD_DUMMY_L = "<w-dl>";
-string Dict::WORD_DUMMY_R = "<pos-dr>";
-string Dict::POS_DUMMY_L = "<w-dl>";
+string Dict::WORD_DUMMY_R = "<w-dr>";
+string Dict::POS_DUMMY_L = "<pos-dl>";
 string Dict::POS_DUMMY_R = "<pos-dr>";
 string Dict::DISTANCE_DUMMY = "_distance_dummy_";
 

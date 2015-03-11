@@ -191,3 +191,82 @@ static vector<int>* decodeProjective_o2sib(int length,double* scores)
 	delete []which;
 	return result;
 }
+
+vector<int>* Method6_O2sib::m6_parse_o2sib(DependencyInstance* x)
+{
+	int idim = feat_gen->get_xdim();
+	int odim = mach->GetOdim();
+	// one sentence
+	int length = x->forms->size();
+	int num_allocated = length*length*length;
+	int num_togo = 0;
+	double *tmp_scores = new double[length*length*length];
+	REAL *mach_x = new REAL[num_allocated*idim];	//num_allocated is more than needed
+	REAL *mach_y = new REAL[num_allocated*odim];
+	REAL* assign_x = mach_x;
+	for(int s=0;s<length;s++){
+		for(int t=s+1;t<length;t++){
+			//s<->t
+			feat_gen->fill_one(assign_x,x,s,t,-1);
+			assign_x += idim;
+			feat_gen->fill_one(assign_x,x,t,s,-1);
+			assign_x += idim;
+			num_togo += 2;
+		}
+	}
+	for(int s=0;s<length;s++){
+		for(int c=s+1;c<length;c++){
+			for(int t=c+1;t<length;t++){
+				//s c t
+				feat_gen->fill_one(assign_x,x,s,t,c);
+				assign_x += idim;
+				feat_gen->fill_one(assign_x,x,t,s,c);
+				assign_x += idim;
+				num_togo += 2;
+			}
+		}
+	}
+	//forward through nn
+	int remain = num_togo;
+	int bsize = mach->GetBsize();
+	REAL* xx = mach_x;
+	REAL* yy = mach_y;
+	while(remain > 0){
+		int n=0;
+		if(remain >= bsize)
+			n = bsize;
+		else
+			n = remain;
+		remain -= bsize;
+		mach->SetDataIn(xx);
+		mach->Forw(n);
+		memcpy(yy, mach->GetDataOut(), odim*sizeof(REAL)*n);
+		yy += n*odim;
+		xx += n*idim;
+	}
+	//and assign the scores
+	REAL* assign_y = mach_y;
+	for(int s=0;s<length;s++){
+		for(int t=s+1;t<length;t++){
+			//s<->t
+			tmp_scores[get_index2_o2sib(length,s,s,t)] = *assign_y++;
+			tmp_scores[get_index2_o2sib(length,t,t,s)] = *assign_y++;
+		}
+	}
+	for(int s=0;s<length;s++){
+		for(int c=s+1;c<length;c++){
+			for(int t=c+1;t<length;t++){
+				//s c t
+				tmp_scores[get_index2_o2sib(length,s,c,t)] = *assign_y++;
+				tmp_scores[get_index2_o2sib(length,t,c,s)] = *assign_y++;
+			}
+		}
+	}
+	//parse it with o2sib
+	vector<int> *ret = decodeProjective_o2sib(length,tmp_scores);
+	delete []mach_x;
+	delete []mach_y;
+	delete []tmp_scores;
+	return ret;
+}
+
