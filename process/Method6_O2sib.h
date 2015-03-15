@@ -35,11 +35,18 @@ public:
 		if(if_testing){
 			if(! feat_gen)	//when testing
 				feat_gen = new FeatureGenO2sib(dict,CONF_x_window,CONF_add_distance,CONF_add_pos);
+			if(CONF_pos_filter){
+				feat_gen->read_extra_info(CONF_feature_file);
+			}
 			feat_gen->deal_with_corpus(dev_test_corpus);
 		}
 		else{
 			feat_gen = new FeatureGenO2sib(dict,CONF_x_window,CONF_add_distance,CONF_add_pos);
 			feat_gen->deal_with_corpus(training_corpus);
+			if(CONF_pos_filter){
+				feat_gen->add_filter(training_corpus);
+				feat_gen->write_extra_info(CONF_feature_file);
+			}
 		}
 	}
 	virtual vector<int>* each_test_one(DependencyInstance* x){

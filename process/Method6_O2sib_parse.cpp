@@ -196,33 +196,46 @@ vector<int>* Method6_O2sib::m6_parse_o2sib(DependencyInstance* x)
 {
 	int idim = feat_gen->get_xdim();
 	int odim = mach->GetOdim();
+	FeatureGenO2sib* feat_o2 = (FeatureGenO2sib*)feat_gen;	//force it
 	// one sentence
 	int length = x->forms->size();
 	int num_allocated = length*length*length;
 	int num_togo = 0;
 	double *tmp_scores = new double[length*length*length];
+	for(int i=0;i<length*length*length;i++)
+		tmp_scores[i] = DOUBLE_LARGENEG;
 	REAL *mach_x = new REAL[num_allocated*idim];	//num_allocated is more than needed
 	REAL *mach_y = new REAL[num_allocated*odim];
 	REAL* assign_x = mach_x;
 	for(int s=0;s<length;s++){
 		for(int t=s+1;t<length;t++){
 			//s<->t
-			feat_gen->fill_one(assign_x,x,s,t,-1);
-			assign_x += idim;
-			feat_gen->fill_one(assign_x,x,t,s,-1);
-			assign_x += idim;
-			num_togo += 2;
+			if(!CONF_pos_filter || feat_o2->allowed_pair(x,s,t,-1)){
+				feat_gen->fill_one(assign_x,x,s,t,-1);
+				assign_x += idim;
+				num_togo += 1;
+			}
+			if(!CONF_pos_filter || feat_o2->allowed_pair(x,t,s,-1)){
+				feat_gen->fill_one(assign_x,x,t,s,-1);
+				assign_x += idim;
+				num_togo += 1;
+			}
 		}
 	}
 	for(int s=0;s<length;s++){
 		for(int c=s+1;c<length;c++){
 			for(int t=c+1;t<length;t++){
 				//s c t
-				feat_gen->fill_one(assign_x,x,s,t,c);
-				assign_x += idim;
-				feat_gen->fill_one(assign_x,x,t,s,c);
-				assign_x += idim;
-				num_togo += 2;
+				if(!CONF_pos_filter || feat_o2->allowed_pair(x,s,t,c)){
+					feat_gen->fill_one(assign_x,x,s,t,c);
+					assign_x += idim;
+					num_togo += 1;
+				}
+				if(!CONF_pos_filter || feat_o2->allowed_pair(x,t,s,c)){
+					feat_gen->fill_one(assign_x,x,t,s,c);
+					assign_x += idim;
+					num_togo += 1;
+				}
 			}
 		}
 	}
@@ -249,16 +262,20 @@ vector<int>* Method6_O2sib::m6_parse_o2sib(DependencyInstance* x)
 	for(int s=0;s<length;s++){
 		for(int t=s+1;t<length;t++){
 			//s<->t
-			tmp_scores[get_index2_o2sib(length,s,s,t)] = *assign_y++;
-			tmp_scores[get_index2_o2sib(length,t,t,s)] = *assign_y++;
+			if(!CONF_pos_filter || feat_o2->allowed_pair(x,s,t,-1))
+				tmp_scores[get_index2_o2sib(length,s,s,t)] = *assign_y++;
+			if(!CONF_pos_filter || feat_o2->allowed_pair(x,t,s,-1))
+				tmp_scores[get_index2_o2sib(length,t,t,s)] = *assign_y++;
 		}
 	}
 	for(int s=0;s<length;s++){
 		for(int c=s+1;c<length;c++){
 			for(int t=c+1;t<length;t++){
 				//s c t
-				tmp_scores[get_index2_o2sib(length,s,c,t)] = *assign_y++;
-				tmp_scores[get_index2_o2sib(length,t,c,s)] = *assign_y++;
+				if(!CONF_pos_filter || feat_o2->allowed_pair(x,s,t,c))
+					tmp_scores[get_index2_o2sib(length,s,c,t)] = *assign_y++;
+				if(!CONF_pos_filter || feat_o2->allowed_pair(x,t,s,c))
+					tmp_scores[get_index2_o2sib(length,t,c,s)] = *assign_y++;
 			}
 		}
 	}

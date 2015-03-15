@@ -121,3 +121,75 @@ int FeatureGenO2sib::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int
 	}
 	return xdim;
 }
+
+//filter based on pos
+void FeatureGenO2sib::add_filter(vector<DependencyInstance*>* c)
+{
+	filter_map = new IntHashMap();
+	int size = c->size();
+	//add possible pos pairs, assuming pos index is less than 500 (depend on dictionary) and also !=0
+	// -- 2*500^3 still ok for int
+	// <h,m,before,2(dir)>
+	for(int i=0;i<size;i++){
+		DependencyInstance* x = c->at(i);
+		int length = x->length();
+		for(int h=0;h<length;h++){
+			int before = -1;
+			for(int m=h-1;m>=0;m--){
+				if(x->heads->at(m) == h){
+					int adding = 0;
+					if(before<0){
+						adding = (x->index_pos->at(h)<<(ASSUMING_MAX_POS_SHIFT+ASSUMING_MAX_POS_SHIFT+1))
+										+(x->index_pos->at(m)<<(ASSUMING_MAX_POS_SHIFT+1))
+										+(0<<1) + 0;
+					}
+					else{
+						adding = (x->index_pos->at(h)<<(ASSUMING_MAX_POS_SHIFT+ASSUMING_MAX_POS_SHIFT+1))
+										+(x->index_pos->at(m)<<(ASSUMING_MAX_POS_SHIFT+1))
+										+(x->index_pos->at(before)<<1) + 0;
+					}
+					filter_map->insert(pair<int, int>(adding,0));
+					before = m;
+				}
+			}
+			before = -1;
+			for(int m=h+1;m<length;m++){
+				if(x->heads->at(m) == h){
+					int adding = 0;
+					if(before<0){
+						adding = (x->index_pos->at(h)<<(ASSUMING_MAX_POS_SHIFT+ASSUMING_MAX_POS_SHIFT+1))
+										+(x->index_pos->at(m)<<(ASSUMING_MAX_POS_SHIFT+1))
+										+(0<<1) + 1;
+					}
+					else{
+						adding = (x->index_pos->at(h)<<(ASSUMING_MAX_POS_SHIFT+ASSUMING_MAX_POS_SHIFT+1))
+										+(x->index_pos->at(m)<<(ASSUMING_MAX_POS_SHIFT+1))
+										+(x->index_pos->at(before)<<1) + 1;
+					}
+					filter_map->insert(pair<int, int>(adding,0));
+					before = m;
+				}
+			}
+		}
+	}
+}
+
+int FeatureGenO2sib::allowed_pair(DependencyInstance* x,int head,int mod,int c)
+{
+	//here different from o1, number is the index in the sentence
+	int h_i = x->index_pos->at(head);
+	int m_i = x->index_pos->at(mod);
+	int c_i = 0;
+	if(c>=0)
+		c_i = x->index_pos->at(c);
+	int dir = 1;	//is direction-left-to-right
+	if(mod < head)
+		dir = 0;
+	int test = (h_i<<(ASSUMING_MAX_POS_SHIFT+ASSUMING_MAX_POS_SHIFT+1))+(m_i<<(ASSUMING_MAX_POS_SHIFT+1))
+					+(c_i<<1) + dir;
+	if(filter_map->find(test) != filter_map->end())
+		return 1;
+	else
+		return 0;
+}
+

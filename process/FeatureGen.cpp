@@ -24,4 +24,31 @@ void FeatureGen::deal_with_corpus(vector<DependencyInstance*>* c)
 	}
 }
 
+//io
+void FeatureGen::write_extra_info(string file)
+{
+	//warning when error
+	printf("-Writing feat-file to %s,size %d.\n",file.c_str(),filter_map->size());
+	ofstream fout;
+	fout.open(file.c_str(),ofstream::out);
+	//fout << filter_map->size() << "\n";
+	for(IntHashMap::iterator i = filter_map->begin();i!=filter_map->end();i++){
+		fout << i->first << endl;
+	}
+	fout.close();
+	printf("-Writing finished.\n");
+}
 
+void FeatureGen::read_extra_info(string file)
+{
+	filter_map = new IntHashMap();
+	printf("-Reading feat-file from %s.\n",file.c_str());
+	ifstream fin;
+	fin.open(file.c_str(),ifstream::in);
+	while(fin){
+		int temp;
+		fin >> temp;
+		filter_map->insert(pair<int, int>(temp,0));
+	}
+	printf("-Reading finished,size %d.\n",filter_map->size());
+}

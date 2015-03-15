@@ -14,6 +14,9 @@ public:
 	FeatureGenO2sib(Dict* d,int w,int di,int apos);
 	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center);
 	virtual ~FeatureGenO2sib(){}
+
+	virtual void add_filter(vector<DependencyInstance*>*);
+	int allowed_pair(DependencyInstance* x,int head,int modif,int c);	//also considering directions
 };
 
 

@@ -71,8 +71,6 @@ int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mo
 	return xdim;
 }
 
-
-#define ASSUMING_MAX_POS 500
 void FeatureGenO1::add_filter(vector<DependencyInstance*>* c)
 {
 	filter_map = new IntHashMap();
@@ -98,33 +96,4 @@ int FeatureGenO1::allowed_pair(int head,int mod)
 		return 1;
 	else
 		return 0;
-}
-
-//io
-void FeatureGenO1::write_extra_info(string file)
-{
-	//warning when error
-	printf("-Writing feat-file to %s,size %d.\n",file.c_str(),filter_map->size());
-	ofstream fout;
-	fout.open(file.c_str(),ofstream::out);
-	//fout << filter_map->size() << "\n";
-	for(IntHashMap::iterator i = filter_map->begin();i!=filter_map->end();i++){
-		fout << i->first << endl;
-	}
-	fout.close();
-	printf("-Writing finished.\n");
-}
-
-void FeatureGenO1::read_extra_info(string file)
-{
-	filter_map = new IntHashMap();
-	printf("-Reading feat-file from %s.\n",file.c_str());
-	ifstream fin;
-	fin.open(file.c_str(),ifstream::in);
-	while(fin){
-		int temp;
-		fin >> temp;
-		filter_map->insert(pair<int, int>(temp,0));
-	}
-	printf("-Reading finished,size %d.\n",filter_map->size());
 }
