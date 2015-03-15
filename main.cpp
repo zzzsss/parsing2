@@ -14,6 +14,7 @@
 #include "process/Method4_random.h"
 #include "process/Method5_localMax.h"
 #include "process/Method6_O2sib.h"
+#include "process/Method7_O2sibAll.h"
 
 //usage: command conf_file ...
 
@@ -44,6 +45,9 @@ int main(int argc,char **argv)
 		break;
 	case 6:
 		x = new Method6_O2sib();
+		break;
+	case 7:
+		x = new Method7_O2sibAll();
 		break;
 	}
 	if(argc == 2){

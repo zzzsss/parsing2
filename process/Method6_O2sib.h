@@ -12,13 +12,12 @@
 //Method 6 : order2, siblings
 //also pairwise like M2~5
 class Method6_O2sib: public Process{
-private:
+protected:
 	REAL* data;
 	int current;
 	int end;
 	REAL* gradient;
 
-protected:
 	virtual void each_write_mach_conf();
 	virtual void each_prepare_data_oneiter();
 	virtual REAL* each_next_data(int*);
