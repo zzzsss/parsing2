@@ -52,6 +52,8 @@ extern const char* CONF_NN_act;
 
 extern int CONF_NN_example;
 
+extern int CONF_NN_scoremax;
+
 //1.3.5 -- init embedings
 extern string CONF_NN_WL;
 extern string CONF_NN_EM;

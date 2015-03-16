@@ -71,11 +71,21 @@ vector<int>* Process::parse_o1(DependencyInstance* x)
 					}
 				}
 				//important ...
-				double temp = 0;
 				if(odim > 1){
-					for(int c=0;c<odim;c++)
-						temp += (*assign_y++)*c;
-					tmp_scores[index] = temp;
+					if(CONF_NN_scoremax){
+						double temp = *assign_y;
+						double ans = 0;
+						for(int c=0;c<odim;c++)
+							if(*assign_y++ > temp)
+								ans = c;
+						tmp_scores[index] = ans;
+					}
+					else{
+						double temp = 0;
+						for(int c=0;c<odim;c++)
+							temp += (*assign_y++)*c;
+						tmp_scores[index] = temp;
+					}
 				}
 				else
 					tmp_scores[index] = *assign_y++;

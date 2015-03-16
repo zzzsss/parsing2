@@ -49,6 +49,8 @@ const char* CONF_NN_act = NN_ACs[0];
 
 int CONF_NN_example = 0;	//whether give training ones for wrong child
 
+int CONF_NN_scoremax=0;	//whether score-max or score-average(only for M1-like methods)
+
 //1.3.5 -- init embedings
 string CONF_NN_WL;
 string CONF_NN_EM;
@@ -125,9 +127,8 @@ void init_configurations(string conf_file)
 			fin >> type;
 			CONF_NN_act = NN_ACs[type];
 		}
-		else if(buf=="nn_example"){
-			fin >> CONF_NN_example;
-		}
+		else if(buf=="nn_example")  fin >> CONF_NN_example;
+		else if(buf=="nn_scoremax") fin >> CONF_NN_scoremax;
 		//1.3.5
 		else if(buf=="nn_init_wl") fin >> CONF_NN_WL;
 		else if(buf=="nn_init_em") fin >> CONF_NN_EM;

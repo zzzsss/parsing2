@@ -258,24 +258,41 @@ vector<int>* Method6_O2sib::m6_parse_o2sib(DependencyInstance* x)
 		xx += n*idim;
 	}
 	//and assign the scores
+#define TMP_GET_MAXINDEX(o_dim,a,assign) {a=0;double temp=*assign;for(int c=0;c<o_dim;c++) if((*assign++)>temp) a=c;}
+#define TMP_GET_ONE(o_dim,a,assign) {\
+	if(o_dim>1){\
+		if(CONF_NN_scoremax){TMP_GET_MAXINDEX(o_dim,a,assign)}\
+		else{a=0;for(int c=0;c<o_dim;c++) a+=(*assign++)*c;}\
+	}\
+	else{a=*assign++;}}
+
 	REAL* assign_y = mach_y;
+	double answer = 0;
 	for(int s=0;s<length;s++){
 		for(int t=s+1;t<length;t++){
 			//s<->t
-			if(!CONF_pos_filter || feat_o2->allowed_pair(x,s,t,-1))
-				tmp_scores[get_index2_o2sib(length,s,s,t)] = *assign_y++;
-			if(!CONF_pos_filter || feat_o2->allowed_pair(x,t,s,-1))
-				tmp_scores[get_index2_o2sib(length,t,t,s)] = *assign_y++;
+			if(!CONF_pos_filter || feat_o2->allowed_pair(x,s,t,-1)){
+				TMP_GET_ONE(odim,answer,assign_y)
+				tmp_scores[get_index2_o2sib(length,s,s,t)] = answer;
+			}
+			if(!CONF_pos_filter || feat_o2->allowed_pair(x,t,s,-1)){
+				TMP_GET_ONE(odim,answer,assign_y)
+				tmp_scores[get_index2_o2sib(length,t,t,s)] = answer;
+			}
 		}
 	}
 	for(int s=0;s<length;s++){
 		for(int c=s+1;c<length;c++){
 			for(int t=c+1;t<length;t++){
 				//s c t
-				if(!CONF_pos_filter || feat_o2->allowed_pair(x,s,t,c))
-					tmp_scores[get_index2_o2sib(length,s,c,t)] = *assign_y++;
-				if(!CONF_pos_filter || feat_o2->allowed_pair(x,t,s,c))
-					tmp_scores[get_index2_o2sib(length,t,c,s)] = *assign_y++;
+				if(!CONF_pos_filter || feat_o2->allowed_pair(x,s,t,c)){
+					TMP_GET_ONE(odim,answer,assign_y)
+					tmp_scores[get_index2_o2sib(length,s,c,t)] = answer;
+				}
+				if(!CONF_pos_filter || feat_o2->allowed_pair(x,t,s,c)){
+					TMP_GET_ONE(odim,answer,assign_y)
+					tmp_scores[get_index2_o2sib(length,t,c,s)] = answer;
+				}
 			}
 		}
 	}
