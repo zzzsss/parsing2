@@ -54,6 +54,8 @@ extern int CONF_NN_example;
 
 extern int CONF_NN_scoremax;
 
+extern string CONF_NN_O2sib_o1mach;
+
 //1.3.5 -- init embedings
 extern string CONF_NN_WL;
 extern string CONF_NN_EM;
