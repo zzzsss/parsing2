@@ -1,11 +1,18 @@
 /*
+ * EisnerO2sib.cpp
+ *
+ *  Created on: 2015年3月18日
+ *      Author: zzs
+ */
+
+/*
  * Method6_EisnerO2sib.cpp
  *
  *  Created on: 2015年3月17日
  *      Author: zzs
  */
 
-#include "Method6_O2sib.h"
+#include "../algorithms/EisnerO2sib.h"
 
 //Algorithm of extended Eisner (order 2 for ../tools/Eisner.h)
 // -- defined here for convenience
@@ -191,3 +198,6 @@ vector<int>* decodeProjective_o2sib(int length,double* scores)
 	delete []which;
 	return result;
 }
+
+
+

@@ -41,24 +41,18 @@ void Method1_allC::each_prepare_data_oneiter()
 		DependencyInstance* x = training_corpus->at(i);
 		int length = x->length();
 		for(int ii=0;ii<length;ii++){
-			for(int j=ii+1;j<length;j++){
-				for(int lr=0;lr<2;lr++){
+			for(int j=0;j<length;j++){
+				if(ii != j){
 					//build mach_x
 					REAL t = 0;
-					int head = ii, mod = j;
-					if(lr==E_LEFT){
-						head = j;
-						mod = ii;
-					}
 					//check filter if set
-					if(CONF_pos_filter){
-						if(!feat_o1->allowed_pair(x->index_pos->at(head),x->index_pos->at(mod)))
+					if(parameters->CONF_pos_filter){
+						if(!feat_o1->allowed_pair(x,ii,j))
 							continue;
 					}
-					feat_gen->fill_one(assign_x,x,head,mod);
-					if(x->heads->at(mod)==head)
+					feat_gen->fill_one(assign_x,x,ii,j);
+					if(x->heads->at(j)==ii)
 						t=1;
-
 					*assign_y = t;
 					assign_x += mach->GetIdim();
 					assign_y += 1;
@@ -72,8 +66,8 @@ void Method1_allC::each_prepare_data_oneiter()
 	//shuffle
 	shuffle_data(data,target,mach->GetIdim(),1,real_num_pairs*mach->GetIdim(),real_num_pairs,10);
 	//sample
-	cout << "--Data for this iter: samples all " << end << " resample: " << (int)(end*CONF_NN_resample) << endl;
-	end = (int)(end*CONF_NN_resample);
+	cout << "--Data for this iter: samples all " << end << " resample: " << (int)(end*parameters->CONF_NN_resample) << endl;
+	end = (int)(end*parameters->CONF_NN_resample);
 }
 
 REAL* Method1_allC::each_next_data(int* size)

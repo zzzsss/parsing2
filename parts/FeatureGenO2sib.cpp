@@ -176,7 +176,6 @@ void FeatureGenO2sib::add_filter(vector<DependencyInstance*>* c)
 
 int FeatureGenO2sib::allowed_pair(DependencyInstance* x,int head,int mod,int c)
 {
-	//here different from o1, number is the index in the sentence
 	int h_i = x->index_pos->at(head);
 	int m_i = x->index_pos->at(mod);
 	int c_i = 0;

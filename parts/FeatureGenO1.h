@@ -18,10 +18,9 @@ public:
 	//virtual void deal_with_corpus(vector<DependencyInstance*>*);	--- same as base-class
 	virtual ~FeatureGenO1(){}
 
-	//@deprecated --- filter for o1 no-use
 	//for extra information(1.filter )
 	virtual void add_filter(vector<DependencyInstance*>*);
-	int allowed_pair(int head,int modif);
+	virtual int allowed_pair(DependencyInstance* x,int head,int modif,int c=-1);
 };
 
 #endif /* FEATUREGEBO1_H_ */

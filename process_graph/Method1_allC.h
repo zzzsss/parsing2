@@ -27,10 +27,11 @@ protected:
 	virtual void each_get_grad(int);
 
 public:
-	Method1_allC(){
+	Method1_allC(string conf):Process(conf){
 		data = 0;
 		target = 0;
 		gradient = 0;
+		end = current = 0;
 	}
 };
 

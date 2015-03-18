@@ -5,11 +5,11 @@
  *      Author: zzs
  */
 
-#include "Eisner.h"
+#include "../algorithms/Eisner.h"
 /* the O(n^3) Eisner's algotithms
  *	--- only need the best tree
  */
-void fill_result(int length,int *which,vector<int>* result,int s,int t,int lr,int comp)
+static void fill_result(int length,int *which,vector<int>* result,int s,int t,int lr,int comp)
 {
 	if(s==t)
 		return;
@@ -80,7 +80,7 @@ vector<int>* decodeProjective(int length,double* scores)
 			for(int r = s; r < t; r++){
 				double tmp = scores_table[get_index(length,s,r,E_RIGHT,E_COM)]
 				                          +scores_table[get_index(length,r+1,t,E_LEFT,E_COM)]
-				                                        +scores[get_index2(length,s,t,E_LEFT)];
+				                                        +scores[get_index2(length,t,s)];
 				if(tmp >= max_score){
 					max_score = tmp;
 					u = r;
@@ -96,7 +96,7 @@ vector<int>* decodeProjective(int length,double* scores)
 			for(int r = s; r < t; r++){
 				double tmp = scores_table[get_index(length,s,r,E_RIGHT,E_COM)]
 				                          +scores_table[get_index(length,r+1,t,E_LEFT,E_COM)]
-				                                        +scores[get_index2(length,s,t,E_RIGHT)];
+				                                        +scores[get_index2(length,s,t)];
 				if(tmp >= max_score){
 					max_score = tmp;
 					u = r;

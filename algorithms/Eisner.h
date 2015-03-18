@@ -8,10 +8,9 @@
 #ifndef EISNER_H_
 #define EISNER_H_
 
-#include"Util.h"
-#include"DependencyInstance.h"
 #include <iostream>
 #include <cstdlib>
+#include <vector>
 using namespace std;
 
 #define Negative_Infinity -1e100
@@ -30,12 +29,12 @@ inline int get_index(int len,int s,int t,int lr,int c)
 	key = key * 2 + c;
 	return key;
 }
-//the index2
-inline int get_index2(int len,int s,int t,int lr)
+//the index2 -- scores
+// -- unified with S[h][m]
+inline int get_index2(int len,int h,int m)
 {
-	int key = s;
-	key = key * len + t;
-	key = key * 2 + lr;
+	int key = h;
+	key = key * len + m;
 	return key;
 }
 

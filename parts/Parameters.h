@@ -1,79 +1,116 @@
 /*
+ * common.h
+ *
+ *  Created on: Dec 19, 2014
+ *      Author: zzs
+ */
+
+#ifndef COMMON_H_
+#define COMMON_H_
+
+/*
  * Parameters.cpp
  *
  *  Created on: Dec 24, 2014
  *      Author: zzs
  */
 
-#include "Parameters.h"
 #include "../cslm/Tools.h"
 #include <fstream>
 #include <cstdio>
 
-namespace parsing_conf{
+#define DOUBLE_LARGENEG -10000000.0		//maybe it is enough
+#define INIT_EM_MAX_SIZE 1000000	//maybe enough
+
+class  parsing_conf{
+public:
 //1.0
 int CONF_method;	//which method
 //1.1-files
 string CONF_train_file;	//the training file
 string CONF_dev_file;	//testing files
 string CONF_test_file;	//testing files
-string CONF_output_file="output.txt";
+string CONF_output_file;
 string CONF_gold_file;	//golden files
-
 //1.2-other files
-string CONF_dict_file="vocab.dict";		//for dictionary
-string CONF_mach_name="nn.mach";		//mach name
-string CONF_mach_conf_name="nn.conf";	//nn.conf
-string CONF_mach_cur_suffix=".curr";
-string CONF_mach_best_suffix=".best";
-string CONF_restart_file="nn.restart";		//recording the training iters
-string CONF_feature_file="nn.feat";
-
+string CONF_dict_file;		//for dictionary
+string CONF_mach_name;		//mach name
+string CONF_mach_conf_name;	//nn.conf
+string CONF_mach_cur_suffix;
+string CONF_mach_best_suffix;
+string CONF_restart_file;		//recording the training iters
+string CONF_feature_file;
 //1.3-for nn
-double CONF_NN_LRATE=0.045;
-int CONF_NN_ITER=20;
-double CONF_NN_LMULT=1e-9;	//when >=0:as mult ; -1~0: schedule rate
-double CONF_NN_WD=3e-5;
-double CONF_NN_hidden_size_portion=100;	//how much is hidden size
-int CONF_NN_we=50;						//word-embedding size
-int CONF_NN_plus_layers=0;				//plus number of layers(plus from base)
-double CONF_NN_resample=1.0;				//re-sample rate
-int CONF_NN_BS=128;						//block-size
-
-int* CONF_NN_h_size = 0;
-double CONF_NN_drop = -1;
-
+double CONF_NN_LRATE;
+int CONF_NN_ITER;
+double CONF_NN_LMULT;	//when >=0:as mult ; -1~0: schedule rate
+double CONF_NN_WD;
+double CONF_NN_hidden_size_portion;	//how much is hidden size
+int CONF_NN_we;						//word-embedding size
+int CONF_NN_plus_layers;				//plus number of layers(plus from base)
+double CONF_NN_resample;				//re-sample rate
+int CONF_NN_BS;						//block-size
+//hsizes: array
+int* CONF_NN_h_size;
+double CONF_NN_drop;
 //activation functions
-const char* NN_ACs[] = {"Tanh","LinRectif"};
-const char* CONF_NN_act = NN_ACs[0];
-
-int CONF_NN_example = 0;	//whether give training ones for wrong child
-
-int CONF_NN_scoremax=0;	//whether score-max or score-average(only for M1-like methods)
-
-string CONF_NN_O2sib_o1mach = "";	//combine score with o1 mach; only used in o2sib now
-
+const char** NN_ACs;
+const char* CONF_NN_act;
+//
+int CONF_NN_example;	//whether give training ones for wrong child
+int CONF_NN_scoremax;	//whether score-max or score-average(only for M1-like methods)
+string CONF_NN_O2sib_o1mach;	//combine score with o1 mach; only used in o2sib now
 //1.3.5 -- init embedings
 string CONF_NN_WL;
 string CONF_NN_EM;
-double CONF_NN_ISCALE=0.1;
-
-
+double CONF_NN_ISCALE;
 //1.4-for parsing basis
-int CONF_x_window=5;	//word and pos window size
-int CONF_add_distance=1;	//whether add distance --- and for different ways
-int CONF_dict_remove=0;	//remove words appears only less than this times
-int CONF_pos_filter=0;		//add filters, with pairs seen before
-
-int CONF_add_pos=1;		//whether add pos
-int CONF_oov_backoff=1;	//whether backoff to pos with oov
-
+int CONF_x_window;	//word and pos window size
+int CONF_add_distance;	//whether add distance --- and for different ways
+int CONF_dict_remove;	//remove words appears only less than this times
+int CONF_pos_filter;		//add filters, with pairs seen before
+int CONF_add_pos;		//whether add pos
+int CONF_oov_backoff;	//whether backoff to pos with oov
 //1.5-others
-int CONF_random_seed=12345;
+int CONF_random_seed;
 
-//others
-void init_configurations(string conf_file)
+//init
+parsing_conf(string conf_file)
 {
+	NN_ACs = new const char*[2];
+	NN_ACs[0] = "Tanh"; NN_ACs[1] = "LinRectif";
+	CONF_NN_act = NN_ACs[0];
+	//defaults:
+	CONF_output_file="output.txt";
+	CONF_dict_file="vocab.dict";		//for dictionary
+	CONF_mach_name="nn.mach";		//mach name
+	CONF_mach_conf_name="nn.conf";	//nn.conf
+	CONF_mach_cur_suffix=".curr";
+	CONF_mach_best_suffix=".best";
+	CONF_restart_file="nn.restart";		//recording the training iters
+	CONF_feature_file="nn.feat";
+	CONF_NN_LRATE=0.045;
+	CONF_NN_ITER=20;
+	CONF_NN_LMULT=1e-9;	//when >=0:as mult ; -1~0: schedule rate
+	CONF_NN_WD=3e-5;
+	CONF_NN_hidden_size_portion=100;	//how much is hidden size
+	CONF_NN_we=50;						//word-embedding size
+	CONF_NN_plus_layers=0;				//plus number of layers(plus from base)
+	CONF_NN_resample=1.0;				//re-sample rate
+	CONF_NN_BS=128;						//block-size
+	CONF_NN_h_size = 0;
+	CONF_NN_drop = -1;
+	CONF_NN_example = 0;	//whether give training ones for wrong child
+	CONF_NN_scoremax=0;	//whether score-max or score-average(only for M1-like methods)
+	CONF_NN_ISCALE=0.1;
+	CONF_x_window=5;	//word and pos window size
+	CONF_add_distance=1;	//whether add distance --- and for different ways
+	CONF_dict_remove=0;	//remove words appears only less than this times
+	CONF_pos_filter=0;		//add filters, with pairs seen before
+	CONF_add_pos=1;		//whether add pos
+	CONF_oov_backoff=1;	//whether backoff to pos with oov
+	CONF_random_seed=12345;
+	//read in conf-file
 #define DATA_LINE_LEN 10000
 	ifstream fin(conf_file.c_str());
 	cout << "Dealing configure file '" << conf_file << "'" << endl;
@@ -162,3 +199,6 @@ void init_configurations(string conf_file)
 }
 
 };
+
+
+#endif /* COMMON_H_ */

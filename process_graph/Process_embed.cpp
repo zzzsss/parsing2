@@ -1,4 +1,5 @@
 /*
+ *
  * Process_init.cpp
  *
  *  Created on: 10 Feb, 2015
@@ -9,7 +10,7 @@
 #include "../cslm/MachTab.h"
 #include "../cslm/Mach.h"
 #include "../cslm/MachMulti.h"
-#include "HashMap.h"
+#include "../parts/HashMap.h"
 #include <fstream>
 #include <cstring>
 
@@ -24,13 +25,13 @@ void Process::init_embed()
 
 	//temps
 	HashMap* t_maps = new HashMap(INIT_EM_MAX_SIZE);
-	REAL * t_embeds = new REAL[CONF_NN_we*INIT_EM_MAX_SIZE];
+	REAL * t_embeds = new REAL[parameters->CONF_NN_we*INIT_EM_MAX_SIZE];
 	vector<string*>* t_words = new vector<string*>();
 
-	cout << "--Init embedding from " << CONF_NN_WL << " and " << CONF_NN_EM << "\n";
+	cout << "--Init embedding from " << parameters->CONF_NN_WL << " and " << parameters->CONF_NN_EM << "\n";
 	ifstream fwl,fem;
-	fwl.open(CONF_NN_WL.c_str());
-	fem.open(CONF_NN_EM.c_str());
+	fwl.open(parameters->CONF_NN_WL.c_str());
+	fem.open(parameters->CONF_NN_EM.c_str());
 	REAL* em_assign = t_embeds;
 	int em_assign_num = 0;
 	if(!fwl || !fem)
@@ -40,9 +41,9 @@ void Process::init_embed()
 			Error("No match with embedding files.");
 		string one_word;
 		fwl >> one_word;
-		for(int i=0;i<CONF_NN_we;i++,em_assign++){
+		for(int i=0;i<parameters->CONF_NN_we;i++,em_assign++){
 			fem >> *em_assign;
-			*em_assign = *em_assign * CONF_NN_ISCALE;
+			*em_assign = *em_assign * parameters->CONF_NN_ISCALE;
 		}
 		string* one_word_p = new string(one_word);
 		t_maps->insert(pair<string*, int>(one_word_p,em_assign_num++));
@@ -76,7 +77,7 @@ void Process::init_embed()
 		if(iter != t_maps->end()){
 			//init
 			int the_index = iter->second;
-			memcpy(to_assign+one_index*CONF_NN_we,t_embeds+the_index*CONF_NN_we,CONF_NN_we*sizeof(REAL));
+			memcpy(to_assign+one_index*parameters->CONF_NN_we,t_embeds+the_index*parameters->CONF_NN_we,parameters->CONF_NN_we*sizeof(REAL));
 		}
 	}
 
@@ -88,5 +89,3 @@ void Process::init_embed()
 	delete t_words;
 	cout << "-- Done, with " << n_all << "/" << n_check << "/" << n_icheck << '\n';
 }
-
-

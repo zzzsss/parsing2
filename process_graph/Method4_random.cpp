@@ -53,9 +53,9 @@ REAL* Method4_random::each_next_data(int* size)
 
 		//multiple use of CONF_NN_resample
 		int one_len = x->length();
-		int one_sample = (one_len-2)*CONF_NN_resample;
-		if(CONF_NN_resample > 0.9999)//well...
-			one_sample = (int)(CONF_NN_resample+0.01);
+		int one_sample = (one_len-2)*parameters->CONF_NN_resample;
+		if(parameters->CONF_NN_resample > 0.9999)//well...
+			one_sample = (int)(parameters->CONF_NN_resample+0.01);
 		else if(one_sample==0)
 			one_sample = 1;	//at least one
 		one_sample = GET_MIN_ONE(one_sample,one_len-2);
@@ -95,7 +95,7 @@ REAL* Method4_random::each_next_data(int* size)
 				one_already[guess] = true;
 
 				//change child and keep parent
-				if(CONF_NN_example && one_already_child_left>0){
+				if(parameters->CONF_NN_example && one_already_child_left>0){
 					guess = rand()%(one_len);
 					while(one_already_child[guess])
 						guess = rand()%(one_len);

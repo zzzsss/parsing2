@@ -7,8 +7,6 @@
 
 #include "Dict.h"
 #include "Parameters.h"
-using parsing_conf::CONF_add_distance;
-using parsing_conf::CONF_oov_backoff;
 
 string Dict::POS_START = "<pos-s>";
 string Dict::POS_END = "<pos-e>";
@@ -24,12 +22,14 @@ string Dict::POS_DUMMY_L = "<pos-dl>";
 string Dict::POS_DUMMY_R = "<pos-dr>";
 string Dict::DISTANCE_DUMMY = "_distance_dummy_";
 
-Dict::Dict(int remove,int stat,int dsize){
+Dict::Dict(int remove,int distance_way,int oov_back,int stat,int dsize){
 	maps = new HashMap(CONS_dict_map_size);
 	real_word_list = new vector<string*>;
 	statistic_info = stat;
 	remove_single = remove;
 	distance_max = dsize;
+	add_distance_way = distance_way;
+	oov_backoff = oov_back;
 	if(remove)	//need to gather statistics
 		statistic_info = 1;
 	dict_num = 0;
@@ -62,7 +62,7 @@ string* Dict::get_distance_str(int n,int way)
 
 int Dict::get_index(int d)
 {
-	string* temp = get_distance_str(d,CONF_add_distance);
+	string* temp = get_distance_str(d,add_distance_way);
 	int x = maps->find(temp)->second;	//must exist
 	delete temp;
 	return x;
@@ -77,7 +77,7 @@ int Dict::get_index(string* word,string* backoff_pos)
 			//for purely pos
 			return maps->find(&POS_UNK)->second;
 		}
-		else if(CONF_oov_backoff){
+		else if(oov_backoff){
 			int i;
 			string* temp = new string(WORD_BACKOFF_POS_PREFIX+*backoff_pos);
 			HashMap::iterator iter2 = maps->find(temp);
@@ -238,6 +238,7 @@ void Dict::write(string file)
 	ofstream fout;
 	fout.open(file.c_str(),ofstream::out);
 	fout << dict_num << " " << distance_max << "\n";
+	fout << add_distance_way << " " << oov_backoff << "\n";
 	string** all = new string*[dict_num];
 	for(HashMap::iterator i = maps->begin();i!=maps->end();i++){
 		if(i->second >= dict_num){
@@ -260,7 +261,7 @@ Dict::Dict(string file)
 	printf("-Reading dict from %s.\n",file.c_str());
 	ifstream fin;
 	fin.open(file.c_str(),ifstream::in);
-	fin >> dict_num >> distance_max;
+	fin >> dict_num >> distance_max >> add_distance_way >> oov_backoff;
 	for(int i=0;i<dict_num;i++){
 		string t;
 		fin >> t;

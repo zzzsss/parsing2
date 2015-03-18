@@ -32,8 +32,8 @@ void Method6_O2sib::each_prepare_data_oneiter()
 		int length = training_corpus->at(i)->length();
 		num_pairs += 2*length*4;	//change the 3 items
 	}
-	if(((int)CONF_NN_resample)>=1){
-		num_pairs *= (int)CONF_NN_resample;	//multiple
+	if(((int)parameters->CONF_NN_resample)>=1){
+		num_pairs *= (int)parameters->CONF_NN_resample;	//multiple
 	}
 	int real_num_pairs = 0;
 	data = new REAL[num_pairs*mach->GetIdim()];
@@ -46,7 +46,7 @@ void Method6_O2sib::each_prepare_data_oneiter()
 		//add each head
 		// really simple implement for multiple ones
 #define FILTER_MAX_TRY_TIMES 10
-		for(int times=0;times<(int)CONF_NN_resample;times++){
+		for(int times=0;times<(int)parameters->CONF_NN_resample;times++){
 		for(int h=0;h<len_t;h++){
 			int before = -1;
 			for(int c=h-1;c>=0;c--){
@@ -62,7 +62,7 @@ void Method6_O2sib::each_prepare_data_oneiter()
 					if(nodes_left > 1){
 						int guess = h;
 						int trying = 0;
-						if(!CONF_pos_filter)
+						if(!parameters->CONF_pos_filter)
 							while((guess=rand()%nodes_left+head_bound+1)==h);
 						else
 							while(trying++<FILTER_MAX_TRY_TIMES && (guess=rand()%nodes_left+head_bound+1)==h
@@ -78,7 +78,7 @@ void Method6_O2sib::each_prepare_data_oneiter()
 					if(nodes_left > 1){
 						int guess = c;
 						int trying = 0;
-						if(!CONF_pos_filter)
+						if(!parameters->CONF_pos_filter)
 							while((guess=rand()%nodes_left)==c);
 						else
 							while(trying++<FILTER_MAX_TRY_TIMES && (guess=rand()%nodes_left)==c
@@ -94,7 +94,7 @@ void Method6_O2sib::each_prepare_data_oneiter()
 					if(nodes_left > 1){
 						int guess = before;
 						int trying = 0;
-						if(!CONF_pos_filter)
+						if(!parameters->CONF_pos_filter)
 							while((guess=rand()%nodes_left+c+1)==before);
 						else
 							while(trying++<FILTER_MAX_TRY_TIMES && (guess=rand()%nodes_left+c+1)==before
@@ -107,7 +107,7 @@ void Method6_O2sib::each_prepare_data_oneiter()
 					}
 					//4.possibly no center
 					if(before>0){
-						if(!CONF_pos_filter || feat_o2->allowed_pair(x,h,c,-1)){
+						if(!parameters->CONF_pos_filter || feat_o2->allowed_pair(x,h,c,-1)){
 							feat_gen->fill_one(assign_x,x,h,c,before);assign_x += mach->GetIdim();
 							feat_gen->fill_one(assign_x,x,h,c,-1);assign_x += mach->GetIdim();
 							real_num_pairs += 2;
@@ -130,7 +130,7 @@ void Method6_O2sib::each_prepare_data_oneiter()
 					if(nodes_left > 1){
 						int guess = h;
 						int trying = 0;
-						if(!CONF_pos_filter)
+						if(!parameters->CONF_pos_filter)
 							while((guess=rand()%nodes_left)==h);
 						else
 							while(trying++<FILTER_MAX_TRY_TIMES && (guess=rand()%nodes_left)==h
@@ -146,7 +146,7 @@ void Method6_O2sib::each_prepare_data_oneiter()
 					if(nodes_left > 1){
 						int guess = c;
 						int trying = 0;
-						if(!CONF_pos_filter)
+						if(!parameters->CONF_pos_filter)
 							while((guess=rand()%nodes_left+child_bound+1)==c);
 						else
 							while(trying++<FILTER_MAX_TRY_TIMES && (guess=rand()%nodes_left+child_bound+1)==c
@@ -162,7 +162,7 @@ void Method6_O2sib::each_prepare_data_oneiter()
 					if(nodes_left > 1){
 						int guess = before;
 						int trying = 0;
-						if(!CONF_pos_filter)
+						if(!parameters->CONF_pos_filter)
 							while((guess=rand()%nodes_left+h+1)==before);
 						else
 							while(trying++<FILTER_MAX_TRY_TIMES && (guess=rand()%nodes_left+h+1)==before
@@ -175,7 +175,7 @@ void Method6_O2sib::each_prepare_data_oneiter()
 					}
 					//4.possibly no center
 					if(before>0){
-						if(!CONF_pos_filter || feat_o2->allowed_pair(x,h,c,-1)){
+						if(!parameters->CONF_pos_filter || feat_o2->allowed_pair(x,h,c,-1)){
 							feat_gen->fill_one(assign_x,x,h,c,before);assign_x += mach->GetIdim();
 							feat_gen->fill_one(assign_x,x,h,c,-1);assign_x += mach->GetIdim();
 							real_num_pairs += 2;
@@ -194,9 +194,9 @@ void Method6_O2sib::each_prepare_data_oneiter()
 	shuffle_data(data,data,2*mach->GetIdim(),2*mach->GetIdim(),
 			real_num_pairs*mach->GetIdim(),real_num_pairs*mach->GetIdim(),10);
 	//sample
-	cout << "--Data for this iter: samples all " << end << " resample: " << (int)(end*CONF_NN_resample) << endl;
-	if(CONF_NN_resample<1)
-		end = (int)(end*CONF_NN_resample);
+	cout << "--Data for this iter: samples all " << end << " resample: " << (int)(end*parameters->CONF_NN_resample) << endl;
+	if(parameters->CONF_NN_resample<1)
+		end = (int)(end*parameters->CONF_NN_resample);
 }
 
 REAL* Method6_O2sib::each_next_data(int* size)
@@ -217,3 +217,23 @@ void Method6_O2sib::each_get_grad(int size)
 	current += size;
 }
 
+vector<int>* Method6_O2sib::each_test_one(DependencyInstance* x)
+{
+	vector<int>* ret;
+	//combine o1 scores
+	if(parameters->CONF_NN_O2sib_o1mach.length() > 0){
+		FeatureGenO1* feat_temp_o1 = new FeatureGenO1(dict,parameters->CONF_x_window,parameters->CONF_add_distance,parameters->CONF_add_pos);
+		ifstream ifs;
+		ifs.open(parameters->CONF_NN_O2sib_o1mach.c_str(),ios::binary);
+		Mach* mach_o1 = Mach::Read(ifs);
+		ifs.close();
+		double* scores_o1 = get_scores_o1(x,parameters,mach_o1,feat_temp_o1);	//same parameters
+		ret = parse_o2sib(x,scores_o1);
+		delete mach_o1;
+		delete []scores_o1;
+	}
+	else{
+		ret = parse_o2sib(x);
+	}
+	return ret;
+}

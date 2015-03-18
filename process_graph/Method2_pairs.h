@@ -27,7 +27,7 @@ protected:
 	virtual void each_get_grad(int);
 
 public:
-	Method2_pairs(){
+	Method2_pairs(string conf):Process(conf){
 		data = 0;
 		//target = 0;
 		gradient = 0;

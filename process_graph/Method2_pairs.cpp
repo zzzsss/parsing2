@@ -32,7 +32,7 @@ void Method2_pairs::each_prepare_data_oneiter()
 		// -- length-2 excludes self,real-head
 		num_pairs += (length-2)*(length-1)*2;
 	}
-	if(CONF_NN_example){
+	if(parameters->CONF_NN_example){
 		num_pairs *= 2;	//should be less, but for simplicity
 	}
 	//-- generate all
@@ -49,8 +49,8 @@ void Method2_pairs::each_prepare_data_oneiter()
 				if(j==head || j==mod)
 					continue;
 				//check filter if set
-				if(CONF_pos_filter){
-					if(!feat_o1->allowed_pair(x->index_pos->at(j),x->index_pos->at(mod)))
+				if(parameters->CONF_pos_filter){
+					if(!feat_o1->allowed_pair(x,head,mod))
 						continue;
 				}
 				//always first right and then wrong
@@ -61,7 +61,7 @@ void Method2_pairs::each_prepare_data_oneiter()
 				real_num_pairs += 2;
 
 				//change the child, and keep the parent
-				if(CONF_NN_example && x->heads->at(j)!=head){
+				if(parameters->CONF_NN_example && x->heads->at(j)!=head){
 					feat_gen->fill_one(assign_x,x,head,mod);
 					assign_x += mach->GetIdim();
 					feat_gen->fill_one(assign_x,x,head,j);
@@ -77,8 +77,8 @@ void Method2_pairs::each_prepare_data_oneiter()
 	shuffle_data(data,data,2*mach->GetIdim(),2*mach->GetIdim(),
 			real_num_pairs*mach->GetIdim(),real_num_pairs*mach->GetIdim(),10);
 	//sample
-	cout << "--Data for this iter: samples all " << end << " resample: " << (int)(end*CONF_NN_resample) << endl;
-	end = (int)(end*CONF_NN_resample);
+	cout << "--Data for this iter: samples all " << end << " resample: " << (int)(end*parameters->CONF_NN_resample) << endl;
+	end = (int)(end*parameters->CONF_NN_resample);
 }
 
 REAL* Method2_pairs::each_next_data(int* size)

@@ -75,7 +75,7 @@ void FeatureGenO1::add_filter(vector<DependencyInstance*>* c)
 {
 	filter_map = new IntHashMap();
 	int size = c->size();
-	//add possible pos pairs, assuming pos index is less than 500 (depend on dictionary)
+	//add possible pos pairs, assuming pos index is less than 500 and larger than 0(depend on dictionary)
 	for(int i=0;i<size;i++){
 		DependencyInstance* x = c->at(i);
 		int length = x->length();
@@ -88,10 +88,11 @@ void FeatureGenO1::add_filter(vector<DependencyInstance*>* c)
 	}
 }
 
-//not virtual, only for Order 1
-int FeatureGenO1::allowed_pair(int head,int mod)
+int FeatureGenO1::allowed_pair(DependencyInstance* x,int head,int mod,int c)
 {
-	int test = head * ASSUMING_MAX_POS + mod;
+	int h_i = x->index_pos->at(head);
+	int m_i = x->index_pos->at(mod);
+	int test = h_i * ASSUMING_MAX_POS + m_i;
 	if(filter_map->find(test) != filter_map->end())
 		return 1;
 	else

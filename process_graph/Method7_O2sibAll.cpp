@@ -39,7 +39,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 					tmp2_right++;
 					first_m = m;
 				}
-				else if(CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1))
+				else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1))
 					tmp2_bad++;
 				else
 					tmp2_wrong++;
@@ -50,7 +50,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 						tmp3_right++;
 						first_m = m;
 					}
-					else if(CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m))
+					else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m))
 						tmp3_bad++;
 					else
 						tmp3_wrong++;
@@ -64,7 +64,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 					tmp2_right++;
 					first_m = m;
 				}
-				else if(CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1))
+				else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1))
 					tmp2_bad++;
 				else
 					tmp2_wrong++;
@@ -75,7 +75,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 						tmp3_right++;
 						first_m = m;
 					}
-					else if(CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m))
+					else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m))
 						tmp3_bad++;
 					else
 						tmp3_wrong++;
@@ -109,7 +109,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 					feat_gen->fill_one(assign_right,x,h,m,-1);assign_right += idim;
 					first_m = m;
 				}
-				else if(CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1)){}
+				else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1)){}
 				else{
 					feat_gen->fill_one(assign_wrong,x,h,m,-1);assign_wrong += idim;
 				}
@@ -120,7 +120,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 						feat_gen->fill_one(assign_right,x,h,one,m);assign_right += idim;
 						first_m = m;
 					}
-					else if(CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m)){}
+					else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m)){}
 					else{
 						feat_gen->fill_one(assign_wrong,x,h,one,m);assign_wrong += idim;
 					}
@@ -134,7 +134,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 					feat_gen->fill_one(assign_right,x,h,m,-1);assign_right += idim;
 					first_m = m;
 				}
-				else if(CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1)){}
+				else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1)){}
 				else{
 					feat_gen->fill_one(assign_wrong,x,h,m,-1);assign_wrong += idim;
 				}
@@ -145,7 +145,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 						feat_gen->fill_one(assign_right,x,h,one,m);assign_right += idim;
 						first_m = m;
 					}
-					else if(CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m)){}
+					else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m)){}
 					else{
 						feat_gen->fill_one(assign_wrong,x,h,one,m);assign_wrong += idim;
 					}
@@ -155,15 +155,15 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 	}
 
 	//then considering CONF_NN_resample and copy them to finish data
-	if(CONF_NN_resample < 1){
+	if(parameters->CONF_NN_resample < 1){
 		//get part of the wrong ones --- but first shuffle them
 		shuffle_data(data_wrong,data_wrong,idim,idim,tmpall_wrong*idim,tmpall_wrong*idim,10);
 	}
-	int tmp_sumup = tmpall_wrong*CONF_NN_resample + tmpall_right;
+	int tmp_sumup = tmpall_wrong*parameters->CONF_NN_resample + tmpall_right;
 	data = new REAL[tmp_sumup*idim];
 	target = new REAL[tmp_sumup];
 	memcpy(data,data_right,tmpall_right*idim*sizeof(REAL));
-	memcpy(data+tmpall_right*idim,data_wrong,tmpall_wrong*CONF_NN_resample*idim*sizeof(REAL));
+	memcpy(data+tmpall_right*idim,data_wrong,tmpall_wrong*parameters->CONF_NN_resample*idim*sizeof(REAL));
 	for(int i=0;i<tmp_sumup;i++){
 		if(i<tmpall_right)
 			target[i] = 1;

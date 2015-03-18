@@ -32,7 +32,7 @@ protected:
 	virtual void each_get_grad(int);
 
 public:
-	Method3_online(){
+	Method3_online(string conf):Process(conf){
 		data = 0;
 		gradient = 0;
 		temp_data = 0;

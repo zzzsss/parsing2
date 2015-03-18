@@ -28,7 +28,9 @@ class Dict{
 	vector<string*>* real_word_list;
 	//
 	int distance_max;
-
+	//some CONFs
+	int add_distance_way;	//the method of distance dealing
+	int oov_backoff;		//whether back-off oov to pos
 	//used only when building
 	int statistic_info;	//whether gather statistic_info
 	int remove_single;	//remove rare word -- backoff to pos -- indicate the number
@@ -49,13 +51,13 @@ public:
 	int get_word_index(string* word);	//for outer use
 
 	void write(string file);
-	static Dict* read(string file);
+	//static Dict* read(string file);
 
 	int get_count(){return dict_num;}
 	vector<string*>* get_real_words() {return real_word_list;}
 
 	Dict(string file);
-	Dict(int remove,int stat=1,int dist=CONS_distance_max);
+	Dict(int remove,int distance_way,int oov_back,int stat=1,int dsize=CONS_distance_max);
 	~Dict(){
 		delete maps;	//leak some memory, but that's alright
 	}
