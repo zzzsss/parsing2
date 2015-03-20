@@ -221,19 +221,40 @@ vector<int>* Method6_O2sib::each_test_one(DependencyInstance* x)
 {
 	vector<int>* ret;
 	//combine o1 scores
-	if(parameters->CONF_NN_O2sib_o1mach.length() > 0){
+	if(parameters->CONF_NN_O2sib_o1mach.length() > 0 && parameters->CONF_NN_O2sib_score_combine){
 		FeatureGenO1* feat_temp_o1 = new FeatureGenO1(dict,parameters->CONF_x_window,parameters->CONF_add_distance,parameters->CONF_add_pos);
-		ifstream ifs;
-		ifs.open(parameters->CONF_NN_O2sib_o1mach.c_str(),ios::binary);
-		Mach* mach_o1 = Mach::Read(ifs);
-		ifs.close();
 		double* scores_o1 = get_scores_o1(x,parameters,mach_o1,feat_temp_o1);	//same parameters
 		ret = parse_o2sib(x,scores_o1);
-		delete mach_o1;
 		delete []scores_o1;
 	}
 	else{
 		ret = parse_o2sib(x);
 	}
 	return ret;
+}
+
+//maybe init embedding from o1 machine
+void Method6_O2sib::init_embed()
+{
+	if(parameters->CONF_NN_O2sib_o1mach.length() > 0 && parameters->CONF_NN_O2sib_embed_init){
+		//special structure
+		int all = parameters->CONF_NN_we * dict->get_count();
+		REAL* embed_from;
+		REAL* embed_to;
+		{
+			MachMulti* m = (MachMulti*)mach_o1;
+			m = (MachMulti*)(m->MachGet(0));
+			MachTab* mm = (MachTab*)(m->MachGet(0));
+			embed_from = mm->GetTabAdr();
+		}
+		{
+			MachMulti* m = (MachMulti*)mach;
+			m = (MachMulti*)(m->MachGet(0));
+			MachTab* mm = (MachTab*)(m->MachGet(0));
+			embed_to = mm->GetTabAdr();
+		}
+		memcpy(embed_to,embed_from,sizeof(REAL)*all);
+	}
+	else
+		Process::init_embed();
 }

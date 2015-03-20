@@ -38,7 +38,7 @@ double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,Mach* zm,F
 			if(ii!=j){
 				int index = get_index2(length,ii,j);
 				//if filter --- this is the easy way(but waste computation)
-				if(zp->CONF_pos_filter){
+				if(zp->CONF_pos_filter && zf->has_filter()){
 					if(!zf->allowed_pair(x,ii,j)){
 						tmp_scores[index] = DOUBLE_LARGENEG;	//is this neg enough??
 						//skip forward

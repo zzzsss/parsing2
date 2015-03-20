@@ -26,6 +26,9 @@ public:
 	int get_xdim(){
 		return xdim;
 	}
+	int has_filter(){
+		return filter_map != 0;
+	}
 	virtual ~FeatureGen(){}
 	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center=-1)=0;
 	virtual void deal_with_corpus(vector<DependencyInstance*>*);

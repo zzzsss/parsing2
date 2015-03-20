@@ -13,6 +13,7 @@ void Process::train()
 	//5. main training
 	cout << "5.start training: " << endl;
 	double best_result = 0;
+	int best_iter = -1;
 	string mach_cur_name = parameters->CONF_mach_name+parameters->CONF_mach_cur_suffix;
 	string mach_best_name = parameters->CONF_mach_name+parameters->CONF_mach_best_suffix;
 	for(int i=cur_iter;i<parameters->CONF_NN_ITER;i++){
@@ -31,6 +32,7 @@ void Process::train()
 		if(this_result > best_result){
 			cout << "-- get better result, write to " << mach_best_name << endl;
 			best_result = this_result;
+			best_iter = cur_iter;
 			fs.open(mach_best_name.c_str(),ios::binary);
 			mach->Write(fs);
 			fs.close();
@@ -43,7 +45,7 @@ void Process::train()
 	}
 
 	//6.results
-	cout << "6.training finished with dev results: " << endl;
+	cout << "6.training finished with dev results: best " << best_result << "|" << best_iter << endl;
 	cout << "zzzzz ";
 	for(int i=0;i<parameters->CONF_NN_ITER;i++)
 		cout << dev_results[i] << " ";

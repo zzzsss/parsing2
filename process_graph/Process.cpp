@@ -12,6 +12,7 @@ Process::Process(string conf)
 	//1.conf
 	cout << "1.configuration:" << endl;
 	parameters = new parsing_conf(conf);
+	feat_gen = 0;
 }
 
 //init --- right after construction, but here use some virtual functions
@@ -60,8 +61,7 @@ void Process::nn_train_prepare()
 	    if(mach == 0)
 	    	Error(mach_config.get_error_string().c_str());
 	    //if init embed
-	    if(parameters->CONF_NN_WL.length()>0 && parameters->CONF_NN_EM.length()>0)
-	    	init_embed();
+	    init_embed();
 	}
 	cout << "-Prepare over..." << endl;
 }

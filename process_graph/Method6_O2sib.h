@@ -17,16 +17,26 @@ protected:
 	int current;
 	int end;
 	REAL* gradient;
+	Mach * mach_o1;
 
 	virtual void each_write_mach_conf();
 	virtual void each_prepare_data_oneiter();
 	virtual REAL* each_next_data(int*);
 	virtual void each_get_grad(int);
+	virtual void init_embed();
 public:
 	Method6_O2sib(string conf):Process(conf){
 		current = end = 0;
 		data = 0;
 		gradient = 0;
+		if(parameters->CONF_NN_O2sib_o1mach.length() > 0){
+			ifstream ifs;
+			ifs.open(parameters->CONF_NN_O2sib_o1mach.c_str(),ios::binary);
+			mach_o1 = Mach::Read(ifs);
+			ifs.close();
+		}
+		else
+			mach_o1 = 0;
 	}
 	virtual void each_get_featgen(int if_testing){
 		if(if_testing){

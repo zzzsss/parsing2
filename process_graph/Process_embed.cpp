@@ -16,6 +16,8 @@
 
 void Process::init_embed()
 {
+	if(!(parameters->CONF_NN_WL.length()>0 && parameters->CONF_NN_EM.length()>0))	//nothing to do if not setting
+		return;
 	vector<string*>* real_wl = dict->get_real_words();
 	//special mach structures
 	MachMulti* m = (MachMulti*)mach;
