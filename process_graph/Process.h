@@ -99,8 +99,8 @@ protected:
 public:
 	Process(string);
 	virtual ~Process(){}
-	void train();
-	void test(Mach*,Dict*);
+	virtual void train();
+	virtual void test(string);
 };
 
 

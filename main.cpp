@@ -15,6 +15,7 @@
 //#include "process_graph/Method5_localMax.h"	//no use anymore
 #include "process_graph/Method6_O2sib.h"
 #include "process_graph/Method7_O2sibAll.h"
+#include "process_graph/Method8_O2sibWitho1.h"
 #include "parts/Parameters.h"
 
 //usage: command conf_file ...
@@ -47,6 +48,9 @@ int main(int argc,char **argv)
 	case 7:
 		x = new Method7_O2sibAll(conf);
 		break;
+	case 8:
+		x = new Method8_O2sibWitho1(conf);
+		break;
 	default:
 		x = 0;
 		break;
@@ -56,22 +60,13 @@ int main(int argc,char **argv)
 		x->train();
 		if(par.CONF_test_file.length()>0 && par.CONF_gold_file.length()>0){
 			//test
-			Dict* temp_d = new Dict(par.CONF_dict_file);
-			ifstream ifs;
 			string mach_best_name = par.CONF_mach_name+par.CONF_mach_best_suffix;
-			ifs.open(mach_best_name.c_str(),ios::binary);
-			Mach* temp_m = Mach::Read(ifs);
-			x->test(temp_m,temp_d);
+			x->test(mach_best_name);
 		}
 	}
 	else{
 		//only testing
-		Dict* temp_d = new Dict(par.CONF_dict_file);
-		ifstream ifs;
-		string mach_best_name = string(argv[2]);	//test conf mach_name
-		ifs.open(mach_best_name.c_str(),ios::binary);
-		Mach* temp_m = Mach::Read(ifs);
-		x->test(temp_m,temp_d);
+		x->test(string(argv[2]));
 	}
 	return 0;
 }

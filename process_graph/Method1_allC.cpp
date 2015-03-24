@@ -46,7 +46,7 @@ void Method1_allC::each_prepare_data_oneiter()
 					//build mach_x
 					REAL t = 0;
 					//check filter if set
-					if(parameters->CONF_pos_filter){
+					if(parameters->CONF_pos_filter && feat_gen->has_filter()){
 						if(!feat_o1->allowed_pair(x,ii,j))
 							continue;
 					}

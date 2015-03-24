@@ -52,11 +52,16 @@ void Process::train()
 	cout << endl;
 }
 
-void Process::test(Mach* m,Dict* d)
+void Process::test(string m_name)
 {
 	cout << "----- Testing -----" << endl;
-	mach = m;
-	dict = d;
+	Dict* temp_d = new Dict(parameters->CONF_dict_file);
+	ifstream ifs;
+	string mach_best_name = m_name;	//test conf mach_name
+	ifs.open(mach_best_name.c_str(),ios::binary);
+	Mach* temp_m = Mach::Read(ifs);
+	mach = temp_m;
+	dict = temp_d;
 	nn_dev_test(parameters->CONF_test_file,parameters->CONF_output_file,parameters->CONF_gold_file);
 }
 
