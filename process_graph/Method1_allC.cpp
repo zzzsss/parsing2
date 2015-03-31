@@ -6,12 +6,6 @@
  */
 
 #include "Method1_allC.h"
-
-void Method1_allC::each_write_mach_conf()
-{
-	write_conf(2);
-}
-
 void Method1_allC::each_prepare_data_oneiter()
 {
 	delete []data;

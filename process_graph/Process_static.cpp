@@ -79,29 +79,3 @@ void Process::set_pair_gradient(const REAL* s_output,REAL* s_gradient,int bsize)
 		optr += 2;
 	}
 }
-
-REAL* Process::mach_forward(Mach* m,REAL* assign,int all)
-{
-	int idim = m->GetIdim();
-	int odim = m->GetOdim();
-	int remain = all;
-	int bsize = m->GetBsize();
-	REAL* xx = assign;
-	REAL* mach_y = new REAL[all*odim];
-	REAL* yy = mach_y;
-	while(remain > 0){
-		int n=0;
-		if(remain >= bsize)
-			n = bsize;
-		else
-			n = remain;
-		remain -= bsize;
-		m->SetDataIn(xx);
-		m->Forw(n);
-		memcpy(yy, m->GetDataOut(), odim*sizeof(REAL)*n);
-		yy += n*odim;
-		xx += n*idim;
-	}
-	return mach_y;
-}
-

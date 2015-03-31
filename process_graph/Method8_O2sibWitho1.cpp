@@ -16,26 +16,9 @@ void Method8_O2sibWitho1::train()
 	m1->training_corpus = training_corpus;
 	m1->dict = dict;
 	m1->each_get_featgen(0);
-	MachConfig mach_config(true);
-	m1->write_conf(2);
-	//for mach_config
-	char *argv[2];
-	argv[0] = "nn";
-	argv[1] = (char*)m1->parameters->CONF_mach_conf_name.c_str();
-	mach_config.parse_options(2,argv);
-	m1->mach = mach_config.get_machine();
-    if(m1->mach == 0)
-    	Error(mach_config.get_error_string().c_str());
+	m1->mach = NNInterface::create_one(m1->parameters,m1->dict->get_count(),m1->feat_gen->get_xdim(),m1->each_get_mach_outdim());
 	//2.force shared embedding --- m1 already ok
-    {
-		MachMulti* m2 = (MachMulti*)m1->mach;
-		m2 = (MachMulti*)(m2->MachGet(0));
-		MachTab* mm2 = (MachTab*)(m2->MachGet(0));
-		MachMulti* m1 = (MachMulti*)mach;
-		m1 = (MachMulti*)(m1->MachGet(0));
-		MachTab* mm1 = (MachTab*)(m1->MachGet(0));
-		mm1->SetTabAdr(mm2->GetTabAdr());
-    }
+	mach->set_tab(m1->mach->get_tab());
     cout << "-Prepare for o1 ok..." << endl;
 
     //start training both of them
@@ -52,24 +35,15 @@ void Method8_O2sibWitho1::train()
 		double this_result = nn_dev_test(parameters->CONF_dev_file,parameters->CONF_output_file+".dev",parameters->CONF_dev_file);
 		dev_results[cur_iter] = this_result;
 		//write curr mach
-		ofstream fs;
-		fs.open(mach_cur_name.c_str(),ios::binary);
-		mach->Write(fs);
-		fs.close();
-		fs.open(mach_cur_name_o1.c_str(),ios::binary);
-		m1->mach->Write(fs);
-		fs.close();
+		mach->Write(mach_cur_name);
+		m1->mach->Write(mach_cur_name_o1);
 		//possible write best mach
 		if(this_result > best_result){
 			cout << "-- get better result, write to " << mach_best_name << endl;
 			best_result = this_result;
 			best_iter = cur_iter;
-			fs.open(mach_best_name.c_str(),ios::binary);
-			mach->Write(fs);
-			fs.close();
-			fs.open(mach_best_name_o1.c_str(),ios::binary);
-			m1->mach->Write(fs);
-			fs.close();
+			mach->Write(mach_best_name);
+			m1->mach->Write(mach_best_name_o1);
 		}
 		//lrate schedule
 		set_lrate_one_iter();
@@ -144,17 +118,13 @@ void Method8_O2sibWitho1::test(string m_name)
 {
 	cout << "----- Testing -----" << endl;
 	Dict* temp_d = new Dict(parameters->CONF_dict_file);
-	ifstream ifs;
-	ifs.open(m_name.c_str(),ios::binary);
-	Mach* temp_m = Mach::Read(ifs);
-	ifs.close();
+	NNInterface* temp_m = NNInterface::Read(m_name);
 	mach = temp_m;
 	dict = temp_d;
-	m1->each_get_featgen(1);
+	m1->feat_gen = new FeatureGenO1(dict,parameters->CONF_x_window,parameters->CONF_add_distance,
+			parameters->CONF_add_pos,parameters->CONF_add_distance_parent);
 	{
-		ifs.open((m_name+M8_SPECIAL_O1_PREDIX).c_str(),ios::binary);
-		Mach* temp_m = Mach::Read(ifs);
-		ifs.close();
+		NNInterface* temp_m = NNInterface::Read(m_name+M8_SPECIAL_O1_PREDIX);
 		m1->mach = temp_m;
 	}
 	nn_dev_test(parameters->CONF_test_file,parameters->CONF_output_file,parameters->CONF_gold_file);

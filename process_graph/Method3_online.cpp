@@ -8,12 +8,6 @@
 #include "Method3_online.h"
 #include <cstdio>
 
-void Method3_online::each_write_mach_conf()
-{
-	//only one output --- the score
-	write_conf(1);
-}
-
 #define GET_MAX_ONE(a,b) (((a)>(b))?(a):(b))
 void Method3_online::each_prepare_data_oneiter()
 {

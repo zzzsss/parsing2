@@ -8,11 +8,6 @@
 #include "Method7_O2sibAll.h"
 #include <cstdio>
 
-void Method7_O2sibAll::each_write_mach_conf()
-{
-	write_conf(2);
-}
-
 void Method7_O2sibAll::each_prepare_data_oneiter()
 {
 	delete []data;

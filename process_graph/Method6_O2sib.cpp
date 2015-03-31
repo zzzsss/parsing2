@@ -7,12 +7,6 @@
 
 #include "Method6_O2sib.h"
 
-void Method6_O2sib::each_write_mach_conf()
-{
-	//only one output --- the score
-	write_conf(1);
-}
-
 #define GET_MAX_ONE(a,b) (((a)>(b))?(a):(b))
 #define GET_MIN_ONE(a,b) (((a)>(b))?(b):(a))
 void Method6_O2sib::each_prepare_data_oneiter()
@@ -240,21 +234,7 @@ void Method6_O2sib::init_embed()
 	if(parameters->CONF_NN_O2sib_o1mach.length() > 0 && parameters->CONF_NN_O2sib_embed_init){
 		//special structure
 		int all = parameters->CONF_NN_we * dict->get_count();
-		REAL* embed_from;
-		REAL* embed_to;
-		{
-			MachMulti* m = (MachMulti*)mach_o1;
-			m = (MachMulti*)(m->MachGet(0));
-			MachTab* mm = (MachTab*)(m->MachGet(0));
-			embed_from = mm->GetTabAdr();
-		}
-		{
-			MachMulti* m = (MachMulti*)mach;
-			m = (MachMulti*)(m->MachGet(0));
-			MachTab* mm = (MachTab*)(m->MachGet(0));
-			embed_to = mm->GetTabAdr();
-		}
-		memcpy(embed_to,embed_from,sizeof(REAL)*all);
+		mach->clone_tab(mach_o1->get_tab(),all);
 	}
 	else
 		Process::init_embed();

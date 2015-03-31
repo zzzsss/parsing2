@@ -24,18 +24,13 @@ void Process::train()
 		double this_result = nn_dev_test(parameters->CONF_dev_file,parameters->CONF_output_file+".dev",parameters->CONF_dev_file);
 		dev_results[cur_iter] = this_result;
 		//write curr mach
-		ofstream fs;
-		fs.open(mach_cur_name.c_str(),ios::binary);
-		mach->Write(fs);
-		fs.close();
+		mach->Write(mach_cur_name);
 		//possible write best mach
 		if(this_result > best_result){
 			cout << "-- get better result, write to " << mach_best_name << endl;
 			best_result = this_result;
 			best_iter = cur_iter;
-			fs.open(mach_best_name.c_str(),ios::binary);
-			mach->Write(fs);
-			fs.close();
+			mach->Write(mach_best_name);
 		}
 		//lrate schedule
 		set_lrate_one_iter();
@@ -55,13 +50,8 @@ void Process::train()
 void Process::test(string m_name)
 {
 	cout << "----- Testing -----" << endl;
-	Dict* temp_d = new Dict(parameters->CONF_dict_file);
-	ifstream ifs;
-	string mach_best_name = m_name;	//test conf mach_name
-	ifs.open(mach_best_name.c_str(),ios::binary);
-	Mach* temp_m = Mach::Read(ifs);
-	mach = temp_m;
-	dict = temp_d;
+	dict = new Dict(parameters->CONF_dict_file);
+	mach = NNInterface::Read(m_name);
 	nn_dev_test(parameters->CONF_test_file,parameters->CONF_output_file,parameters->CONF_gold_file);
 }
 

@@ -8,12 +8,6 @@
 #include "Method4_random.h"
 #include <cstdio>
 
-void Method4_random::each_write_mach_conf()
-{
-	//only one output --- the score
-	write_conf(1);
-}
-
 #define GET_MAX_ONE(a,b) (((a)>(b))?(a):(b))
 #define GET_MIN_ONE(a,b) (((a)>(b))?(b):(a))
 void Method4_random::each_prepare_data_oneiter()

@@ -15,8 +15,7 @@
 #include "../parts/Dict.h"
 #include "../tools/CONLLReader.h"
 #include "../tools/DependencyEvaluator.h"
-#include "../cslm/Mach.h"
-#include "../cslm/MachConfig.h"
+#include "../nn/NNInterface.h"
 #include <cstdlib>
 #include <cstring>
 #include <vector>
@@ -37,27 +36,25 @@ protected:
 	int cur_iter;
 	int CTL_continue;	//if continue training
 	double * dev_results;	//the results of dev-data
-	Mach *mach;
+	NNInterface *mach;
+	//init embedings	--- here for convenience(should be put to NNInterface)
+	virtual void init_embed();
 
 	//some procedures
 	void set_lrate();					//no schedule, just decrease lrate
 	int set_lrate_one_iter();	//lrate schedule
-	//init embedings
-	virtual void init_embed();
 	//restart files
 	void read_restart_conf();
 	void write_restart_conf();
 	void delete_restart_conf();
-	void write_conf(int);	//maybe useful
 
 	//help
 	static void shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int times);
 	static void set_softmax_gradient(const REAL* s_target,const REAL* s_output,REAL* s_gradient,int bsize,int c);
 	static void set_pair_gradient(const REAL* s_output,REAL* s_gradient,int bsize);
-	static REAL* mach_forward(Mach* m,REAL* assign,int all);
 	//parse
-	static double* get_scores_o1(DependencyInstance* x,parsing_conf* zp,Mach* zm,FeatureGen* zf);		//double[l*l]
-	static double* get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,Mach* zm,FeatureGen* zf);	//double[l*l*l]
+	static double* get_scores_o1(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf);		//double[l*l]
+	static double* get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf);	//double[l*l*l]
 	vector<int>* parse_o1(DependencyInstance* x);
 	vector<int>* parse_o2sib(DependencyInstance* x,double* score_of_o1=0);
 
@@ -67,7 +64,7 @@ protected:
 	void nn_train_prepare();
 
 	//virtual functions for different methods
-	virtual void each_write_mach_conf(){};
+	virtual int each_get_mach_outdim(){return 2;}	//really bad design --- default 2(binary)
 	virtual void each_prepare_data_oneiter()=0;
 	virtual REAL* each_next_data(int*)=0;
 	virtual void each_get_grad(int)=0;

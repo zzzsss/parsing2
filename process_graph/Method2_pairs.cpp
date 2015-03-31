@@ -6,13 +6,6 @@
  */
 
 #include "Method2_pairs.h"
-
-void Method2_pairs::each_write_mach_conf()
-{
-	//only one output --- the score
-	write_conf(1);
-}
-
 void Method2_pairs::each_prepare_data_oneiter()
 {
 	delete []data;

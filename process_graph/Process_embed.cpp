@@ -19,11 +19,7 @@ void Process::init_embed()
 	if(!(parameters->CONF_NN_WL.length()>0 && parameters->CONF_NN_EM.length()>0))	//nothing to do if not setting
 		return;
 	vector<string*>* real_wl = dict->get_real_words();
-	//special mach structures
-	MachMulti* m = (MachMulti*)mach;
-	m = (MachMulti*)(m->MachGet(0));
-	MachTab* mm = (MachTab*)(m->MachGet(0));
-	REAL* to_assign = mm->GetTabAdr();
+	REAL* to_assign = mach->get_tab();
 
 	//temps
 	HashMap* t_maps = new HashMap(INIT_EM_MAX_SIZE);

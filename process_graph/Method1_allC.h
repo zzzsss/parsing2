@@ -22,7 +22,7 @@ private:
 	REAL* gradient;
 
 protected:
-	virtual void each_write_mach_conf();
+	//virtual int each_get_mach_outdim(){return 2;}
 	virtual void each_prepare_data_oneiter();
 	virtual REAL* each_next_data(int*);
 	virtual void each_get_grad(int);

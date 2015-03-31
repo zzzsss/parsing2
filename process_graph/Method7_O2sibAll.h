@@ -18,7 +18,7 @@ public:
 	Method7_O2sibAll(string conf):Method6_O2sib(conf),target(0){}
 	virtual void each_prepare_data_oneiter();
 	virtual void each_get_grad(int);
-	virtual void each_write_mach_conf();
+	virtual int each_get_mach_outdim(){return 2;}
 };
 
 

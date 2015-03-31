@@ -1,0 +1,108 @@
+/*
+ * CslmInterface.cpp
+ *
+ *  Created on: 2015Äê3ÔÂ31ÈÕ
+ *      Author: zzs
+ */
+
+#include "CslmInterface.h"
+
+REAL* CslmInterface::mach_forward(REAL* assign,int all)
+{
+	Mach* m = mach;
+	int idim = m->GetIdim();
+	int odim = m->GetOdim();
+	int remain = all;
+	int bsize = m->GetBsize();
+	REAL* xx = assign;
+	REAL* mach_y = new REAL[all*odim];
+	REAL* yy = mach_y;
+	while(remain > 0){
+		int n=0;
+		if(remain >= bsize)
+			n = bsize;
+		else
+			n = remain;
+		remain -= bsize;
+		m->SetDataIn(xx);
+		m->Forw(n);
+		memcpy(yy, m->GetDataOut(), odim*sizeof(REAL)*n);
+		yy += n*odim;
+		xx += n*idim;
+	}
+	return mach_y;
+}
+
+#define WRITE_CONF_ONE(a1,a2) \
+	fout << parameters->CONF_NN_act << " = " << (int)(a1) << "x" << (int)(a2) << " fanio-init-weights=1.0\n";
+//specified init
+CslmInterface* CslmInterface::create_one(parsing_conf* parameters,int dict_count,int xdim,int outdim)
+{
+	//1.first write conf
+	ofstream fout(parameters->CONF_mach_conf_name.c_str());
+	fout << "block-size = " << parameters->CONF_NN_BS << "\n";
+	if(parameters->CONF_NN_drop>0)
+		fout << "drop-out = " << parameters->CONF_NN_drop << "\n";
+	int width = xdim*parameters->CONF_NN_we;
+	//projection layer
+	fout << "[machine]\n" << "Sequential = \n" << "Parallel = \n";
+	for(int i=0;i<xdim;i++)
+		fout << "Tab = " << dict_count << "x" << parameters->CONF_NN_we << "\n";
+	fout << "#End\n";
+	if(parameters->CONF_NN_h_size==0){
+		//hidden layer1
+		if(parameters->CONF_NN_hidden_size_portion <= 1){
+			WRITE_CONF_ONE(width,width*parameters->CONF_NN_hidden_size_portion);
+			//fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
+			width = (int)(width*parameters->CONF_NN_hidden_size_portion);
+			//more hidden layers??
+			for(int i=0;i<parameters->CONF_NN_plus_layers;i++){
+				WRITE_CONF_ONE(width,width*parameters->CONF_NN_hidden_size_portion);
+				//fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
+				width = (int)(width*parameters->CONF_NN_hidden_size_portion);
+			}
+		}
+		else{
+			WRITE_CONF_ONE(width,parameters->CONF_NN_hidden_size_portion);
+			//fout << "Tanh = " << width << "x" << (int)(CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
+			width = parameters->CONF_NN_hidden_size_portion;
+			for(int i=0;i<parameters->CONF_NN_plus_layers;i++)
+				WRITE_CONF_ONE(width,width);
+				//fout << "Tanh = " << width << "x" << width << " fanio-init-weights=1.0\n";
+		}
+	}
+	else{
+		//hidden layer1
+		WRITE_CONF_ONE(width,parameters->CONF_NN_h_size[0]);
+		//fout << "Tanh = " << width << "x" << CONF_NN_h_size[0] << " fanio-init-weights=1.0\n";
+		//more hidden layers??
+		for(int i=0;i<parameters->CONF_NN_plus_layers;i++){
+			WRITE_CONF_ONE(parameters->CONF_NN_h_size[i],parameters->CONF_NN_h_size[i+1]);
+			//fout << "Tanh = " << CONF_NN_h_size[i] << "x" << CONF_NN_h_size[i+1] << " fanio-init-weights=1.0\n";
+		}
+		width = parameters->CONF_NN_h_size[parameters->CONF_NN_plus_layers];
+	}
+	if(outdim>1){
+		//output multiclass-class(0 or 1)
+		fout << "Softmax = " << width << "x" << outdim << " fanio-init-weights=1.0\n";
+	}
+	else{
+		//linear output score
+		fout << "Linear = " << width << "x" << 1 << " fanio-init-weights=1.0\n";
+	}
+	fout << "#End\n";
+	fout.close();
+
+	//2. get machine
+	MachConfig mach_config(true);
+	//for mach_config
+	char *argv[2];
+	argv[0] = "nn";
+	argv[1] = (char*)parameters->CONF_mach_conf_name.c_str();
+	mach_config.parse_options(2,argv);
+    Mach* mach = mach_config.get_machine();
+    if(mach == 0)
+    	Error(mach_config.get_error_string().c_str());
+    CslmInterface* ret = new CslmInterface(mach);
+    return ret;
+}

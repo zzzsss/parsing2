@@ -17,9 +17,9 @@ protected:
 	int current;
 	int end;
 	REAL* gradient;
-	Mach * mach_o1;
+	NNInterface * mach_o1;
 
-	virtual void each_write_mach_conf();
+	virtual int each_get_mach_outdim(){return 1;}
 	virtual void each_prepare_data_oneiter();
 	virtual REAL* each_next_data(int*);
 	virtual void each_get_grad(int);
@@ -30,10 +30,7 @@ public:
 		data = 0;
 		gradient = 0;
 		if(parameters->CONF_NN_O2sib_o1mach.length() > 0){
-			ifstream ifs;
-			ifs.open(parameters->CONF_NN_O2sib_o1mach.c_str(),ios::binary);
-			mach_o1 = Mach::Read(ifs);
-			ifs.close();
+			mach_o1 = NNInterface::Read(parameters->CONF_NN_O2sib_o1mach);
 		}
 		else
 			mach_o1 = 0;

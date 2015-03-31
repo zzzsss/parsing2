@@ -11,7 +11,7 @@
 
 //-------------------- these two also static methods -----------------------------
 //return Score[length][length]
-double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,Mach* zm,FeatureGen* zf)
+double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf)
 {
 	int idim = zf->get_xdim();
 	int odim = zm->GetOdim();
@@ -31,7 +31,7 @@ double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,Mach* zm,F
 			}
 		}
 	}
-	REAL* mach_y = mach_forward(zm,mach_x,num_pair);
+	REAL* mach_y = zm->mach_forward(mach_x,num_pair);
 	REAL* assign_y = mach_y;
 	for(int ii=0;ii<length;ii++){
 		for(int j=0;j<length;j++){
@@ -74,7 +74,7 @@ double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,Mach* zm,F
 }
 
 //return Score[length][length][length]
-double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,Mach* zm,FeatureGen* zf)
+double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf)
 {
 	int idim = zf->get_xdim();
 	int odim = zm->GetOdim();
@@ -120,7 +120,7 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,Mach* z
 		}
 	}
 	//forward
-	REAL* mach_y = mach_forward(zm,mach_x,num_togo);
+	REAL* mach_y = zm->mach_forward(mach_x,num_togo);
 	//and assign the scores
 #define TMP_GET_MAXINDEX(o_dim,a,assign) {a=0;double temp=*assign;for(int c=0;c<o_dim;c++) if((*assign++)>temp) a=c;}
 #define TMP_GET_ONE(o_dim,a,assign) {\

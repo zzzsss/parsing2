@@ -43,23 +43,11 @@ void Process::nn_train_prepare()
 	string mach_cur_name = parameters->CONF_mach_name+parameters->CONF_mach_cur_suffix;
 	if(CTL_continue){
 		cout << "4.get mach from file "<< mach_cur_name << endl;
-		ifstream ifs;
-		ifs.open(mach_cur_name.c_str(),ios::binary);
-		mach = Mach::Read(ifs);
-		ifs.close();
+		mach = NNInterface::Read(mach_cur_name);
 	}
 	else{
 		cout << "4.get mach from scratch:" << endl;
-		MachConfig mach_config(true);
-		each_write_mach_conf();		/*************virtual****************/
-		//for mach_config
-		char *argv[2];
-		argv[0] = "nn";
-		argv[1] = (char*)parameters->CONF_mach_conf_name.c_str();
-		mach_config.parse_options(2,argv);
-	    mach = mach_config.get_machine();
-	    if(mach == 0)
-	    	Error(mach_config.get_error_string().c_str());
+		mach = NNInterface::create_one(parameters,dict->get_count(),feat_gen->get_xdim(),each_get_mach_outdim());
 	    //if init embed
 	    init_embed();
 	}
@@ -131,63 +119,3 @@ int Process::set_lrate_one_iter()
 	return 1;
 }
 
-#define WRITE_CONF_ONE(a1,a2) \
-	fout << parameters->CONF_NN_act << " = " << (int)(a1) << "x" << (int)(a2) << " fanio-init-weights=1.0\n";
-
-void Process::write_conf(int c)
-{
-	ofstream fout(parameters->CONF_mach_conf_name.c_str());
-	fout << "block-size = " << parameters->CONF_NN_BS << "\n";
-	if(parameters->CONF_NN_drop>0)
-		fout << "drop-out = " << parameters->CONF_NN_drop << "\n";
-	int xdim = feat_gen->get_xdim();
-	int width = xdim*parameters->CONF_NN_we;
-	//projection layer
-	fout << "[machine]\n" << "Sequential = \n" << "Parallel = \n";
-	for(int i=0;i<xdim;i++)
-		fout << "Tab = " << dict->get_count() << "x" << parameters->CONF_NN_we << "\n";
-	fout << "#End\n";
-	if(parameters->CONF_NN_h_size==0){
-		//hidden layer1
-		if(parameters->CONF_NN_hidden_size_portion <= 1){
-			WRITE_CONF_ONE(width,width*parameters->CONF_NN_hidden_size_portion);
-			//fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
-			width = (int)(width*parameters->CONF_NN_hidden_size_portion);
-			//more hidden layers??
-			for(int i=0;i<parameters->CONF_NN_plus_layers;i++){
-				WRITE_CONF_ONE(width,width*parameters->CONF_NN_hidden_size_portion);
-				//fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
-				width = (int)(width*parameters->CONF_NN_hidden_size_portion);
-			}
-		}
-		else{
-			WRITE_CONF_ONE(width,parameters->CONF_NN_hidden_size_portion);
-			//fout << "Tanh = " << width << "x" << (int)(CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
-			width = parameters->CONF_NN_hidden_size_portion;
-			for(int i=0;i<parameters->CONF_NN_plus_layers;i++)
-				WRITE_CONF_ONE(width,width);
-				//fout << "Tanh = " << width << "x" << width << " fanio-init-weights=1.0\n";
-		}
-	}
-	else{
-		//hidden layer1
-		WRITE_CONF_ONE(width,parameters->CONF_NN_h_size[0]);
-		//fout << "Tanh = " << width << "x" << CONF_NN_h_size[0] << " fanio-init-weights=1.0\n";
-		//more hidden layers??
-		for(int i=0;i<parameters->CONF_NN_plus_layers;i++){
-			WRITE_CONF_ONE(parameters->CONF_NN_h_size[i],parameters->CONF_NN_h_size[i+1]);
-			//fout << "Tanh = " << CONF_NN_h_size[i] << "x" << CONF_NN_h_size[i+1] << " fanio-init-weights=1.0\n";
-		}
-		width = parameters->CONF_NN_h_size[parameters->CONF_NN_plus_layers];
-	}
-	if(c>1){
-		//output multiclass-class(0 or 1)
-		fout << "Softmax = " << width << "x" << c << " fanio-init-weights=1.0\n";
-	}
-	else{
-		//linear output score
-		fout << "Linear = " << width << "x" << 1 << " fanio-init-weights=1.0\n";
-	}
-	fout << "#End\n";
-	fout.close();
-}

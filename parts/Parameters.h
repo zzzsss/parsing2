@@ -8,13 +8,6 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
-/*
- * Parameters.cpp
- *
- *  Created on: Dec 24, 2014
- *      Author: zzs
- */
-
 #include "../cslm/Tools.h"
 #include <fstream>
 #include <cstdio>
@@ -41,6 +34,7 @@ string CONF_mach_best_suffix;
 string CONF_restart_file;		//recording the training iters
 string CONF_feature_file;
 //1.3-for nn
+string CONF_NN_toolkit;
 double CONF_NN_LRATE;
 int CONF_NN_ITER;
 double CONF_NN_LMULT;	//when >=0:as mult ; -1~0: schedule rate
@@ -81,6 +75,7 @@ int CONF_random_seed;
 //init
 parsing_conf(string conf_file)
 {
+	CONF_NN_toolkit = string("HPerf");
 	NN_ACs = new const char*[2];
 	NN_ACs[0] = "Tanh"; NN_ACs[1] = "LinRectif";
 	CONF_NN_act = NN_ACs[0];
@@ -141,6 +136,7 @@ parsing_conf(string conf_file)
 		else if(buf=="output")	fin >> CONF_output_file;
 		else if(buf=="gold")	fin >> CONF_gold_file;
 		//1.2
+		else if(buf=="nn_tool") fin >> CONF_NN_toolkit;
 		//1.3
 		else if(buf=="nn_lrate") fin >> CONF_NN_LRATE;
 		else if(buf=="nn_iters") fin >> CONF_NN_ITER;
