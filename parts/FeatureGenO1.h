@@ -13,7 +13,7 @@ class FeatureGenO1: public FeatureGen{
 private:
 
 public:
-	FeatureGenO1(Dict* d,int w,int di,int apos);
+	FeatureGenO1(Dict* d,int w,int di,int apos,int d_sys);
 	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center=0);	//mod_center no use for o1
 	//virtual void deal_with_corpus(vector<DependencyInstance*>*);	--- same as base-class
 	virtual ~FeatureGenO1(){}

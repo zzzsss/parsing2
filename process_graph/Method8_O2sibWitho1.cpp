@@ -15,7 +15,7 @@ void Method8_O2sibWitho1::train()
 	Process::nn_train_prepare();
 	m1->training_corpus = training_corpus;
 	m1->dict = dict;
-	m1->feat_gen = new FeatureGenO1(dict,parameters->CONF_x_window,parameters->CONF_add_distance,parameters->CONF_add_pos);	//no-filter
+	m1->each_get_featgen(0);
 	MachConfig mach_config(true);
 	m1->write_conf(2);
 	//for mach_config
@@ -150,7 +150,7 @@ void Method8_O2sibWitho1::test(string m_name)
 	ifs.close();
 	mach = temp_m;
 	dict = temp_d;
-	m1->feat_gen = new FeatureGenO1(dict,parameters->CONF_x_window,parameters->CONF_add_distance,parameters->CONF_add_pos);	//no-filter
+	m1->each_get_featgen(1);
 	{
 		ifs.open((m_name+M8_SPECIAL_O1_PREDIX).c_str(),ios::binary);
 		Mach* temp_m = Mach::Read(ifs);

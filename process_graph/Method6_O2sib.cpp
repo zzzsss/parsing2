@@ -222,7 +222,8 @@ vector<int>* Method6_O2sib::each_test_one(DependencyInstance* x)
 	vector<int>* ret;
 	//combine o1 scores
 	if(parameters->CONF_NN_O2sib_o1mach.length() > 0 && parameters->CONF_NN_O2sib_score_combine){
-		FeatureGenO1* feat_temp_o1 = new FeatureGenO1(dict,parameters->CONF_x_window,parameters->CONF_add_distance,parameters->CONF_add_pos);
+		FeatureGenO1* feat_temp_o1 = new FeatureGenO1(dict,parameters->CONF_x_window,
+				parameters->CONF_add_distance,parameters->CONF_add_pos,parameters->CONF_add_distance_parent);
 		double* scores_o1 = get_scores_o1(x,parameters,mach_o1,feat_temp_o1);	//same parameters
 		ret = parse_o2sib(x,scores_o1);
 		delete []scores_o1;

@@ -25,6 +25,7 @@ public:
 		m1->parameters->CONF_mach_conf_name += ".o1";
 		m1->parameters->CONF_mach_name += ".o1";
 		m1->parameters->CONF_NN_resample = 1;	//force it to be 1
+		m1->parameters->CONF_pos_filter = 0;	//no-filter
 	}
 	virtual void train();
 	virtual void test(string m_name);

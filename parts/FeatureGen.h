@@ -22,6 +22,7 @@ protected:
 	int window_size;
 	int distance;	//whether add distance feature
 	int pos_add;	//whether add pos
+	int distance_parent;	//whether add a dummy distance_0 for parent(to be symmetric)
 public:
 	int get_xdim(){
 		return xdim;
@@ -32,7 +33,8 @@ public:
 	virtual ~FeatureGen(){}
 	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center=-1)=0;
 	virtual void deal_with_corpus(vector<DependencyInstance*>*);
-	FeatureGen(Dict* d,int w,int di,int apos):xdim(0),filter_map(0),dictionary(d),window_size(w),distance(di),pos_add(apos){}
+	FeatureGen(Dict* d,int w,int di,int apos,int d_sys):
+		xdim(0),filter_map(0),dictionary(d),window_size(w),distance(di),pos_add(apos),distance_parent(d_sys){}
 
 	//for extra information(1.filter )
 	virtual void add_filter(vector<DependencyInstance*>*)=0;
