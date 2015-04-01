@@ -29,7 +29,7 @@ void Method8_O2sibWitho1::train()
 	string mach_best_name = parameters->CONF_mach_name+parameters->CONF_mach_best_suffix;
 	string mach_cur_name_o1 = mach_cur_name+M8_SPECIAL_O1_PREDIX;	//special machine name written
 	string mach_best_name_o1 = mach_best_name+M8_SPECIAL_O1_PREDIX;
-	for(int i=cur_iter;i<parameters->CONF_NN_ITER;i++){
+	for(int i=cur_iter;i<parameters->CONF_NN_ITER || whether_keep_trainning();i++){
 		m8_nn_train_one_iter();
 		cout << "-- Iter done, waiting for test dev:" << endl;
 		double this_result = nn_dev_test(parameters->CONF_dev_file,parameters->CONF_output_file+".dev",parameters->CONF_dev_file);

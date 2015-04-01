@@ -16,7 +16,7 @@ void Process::train()
 	int best_iter = -1;
 	string mach_cur_name = parameters->CONF_mach_name+parameters->CONF_mach_cur_suffix;
 	string mach_best_name = parameters->CONF_mach_name+parameters->CONF_mach_best_suffix;
-	for(int i=cur_iter;i<parameters->CONF_NN_ITER;i++){
+	for(int i=cur_iter;i<parameters->CONF_NN_ITER || whether_keep_trainning();i++){	//at least NN_ITER iters
 		if(cur_iter>0)
 			write_restart_conf();
 		nn_train_one_iter();

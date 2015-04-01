@@ -13,6 +13,7 @@ Process::Process(string conf)
 	cout << "1.configuration:" << endl;
 	parameters = new parsing_conf(conf);
 	feat_gen = 0;
+	lrate_cut_times = 0;
 }
 
 //init --- right after construction, but here use some virtual functions
@@ -112,10 +113,17 @@ int Process::set_lrate_one_iter()
 	if(parameters->CONF_NN_LMULT<0 && cur_iter>0){
 		//special schedule in (-1,0)
 		if(parameters->CONF_NN_LMULT > -1){
-			if(dev_results[cur_iter] < dev_results[cur_iter-1])
+			if(dev_results[cur_iter] < dev_results[cur_iter-1]){
 				cur_lrate *= (-1 * parameters->CONF_NN_LMULT);
+				lrate_cut_times++;
+			}
 		}
 	}
 	return 1;
+}
+
+int Process::whether_keep_trainning()
+{
+	return lrate_cut_times < parameters->CONF_NN_ITER_decrease;
 }
 

@@ -41,6 +41,7 @@ int CONF_NN_split_share;		//when splitting, whether share parameters(w and b)
 //other nn options
 double CONF_NN_LRATE;
 int CONF_NN_ITER;
+int CONF_NN_ITER_decrease;		//at lease cut lrate this times when stopping(so real iters maybe more than iter)
 double CONF_NN_LMULT;	//when >=0:as mult ; -1~0: schedule rate
 double CONF_NN_WD;
 double CONF_NN_hidden_size_portion;	//how much is hidden size
@@ -94,13 +95,14 @@ parsing_conf(string conf_file)
 	CONF_feature_file="nn.feat";
 	CONF_NN_split = 0;				//whether split the first layer(context split)
 	CONF_NN_split_share = 0;		//when splitting, whether share parameters(w and b)
-	CONF_NN_LRATE=0.045;
-	CONF_NN_ITER=20;
-	CONF_NN_LMULT=1e-9;	//when >=0:as mult ; -1~0: schedule rate
+	CONF_NN_LRATE=0.1;
+	CONF_NN_ITER=10;
+	CONF_NN_ITER_decrease=2;		//cut two times
+	CONF_NN_LMULT=-0.5;	//when >=0:as mult ; -1~0: schedule rate
 	CONF_NN_WD=3e-5;
 	CONF_NN_hidden_size_portion=100;	//how much is hidden size
 	CONF_NN_we=50;						//word-embedding size
-	CONF_NN_plus_layers=0;				//plus number of layers(plus from base)
+	CONF_NN_plus_layers=1;				//plus number of layers(plus from base)
 	CONF_NN_resample=1.0;				//re-sample rate
 	CONF_NN_BS=128;						//block-size
 	CONF_NN_h_size = 0;
@@ -149,6 +151,7 @@ parsing_conf(string conf_file)
 		//
 		else if(buf=="nn_lrate") fin >> CONF_NN_LRATE;
 		else if(buf=="nn_iters") fin >> CONF_NN_ITER;
+		else if(buf=="nn_iters_dec") fin >> CONF_NN_ITER_decrease;
 		else if(buf=="nn_lmult") fin >> CONF_NN_LMULT;
 		else if(buf=="nn_wd")	 fin >> CONF_NN_WD;
 		else if(buf=="nn_h_por") fin >> CONF_NN_hidden_size_portion;

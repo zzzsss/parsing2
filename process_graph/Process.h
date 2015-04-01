@@ -36,6 +36,7 @@ protected:
 	int cur_iter;
 	int CTL_continue;	//if continue training
 	double * dev_results;	//the results of dev-data
+	int lrate_cut_times;	//number of times of lrate cut
 	NNInterface *mach;
 	//init embedings	--- here for convenience(should be put to NNInterface)
 	virtual void init_embed();
@@ -43,6 +44,7 @@ protected:
 	//some procedures
 	void set_lrate();					//no schedule, just decrease lrate
 	int set_lrate_one_iter();	//lrate schedule
+	virtual int whether_keep_trainning();
 	//restart files
 	void read_restart_conf();
 	void write_restart_conf();
