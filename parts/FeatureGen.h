@@ -24,12 +24,13 @@ protected:
 	int pos_add;	//whether add pos
 	int distance_parent;	//whether add a dummy distance_0 for parent(to be symmetric)
 public:
-	int get_xdim(){
-		return xdim;
+	int get_xdim()		{return xdim;}
+	int has_filter()	{return filter_map != 0;}
+	Dict* get_dict()	{return dictionary;}
+	virtual int get_order(){
+		return 1;
 	}
-	int has_filter(){
-		return filter_map != 0;
-	}
+
 	virtual ~FeatureGen(){}
 	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center=-1)=0;
 	virtual void deal_with_corpus(vector<DependencyInstance*>*);

@@ -11,9 +11,6 @@
 #include "NNInterface.h"
 #include "../cslm/Mach.h"
 #include "../cslm/MachConfig.h"
-#include "../cslm/MachTab.h"
-#include "../cslm/Mach.h"
-#include "../cslm/MachMulti.h"
 #include <fstream>
 #include <cstring>
 using namespace std;
@@ -21,6 +18,7 @@ using namespace std;
 class CslmInterface: public NNInterface{
 protected:
 	Mach *mach;
+
 public:
 	virtual void SetDataIn(REAL *data)		{mach->SetDataIn(data);}
 	virtual void Forw(int x)				{mach->Forw(x);}
@@ -39,6 +37,7 @@ public:
 	virtual REAL* GetDataOut()			{return mach->GetDataOut();}
 
 	virtual REAL* mach_forward(REAL* assign,int all);	//allocated here
+	void mach_split_share();
 	virtual REAL* get_tab(){
 		MachMulti* m = (MachMulti*)mach;
 		m = (MachMulti*)(m->MachGet(0));
@@ -73,7 +72,7 @@ public:
 		else
 			return 0;
 	}
-	static CslmInterface* create_one(parsing_conf* p,int dict_count,int xdim,int outdim);
+	static CslmInterface* create_one(parsing_conf* p,FeatureGen* f,int outdim);
 };
 
 

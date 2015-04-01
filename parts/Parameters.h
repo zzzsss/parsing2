@@ -35,6 +35,10 @@ string CONF_restart_file;		//recording the training iters
 string CONF_feature_file;
 //1.3-for nn
 string CONF_NN_toolkit;
+//1.3.001 -- nn structure split options
+int CONF_NN_split;				//whether split the first layer(context split)
+int CONF_NN_split_share;		//when splitting, whether share parameters(w and b)
+//other nn options
 double CONF_NN_LRATE;
 int CONF_NN_ITER;
 double CONF_NN_LMULT;	//when >=0:as mult ; -1~0: schedule rate
@@ -88,6 +92,8 @@ parsing_conf(string conf_file)
 	CONF_mach_best_suffix=".best";
 	CONF_restart_file="nn.restart";		//recording the training iters
 	CONF_feature_file="nn.feat";
+	CONF_NN_split = 0;				//whether split the first layer(context split)
+	CONF_NN_split_share = 0;		//when splitting, whether share parameters(w and b)
 	CONF_NN_LRATE=0.045;
 	CONF_NN_ITER=20;
 	CONF_NN_LMULT=1e-9;	//when >=0:as mult ; -1~0: schedule rate
@@ -138,6 +144,9 @@ parsing_conf(string conf_file)
 		//1.2
 		else if(buf=="nn_tool") fin >> CONF_NN_toolkit;
 		//1.3
+		else if(buf=="nn_split") fin >> CONF_NN_split;
+		else if(buf=="nn_split_s") fin >> CONF_NN_split_share;
+		//
 		else if(buf=="nn_lrate") fin >> CONF_NN_LRATE;
 		else if(buf=="nn_iters") fin >> CONF_NN_ITER;
 		else if(buf=="nn_lmult") fin >> CONF_NN_LMULT;

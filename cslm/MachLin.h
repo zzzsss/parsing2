@@ -30,6 +30,7 @@
 
 class MachLin : public Mach
 {
+	friend class CslmInterface;
 protected:
   int  nb_params;	// number of params for max-out
    // CUDA: the following two variables refer to device memory

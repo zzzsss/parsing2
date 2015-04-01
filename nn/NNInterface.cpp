@@ -9,10 +9,10 @@
 #include "CslmInterface.h"
 #include <fstream>
 
-NNInterface* NNInterface::create_one(parsing_conf* p,int dict_count,int xdim,int outdim)
+NNInterface* NNInterface::create_one(parsing_conf* p,FeatureGen* f,int outdim)
 {
 	if(p->CONF_NN_toolkit == string(NN_HNAME_CSLM)){
-		return CslmInterface::create_one(p,dict_count,xdim,outdim);
+		return CslmInterface::create_one(p,f,outdim);
 	}
 	else
 		return 0;

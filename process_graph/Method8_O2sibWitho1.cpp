@@ -16,7 +16,7 @@ void Method8_O2sibWitho1::train()
 	m1->training_corpus = training_corpus;
 	m1->dict = dict;
 	m1->each_get_featgen(0);
-	m1->mach = NNInterface::create_one(m1->parameters,m1->dict->get_count(),m1->feat_gen->get_xdim(),m1->each_get_mach_outdim());
+	m1->mach = NNInterface::create_one(m1->parameters,m1->feat_gen,m1->each_get_mach_outdim());
 	//2.force shared embedding --- m1 already ok
 	mach->set_tab(m1->mach->get_tab());
     cout << "-Prepare for o1 ok..." << endl;

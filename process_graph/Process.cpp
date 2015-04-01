@@ -47,7 +47,7 @@ void Process::nn_train_prepare()
 	}
 	else{
 		cout << "4.get mach from scratch:" << endl;
-		mach = NNInterface::create_one(parameters,dict->get_count(),feat_gen->get_xdim(),each_get_mach_outdim());
+		mach = NNInterface::create_one(parameters,feat_gen,each_get_mach_outdim());
 	    //if init embed
 	    init_embed();
 	}

@@ -16,6 +16,8 @@ using namespace std;
 #include "../cslm/Tools.h"
 #include "../cslm/Mach.h"
 #include "../parts/Parameters.h"
+#include "../parts/FeatureGen.h"
+
 class NNInterface{
 public:
 	virtual void SetDataIn(REAL *data)=0;
@@ -37,7 +39,7 @@ public:
 	virtual void clone_tab(REAL* x,int all)=0;
 
 	static NNInterface* Read(string name);
-	static NNInterface* create_one(parsing_conf* p,int dict_count,int xdim,int outdim);
+	static NNInterface* create_one(parsing_conf* p,FeatureGen* f,int outdim);
 };
 
 
