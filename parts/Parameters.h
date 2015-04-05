@@ -44,9 +44,9 @@ int CONF_NN_ITER;
 int CONF_NN_ITER_decrease;		//at lease cut lrate this times when stopping(so real iters maybe more than iter)
 double CONF_NN_LMULT;	//when >=0:as mult ; -1~0: schedule rate
 double CONF_NN_WD;
-double CONF_NN_hidden_size_portion;	//how much is hidden size
+double CONF_NN_hidden_size_portion;	//how much is hidden size  ---@deprecate---
 int CONF_NN_we;						//word-embedding size
-int CONF_NN_plus_layers;				//plus number of layers(plus from base)
+int CONF_NN_plus_layers;				//plus number of layers(plus from base)		---changed: number of hidden except projection---
 double CONF_NN_resample;				//re-sample rate
 int CONF_NN_BS;						//block-size
 //hsizes: array
@@ -102,7 +102,7 @@ parsing_conf(string conf_file)
 	CONF_NN_WD=3e-5;
 	CONF_NN_hidden_size_portion=100;	//how much is hidden size
 	CONF_NN_we=50;						//word-embedding size
-	CONF_NN_plus_layers=1;				//plus number of layers(plus from base)
+	CONF_NN_plus_layers=2;				//plus number of layers(plus from base)
 	CONF_NN_resample=1.0;				//re-sample rate
 	CONF_NN_BS=128;						//block-size
 	CONF_NN_h_size = 0;
@@ -161,8 +161,8 @@ parsing_conf(string conf_file)
 		else if(buf=="nn_bs") 	 fin >> CONF_NN_BS;
 		else if(buf=="nn_hsize"){
 			//here no checking
-			CONF_NN_h_size = new int[1+CONF_NN_plus_layers];
-			for(int i=0;i<1+CONF_NN_plus_layers;i++)
+			CONF_NN_h_size = new int[CONF_NN_plus_layers];
+			for(int i=0;i<CONF_NN_plus_layers;i++)
 				fin >> CONF_NN_h_size[i];
 		}
 		//these two specified for 2 hidden layers

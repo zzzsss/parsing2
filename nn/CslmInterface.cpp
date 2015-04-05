@@ -37,17 +37,18 @@ REAL* CslmInterface::mach_forward(REAL* assign,int all)
 	fout << parameters->CONF_NN_act << " = " << (int)(a1) << "x" << (int)(a2) << " fanio-init-weights=1.0\n";
 static inline void write_conf_no_split(parsing_conf* parameters,int dict_count,int xdim,int outdim)
 {
-	//1.first write conf
+	//--first write conf
 	ofstream fout(parameters->CONF_mach_conf_name.c_str());
 	fout << "block-size = " << parameters->CONF_NN_BS << "\n";
 	if(parameters->CONF_NN_drop>0)
 		fout << "drop-out = " << parameters->CONF_NN_drop << "\n";
 	int width = xdim*parameters->CONF_NN_we;
-	//projection layer
+	//1.projection layer
 	fout << "[machine]\n" << "Sequential = \n" << "Parallel = \n";
 	for(int i=0;i<xdim;i++)
 		fout << "Tab = " << dict_count << "x" << parameters->CONF_NN_we << "\n";
 	fout << "#End\n";
+	/*
 	if(parameters->CONF_NN_h_size==0){
 		//hidden layer1
 		if(parameters->CONF_NN_hidden_size_portion <= 1){
@@ -81,6 +82,13 @@ static inline void write_conf_no_split(parsing_conf* parameters,int dict_count,i
 		}
 		width = parameters->CONF_NN_h_size[parameters->CONF_NN_plus_layers];
 	}
+	*/
+	//2.hidden layers
+	for(int i=0;i<parameters->CONF_NN_plus_layers;i++){
+		WRITE_CONF_ONE(width,parameters->CONF_NN_h_size[i]);
+		width = parameters->CONF_NN_h_size[i];
+	}
+	//3.output layer
 	if(outdim>1){
 		//output multiclass-class(0 or 1)
 		fout << "Softmax = " << width << "x" << outdim << " fanio-init-weights=1.0\n";
@@ -116,11 +124,10 @@ static inline void write_conf_split(parsing_conf* parameters,int dict_count,int 
 		fout << "#End\n";
 	}
 	//more hidden layers??
-	for(int i=0;i<parameters->CONF_NN_plus_layers;i++){
+	for(int i=0;i<parameters->CONF_NN_plus_layers-1;i++){
 		WRITE_CONF_ONE(parameters->CONF_NN_h_size[i],parameters->CONF_NN_h_size[i+1]);
-		//fout << "Tanh = " << CONF_NN_h_size[i] << "x" << CONF_NN_h_size[i+1] << " fanio-init-weights=1.0\n";
 	}
-	width = parameters->CONF_NN_h_size[parameters->CONF_NN_plus_layers];
+	width = parameters->CONF_NN_h_size[parameters->CONF_NN_plus_layers-1];
 	//3.output
 	if(outdim>1)
 		fout << "Softmax = " << width << "x" << outdim << " fanio-init-weights=1.0\n";

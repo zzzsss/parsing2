@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include "process_graph/Process.h"
 #include "process_graph/Method1_allC.h"
+#include "process_graph/Method10_allC.h"
 #include "process_graph/Method2_pairs.h"
 #include "process_graph/Method3_online.h"
 #include "process_graph/Method4_random.h"
@@ -32,6 +33,9 @@ int main(int argc,char **argv)
 	switch(par.CONF_method){
 	case 1:
 		x = new Method1_allC(conf);
+		break;
+	case 10:
+		x = new Method10_allC(conf);
 		break;
 	case 2:
 		x = new Method2_pairs(conf);
