@@ -76,6 +76,8 @@ int CONF_add_pos;		//whether add pos
 int CONF_oov_backoff;	//whether backoff to pos with oov
 //1.5-others
 int CONF_random_seed;
+//1.6 -- scores
+int CONF_score_prob;	//whether give transform score, only for M1 (0,1)
 
 //init
 parsing_conf(string conf_file)
@@ -120,6 +122,7 @@ parsing_conf(string conf_file)
 	CONF_add_pos=1;		//whether add pos
 	CONF_oov_backoff=1;	//whether backoff to pos with oov
 	CONF_random_seed=12345;
+	CONF_score_prob=0;
 	//read in conf-file
 #define DATA_LINE_LEN 10000
 	ifstream fin(conf_file.c_str());
@@ -201,6 +204,8 @@ parsing_conf(string conf_file)
 		else if(buf=="f_oov_bo")	fin >> CONF_oov_backoff;
 		//1.5
 		else if(buf=="o_srand") fin >> CONF_random_seed;
+		//1.6
+		else if(buf=="s_prob") fin >> CONF_score_prob;
 		else
 			cout << "Unknown conf " << buf << endl;
 	}

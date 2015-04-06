@@ -18,6 +18,8 @@ double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,NNInterfac
 	//default order1 parsing
 	int length = x->forms->size();
 	double *tmp_scores = new double[length*length];
+	for(int i=0;i<length*length;i++)
+		tmp_scores[i] = DOUBLE_LARGENEG;
 	//construct scores using nn
 	int num_pair = length*(length-1);	//2 * (0+(l-1))*l/2
 	REAL *mach_x = new REAL[num_pair*idim];
@@ -165,11 +167,84 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 	return tmp_scores;
 }
 
+//--------------------transfrom scores only for (0,1)--------------------------
+#include <cmath>
+#define SET_LOG_HERE(tmp_yes,tmp_nope,ind,prob) \
+	if(prob <= 0){tmp_yes[ind] = DOUBLE_LARGENEG;tmp_nope[ind] = 0;}\
+	else if(prob < 1){tmp_yes[ind] = log(prob);tmp_nope[ind] = log(1-prob);}\
+	else{tmp_yes[ind] = 0;tmp_nope[ind] = DOUBLE_LARGENEG;}
+
+static void trans_o1(double* s,int len)
+{
+	double* tmp_yes = new double[len*len];
+	double* tmp_nope = new double[len*len];
+	//to log number
+	for(int i=0;i<len*len;i++){
+		SET_LOG_HERE(tmp_yes,tmp_nope,i,s[i]);
+	}
+	//sum
+	for(int m=1;m<len;m++){
+		double all_nope = 0;
+		for(int h=0;h<len;h++){
+			if(h==m)
+				continue;
+			all_nope += tmp_nope[get_index2(len,h,m)];
+		}
+		for(int h=0;h<len;h++){
+			if(h==m)
+				continue;
+			int ind = get_index2(len,h,m);
+			s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+		}
+	}
+	delete []tmp_yes;
+	delete []tmp_nope;
+}
+static void trans_o2sib(double* s,int len)
+{
+	double* tmp_yes = new double[len*len*len];
+	double* tmp_nope = new double[len*len*len];
+	//to log number
+	for(int i=0;i<len*len*len;i++){
+		SET_LOG_HERE(tmp_yes,tmp_nope,i,s[i]);
+	}
+	//sum
+	for(int m=1;m<len;m++){
+		double all_nope = 0;
+		for(int h=0;h<len;h++){
+			if(h==m)
+				continue;
+			all_nope += tmp_nope[get_index2_o2sib(len,h,h,m)];
+			for(int c=h+1;c<m;c++)
+				all_nope += tmp_nope[get_index2_o2sib(len,h,c,m)];
+			for(int c=m+1;c<h;c++)
+				all_nope += tmp_nope[get_index2_o2sib(len,h,c,m)];
+		}
+		for(int h=0;h<len;h++){
+			if(h==m)
+				continue;
+			int ind = get_index2_o2sib(len,h,h,m);
+			s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+			for(int c=h+1;c<m;c++){
+				int ind = get_index2_o2sib(len,h,c,m);
+				s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+			}
+			for(int c=m+1;c<h;c++){
+				int ind = get_index2_o2sib(len,h,c,m);
+				s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+			}
+		}
+	}
+	delete []tmp_yes;
+	delete []tmp_nope;
+}
 
 //-------------------- parsing non-static methods -----------------------------
 vector<int>* Process::parse_o1(DependencyInstance* x)
 {
 	double *tmp_scores = get_scores_o1(x,parameters,mach,feat_gen);
+	if(parameters->CONF_score_prob)
+		trans_o1(tmp_scores,x->length());
 	vector<int> *ret = decodeProjective(x->length(),tmp_scores);
 	delete []tmp_scores;
 	return ret;
@@ -179,7 +254,11 @@ vector<int>* Process::parse_o2sib(DependencyInstance* x,double* score_of_o1)
 {
 	int length = x->length();
 	double *tmp_scores = get_scores_o2sib(x,parameters,mach,feat_gen);
+	if(parameters->CONF_score_prob)
+		trans_o2sib(tmp_scores,length);
 	if(score_of_o1){
+		if(parameters->CONF_score_prob)
+			trans_o1(score_of_o1,length);
 		for(int i=0;i<length;i++){
 			for(int j=0;j<length;j++){
 				if(i!=j){
