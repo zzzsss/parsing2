@@ -62,6 +62,9 @@ int CONF_NN_scoremax;	//whether score-max or score-average(only for M1-like meth
 int CONF_NN_O2sib_embed_init;
 int CONF_NN_O2sib_score_combine;
 string CONF_NN_O2sib_o1mach;	//combine score with o1 mach; only used in o2sib now
+//o1-mach as filter --- only 0-1 models(thus M7)
+int CONF_NN_o2sib_o1filter;
+double CONF_NN_o2sib_o1filter_cut;	//filter out when < this
 //1.3.5 -- init embedings
 string CONF_NN_WL;
 string CONF_NN_EM;
@@ -113,6 +116,8 @@ parsing_conf(string conf_file)
 	CONF_NN_scoremax=0;	//whether score-max or score-average(only for M1-like methods)
 	CONF_NN_O2sib_embed_init = 0;
 	CONF_NN_O2sib_score_combine = 0;
+	CONF_NN_o2sib_o1filter = 0;
+	CONF_NN_o2sib_o1filter_cut = 0.001;	//filter out when < this
 	CONF_NN_ISCALE=0.1;
 	CONF_x_window=5;	//word and pos window size
 	CONF_add_distance=1;	//whether add distance --- and for different ways
@@ -190,6 +195,8 @@ parsing_conf(string conf_file)
 		else if(buf=="nn_o1mach") fin >> CONF_NN_O2sib_o1mach;
 		else if(buf=="nn_o1mach_init") fin >> 	CONF_NN_O2sib_embed_init;
 		else if(buf=="nn_o1mach_combine") fin >> CONF_NN_O2sib_score_combine;
+		else if(buf=="nn_o1mach_filter") fin >> CONF_NN_o2sib_o1filter;
+		else if(buf=="nn_o1mach_filter_cut") fin >> CONF_NN_o2sib_o1filter_cut;
 		//1.3.5
 		else if(buf=="nn_init_wl") fin >> CONF_NN_WL;
 		else if(buf=="nn_init_em") fin >> CONF_NN_EM;

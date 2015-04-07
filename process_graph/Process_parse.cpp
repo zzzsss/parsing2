@@ -76,10 +76,13 @@ double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,NNInterfac
 }
 
 //return Score[length][length][length]
-double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf)
+double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf,bool* score_o1)
 {
 	int idim = zf->get_xdim();
 	int odim = zm->GetOdim();
+	int whether_o1_filter = 0;
+	if(score_o1 && zp->CONF_NN_o2sib_o1filter)
+		whether_o1_filter = 1;
 	// one sentence
 	int length = x->forms->size();
 	int num_allocated = length*length*length;
@@ -93,14 +96,18 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 		for(int t=s+1;t<length;t++){
 			//s<->t
 			if(!zp->CONF_pos_filter || zf->allowed_pair(x,s,t,-1)){
-				zf->fill_one(assign_x,x,s,t,-1);
-				assign_x += idim;
-				num_togo += 1;
+				if(!whether_o1_filter || !score_o1[get_index2(length,s,t)]){
+					zf->fill_one(assign_x,x,s,t,-1);
+					assign_x += idim;
+					num_togo += 1;
+				}
 			}
 			if(!zp->CONF_pos_filter || zf->allowed_pair(x,t,s,-1)){
-				zf->fill_one(assign_x,x,t,s,-1);
-				assign_x += idim;
-				num_togo += 1;
+				if(!whether_o1_filter || !score_o1[get_index2(length,t,s)]){
+					zf->fill_one(assign_x,x,t,s,-1);
+					assign_x += idim;
+					num_togo += 1;
+				}
 			}
 		}
 	}
@@ -109,14 +116,18 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 			for(int t=c+1;t<length;t++){
 				//s c t
 				if(!zp->CONF_pos_filter || zf->allowed_pair(x,s,t,c)){
-					zf->fill_one(assign_x,x,s,t,c);
-					assign_x += idim;
-					num_togo += 1;
+					if(!whether_o1_filter || !score_o1[get_index2(length,s,t)] || !score_o1[get_index2(length,s,c)]){
+						zf->fill_one(assign_x,x,s,t,c);
+						assign_x += idim;
+						num_togo += 1;
+					}
 				}
 				if(!zp->CONF_pos_filter || zf->allowed_pair(x,t,s,c)){
-					zf->fill_one(assign_x,x,t,s,c);
-					assign_x += idim;
-					num_togo += 1;
+					if(!whether_o1_filter || !score_o1[get_index2(length,t,s)] || !score_o1[get_index2(length,t,c)]){
+						zf->fill_one(assign_x,x,t,s,c);
+						assign_x += idim;
+						num_togo += 1;
+					}
 				}
 			}
 		}
@@ -138,12 +149,16 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 		for(int t=s+1;t<length;t++){
 			//s<->t
 			if(!zp->CONF_pos_filter || zf->allowed_pair(x,s,t,-1)){
-				TMP_GET_ONE(odim,answer,assign_y)
-				tmp_scores[get_index2_o2sib(length,s,s,t)] = answer;
+				if(!whether_o1_filter || !score_o1[get_index2(length,s,t)]){
+					TMP_GET_ONE(odim,answer,assign_y)
+					tmp_scores[get_index2_o2sib(length,s,s,t)] = answer;
+				}
 			}
 			if(!zp->CONF_pos_filter || zf->allowed_pair(x,t,s,-1)){
-				TMP_GET_ONE(odim,answer,assign_y)
-				tmp_scores[get_index2_o2sib(length,t,t,s)] = answer;
+				if(!whether_o1_filter || !score_o1[get_index2(length,t,s)]){
+					TMP_GET_ONE(odim,answer,assign_y)
+					tmp_scores[get_index2_o2sib(length,t,t,s)] = answer;
+				}
 			}
 		}
 	}
@@ -152,12 +167,16 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 			for(int t=c+1;t<length;t++){
 				//s c t
 				if(!zp->CONF_pos_filter || zf->allowed_pair(x,s,t,c)){
-					TMP_GET_ONE(odim,answer,assign_y)
-					tmp_scores[get_index2_o2sib(length,s,c,t)] = answer;
+					if(!whether_o1_filter || !score_o1[get_index2(length,s,t)] || !score_o1[get_index2(length,s,c)]){
+						TMP_GET_ONE(odim,answer,assign_y)
+						tmp_scores[get_index2_o2sib(length,s,c,t)] = answer;
+					}
 				}
 				if(!zp->CONF_pos_filter || zf->allowed_pair(x,t,s,c)){
-					TMP_GET_ONE(odim,answer,assign_y)
-					tmp_scores[get_index2_o2sib(length,t,c,s)] = answer;
+					if(!whether_o1_filter || !score_o1[get_index2(length,t,s)] || !score_o1[get_index2(length,t,c)]){
+						TMP_GET_ONE(odim,answer,assign_y)
+						tmp_scores[get_index2_o2sib(length,t,c,s)] = answer;
+					}
 				}
 			}
 		}
@@ -253,10 +272,18 @@ vector<int>* Process::parse_o1(DependencyInstance* x)
 vector<int>* Process::parse_o2sib(DependencyInstance* x,double* score_of_o1)
 {
 	int length = x->length();
-	double *tmp_scores = get_scores_o2sib(x,parameters,mach,feat_gen);
+	bool *whether_cut_o1 = 0;
+	if(score_of_o1 && parameters->CONF_NN_o2sib_o1filter){
+		whether_cut_o1 = new bool[length*length];
+		for(int i=0;i<length*length;i++){
+			whether_cut_o1[i] = (score_noprob(score_of_o1[i])) ? true : false;
+		}
+	}
+	double *tmp_scores = get_scores_o2sib(x,parameters,mach,feat_gen,whether_cut_o1);
+	delete []whether_cut_o1;
 	if(parameters->CONF_score_prob)
 		trans_o2sib(tmp_scores,length);
-	if(score_of_o1){
+	if(score_of_o1 && parameters->CONF_NN_O2sib_score_combine){
 		if(parameters->CONF_score_prob)
 			trans_o1(score_of_o1,length);
 		for(int i=0;i<length;i++){

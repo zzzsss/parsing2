@@ -56,9 +56,13 @@ protected:
 	static void set_pair_gradient(const REAL* s_output,REAL* s_gradient,int bsize);
 	//parse
 	static double* get_scores_o1(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf);		//double[l*l]
-	static double* get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf);	//double[l*l*l]
+	static double* get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf,bool* score_o1=0);	//double[l*l*l]
 	vector<int>* parse_o1(DependencyInstance* x);
 	vector<int>* parse_o2sib(DependencyInstance* x,double* score_of_o1=0);
+	int score_noprob(double score){
+		//impossible scores-prob for o2-o1-pruning
+		return score < parameters->CONF_NN_o2sib_o1filter_cut;
+	}
 
 	//train and test
 	double nn_dev_test(string to_test,string output,string gold);
