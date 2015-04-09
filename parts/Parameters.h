@@ -119,7 +119,7 @@ parsing_conf(string conf_file)
 	CONF_NN_o2sib_o1filter = 0;
 	CONF_NN_o2sib_o1filter_cut = 0.001;	//filter out when < this
 	CONF_NN_ISCALE=0.1;
-	CONF_x_window=5;	//word and pos window size
+	CONF_x_window=7;	//word and pos window size
 	CONF_add_distance=1;	//whether add distance --- and for different ways
 	CONF_add_distance_parent=0;
 	CONF_dict_remove=0;	//remove words appears only less than this times
@@ -127,7 +127,7 @@ parsing_conf(string conf_file)
 	CONF_add_pos=1;		//whether add pos
 	CONF_oov_backoff=1;	//whether backoff to pos with oov
 	CONF_random_seed=12345;
-	CONF_score_prob=0;
+	CONF_score_prob=1;
 	//read in conf-file
 #define DATA_LINE_LEN 10000
 	ifstream fin(conf_file.c_str());
