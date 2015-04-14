@@ -34,7 +34,7 @@ void Process::nn_train_prepare()
 	}
 	else{
 		cout << "3.get dict from scratch:" << endl;
-		dict = new Dict(parameters->CONF_dict_remove,parameters->CONF_add_distance,parameters->CONF_oov_backoff);
+		dict = new Dict(parameters->CONF_dict_remove,parameters->CONF_add_distance,parameters->CONF_oov_backoff,parameters->CONF_dict_tolower);
 		dict->construct_dictionary(training_corpus);
 		dict->write(parameters->CONF_dict_file);
 	}

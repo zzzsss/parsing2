@@ -10,6 +10,8 @@
 #include <iostream>
 #include <fstream>
 #include <cstdio>
+#include <cctype>
+#include <cstring>
 #include <string>
 #include <algorithm>
 #include <fstream>
@@ -22,19 +24,17 @@ using namespace std;
 
 //the dictionary
 class Dict{
-
 	HashMap* maps;	//feature maps
 	int dict_num;
 	vector<string*>* real_word_list;
-	//
-	int distance_max;
+	//used only when building
+	int remove_single;	//remove rare word -- backoff to pos -- indicate the number
 	//some CONFs
 	int add_distance_way;	//the method of distance dealing
 	int oov_backoff;		//whether back-off oov to pos
-	//used only when building
-	int statistic_info;	//whether gather statistic_info
-	int remove_single;	//remove rare word -- backoff to pos -- indicate the number
+	int all_a2z;	//whether all transform to a-z
 
+	int distance_max;	//just const is fine
 public:
 	//symbols
 	static string POS_START,POS_END,POS_UNK;
@@ -45,19 +45,27 @@ public:
 	static string WORD_DUMMY_L,WORD_DUMMY_R,POS_DUMMY_L,POS_DUMMY_R;
 	static string DISTANCE_DUMMY;
 
+	static string* tmpfunc_toa2z(string* x){
+		int s = x->length();
+		string* t = new string(*x);
+		for(int i=0;i<s;i++){
+			int one = t->at(i);
+			t->at(i) = tolower(one);
+		}
+		return t;
+	}
+
 	string* get_distance_str(int n,int way=1);
 	int get_index(string* word,string* backoff_pos);	//word or pos
 	int get_index(int distance);						//distance
 	int get_word_index(string* word);	//for outer use
 
 	void write(string file);
-	//static Dict* read(string file);
-
 	int get_count(){return dict_num;}
 	vector<string*>* get_real_words() {return real_word_list;}
 
 	Dict(string file);
-	Dict(int remove,int distance_way,int oov_back,int stat=1,int dsize=CONS_distance_max);
+	Dict(int remove,int distance_way,int oov_back,int allaz,int dsize=CONS_distance_max);
 	~Dict(){
 		delete maps;	//leak some memory, but that's alright
 	}

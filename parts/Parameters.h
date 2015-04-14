@@ -32,7 +32,7 @@ string CONF_mach_conf_name;	//nn.conf
 string CONF_mach_cur_suffix;
 string CONF_mach_best_suffix;
 string CONF_restart_file;		//recording the training iters
-string CONF_feature_file;
+string CONF_feature_file;	//for featgen's filters
 //1.3-for nn
 string CONF_NN_toolkit;
 //1.3.001 -- nn structure split options
@@ -44,20 +44,13 @@ int CONF_NN_ITER;
 int CONF_NN_ITER_decrease;		//at lease cut lrate this times when stopping(so real iters maybe more than iter)
 double CONF_NN_LMULT;	//when >=0:as mult ; -1~0: schedule rate
 double CONF_NN_WD;
-double CONF_NN_hidden_size_portion;	//how much is hidden size  ---@deprecate---
 int CONF_NN_we;						//word-embedding size
 int CONF_NN_plus_layers;				//plus number of layers(plus from base)		---changed: number of hidden except projection---
 double CONF_NN_resample;				//re-sample rate
 int CONF_NN_BS;						//block-size
-//hsizes: array
-int* CONF_NN_h_size;
+int* CONF_NN_h_size;	//hsizes: array
 double CONF_NN_drop;
-//activation functions
-const char** NN_ACs;
-const char* CONF_NN_act;
-//
-int CONF_NN_example;	//whether give training ones for wrong child
-int CONF_NN_scoremax;	//whether score-max or score-average(only for M1-like methods)
+int CONF_NN_act;	//activation functions
 //use o1-mach for o2sib <must with the same other parameters>
 int CONF_NN_O2sib_embed_init;
 int CONF_NN_O2sib_score_combine;
@@ -77,6 +70,7 @@ int CONF_dict_remove;	//remove words appears only less than this times
 int CONF_pos_filter;		//add filters, with pairs seen before
 int CONF_add_pos;		//whether add pos
 int CONF_oov_backoff;	//whether backoff to pos with oov
+int CONF_dict_tolower;	//tolower all the words
 //1.5-others
 int CONF_random_seed;
 //1.6 -- scores
@@ -86,9 +80,7 @@ int CONF_score_prob;	//whether give transform score, only for M1 (0,1)
 parsing_conf(string conf_file)
 {
 	CONF_NN_toolkit = string("HPerf");
-	NN_ACs = new const char*[2];
-	NN_ACs[0] = "Tanh"; NN_ACs[1] = "LinRectif";
-	CONF_NN_act = NN_ACs[0];
+	CONF_NN_act = 0;	//default activation depends on specified ones
 	//defaults:
 	CONF_output_file="output.txt";
 	CONF_dict_file="vocab.dict";		//for dictionary
@@ -105,15 +97,12 @@ parsing_conf(string conf_file)
 	CONF_NN_ITER_decrease=2;		//cut two times
 	CONF_NN_LMULT=-0.5;	//when >=0:as mult ; -1~0: schedule rate
 	CONF_NN_WD=3e-5;
-	CONF_NN_hidden_size_portion=100;	//how much is hidden size
 	CONF_NN_we=50;						//word-embedding size
 	CONF_NN_plus_layers=2;				//plus number of layers(plus from base)
 	CONF_NN_resample=1.0;				//re-sample rate
 	CONF_NN_BS=128;						//block-size
 	CONF_NN_h_size = 0;
 	CONF_NN_drop = -1;
-	CONF_NN_example = 0;	//whether give training ones for wrong child
-	CONF_NN_scoremax=0;	//whether score-max or score-average(only for M1-like methods)
 	CONF_NN_O2sib_embed_init = 0;
 	CONF_NN_O2sib_score_combine = 0;
 	CONF_NN_o2sib_o1filter = 0;
@@ -126,6 +115,7 @@ parsing_conf(string conf_file)
 	CONF_pos_filter=0;		//add filters, with pairs seen before
 	CONF_add_pos=1;		//whether add pos
 	CONF_oov_backoff=1;	//whether backoff to pos with oov
+	CONF_dict_tolower=0;
 	CONF_random_seed=12345;
 	CONF_score_prob=1;
 	//read in conf-file
@@ -162,7 +152,6 @@ parsing_conf(string conf_file)
 		else if(buf=="nn_iters_dec") fin >> CONF_NN_ITER_decrease;
 		else if(buf=="nn_lmult") fin >> CONF_NN_LMULT;
 		else if(buf=="nn_wd")	 fin >> CONF_NN_WD;
-		else if(buf=="nn_h_por") fin >> CONF_NN_hidden_size_portion;
 		else if(buf=="nn_we")	fin >> CONF_NN_we;
 		else if(buf=="nn_plusl") fin >> CONF_NN_plus_layers;
 		else if(buf=="nn_resample") fin >> CONF_NN_resample;
@@ -184,13 +173,7 @@ parsing_conf(string conf_file)
 			fin >> CONF_NN_h_size[1];
 		}
 		else if(buf=="nn_drop")	fin >> CONF_NN_drop;
-		else if(buf=="nn_act"){
-			int type;
-			fin >> type;
-			CONF_NN_act = NN_ACs[type];
-		}
-		else if(buf=="nn_example")  fin >> CONF_NN_example;
-		else if(buf=="nn_scoremax") fin >> CONF_NN_scoremax;
+		else if(buf=="nn_act") fin >> CONF_NN_act;
 		//o2sib use o1
 		else if(buf=="nn_o1mach") fin >> CONF_NN_O2sib_o1mach;
 		else if(buf=="nn_o1mach_init") fin >> 	CONF_NN_O2sib_embed_init;
@@ -209,6 +192,7 @@ parsing_conf(string conf_file)
 		else if(buf=="f_filter") fin >> CONF_pos_filter;
 		else if(buf=="f_pos")	fin >> CONF_add_pos;
 		else if(buf=="f_oov_bo")	fin >> CONF_oov_backoff;
+		else if(buf=="f_tolower") fin >> CONF_dict_tolower;
 		//1.5
 		else if(buf=="o_srand") fin >> CONF_random_seed;
 		//1.6
@@ -221,9 +205,9 @@ parsing_conf(string conf_file)
 	printf("The configurations:\n");
 	printf("Data files: %s,%s,%s,%s,%s\n",CONF_train_file.c_str(),CONF_dev_file.c_str(),
 			CONF_test_file.c_str(),CONF_output_file.c_str(),CONF_gold_file.c_str());
-	printf("NN: lrate(%g),iters(%d),lmult(%g),wdecay(%g),hidden_por(%g),"
+	printf("NN: lrate(%g),iters(%d),lmult(%g),wdecay(%g),"
 			"word_esize(%d),plus_layers(%d),resample(%g),bsize(%d),drop_out(%g)",
-			CONF_NN_LRATE,CONF_NN_ITER,CONF_NN_LMULT,CONF_NN_WD,CONF_NN_hidden_size_portion,CONF_NN_we,CONF_NN_plus_layers,
+			CONF_NN_LRATE,CONF_NN_ITER,CONF_NN_LMULT,CONF_NN_WD,CONF_NN_we,CONF_NN_plus_layers,
 			CONF_NN_resample,CONF_NN_BS,CONF_NN_drop);
 	printf("Feature: xwindow(%d),distance(%d),removes(%d),filter(%d)\n",
 			CONF_x_window,CONF_add_distance,CONF_dict_remove,CONF_pos_filter);

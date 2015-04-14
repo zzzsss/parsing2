@@ -22,16 +22,14 @@ string Dict::POS_DUMMY_L = "<pos-dl>";
 string Dict::POS_DUMMY_R = "<pos-dr>";
 string Dict::DISTANCE_DUMMY = "_distance_dummy_";
 
-Dict::Dict(int remove,int distance_way,int oov_back,int stat,int dsize){
+Dict::Dict(int remove,int distance_way,int oov_back,int allaz,int dsize){
 	maps = new HashMap(CONS_dict_map_size);
 	real_word_list = new vector<string*>;
-	statistic_info = stat;
+	all_a2z = allaz;
 	remove_single = remove;
 	distance_max = dsize;
 	add_distance_way = distance_way;
 	oov_backoff = oov_back;
-	if(remove)	//need to gather statistics
-		statistic_info = 1;
 	dict_num = 0;
 }
 
@@ -71,7 +69,12 @@ int Dict::get_index(int d)
 int Dict::get_index(string* word,string* backoff_pos)
 {
 	//2 ways:(backoff_pos=0 for pos, else for word)
+	if(all_a2z)
+		word = tmpfunc_toa2z(word);
 	HashMap::iterator iter = maps->find(word);
+	if(all_a2z)
+		delete word;
+
 	if(iter == maps->end()){
 		if(backoff_pos == 0){
 			//for purely pos
@@ -97,11 +100,16 @@ int Dict::get_index(string* word,string* backoff_pos)
 
 int Dict::get_word_index(string* word)
 {
+	int ret = -1;
+	if(all_a2z)
+		word = tmpfunc_toa2z(word);
 	HashMap::iterator iter = maps->find(word);
-	if(iter == maps->end())
-		return -1;
+	if(iter == maps->end()){}
 	else
-		return iter->second;
+		ret = iter->second;
+	if(all_a2z)
+		delete word;
+	return ret;
 }
 
 void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
@@ -167,6 +175,9 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 		int sen_length = one_form->size();
 		for(int j=0;j<sen_length;j++){
 			string* to_find = one_form->at(j);
+			if(all_a2z){
+				to_find = tmpfunc_toa2z(to_find);
+			}
 			HashMap::iterator iter = real_words_map.find(to_find);
 			if(iter == real_words_map.end()){
 				real_words_map.insert(pair<string*, int>(to_find,real_word_num++));
@@ -185,7 +196,7 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	//4.deal with statistics and removing
 	printf("-Finish dictionary building, all is %d,distance %d,pos %d,words %d.\n",
 			dict_num+real_word_num,num_distance,num_pos,num_words);
-	if(statistic_info){
+	if(1){
 		//counting frequencies
 		printf("--Trying to get more specific statistics of words-count:\n");
 		vector<int> temp_words_count = real_words_count;
@@ -237,8 +248,8 @@ void Dict::write(string file)
 	printf("-Writing dict to %s.\n",file.c_str());
 	ofstream fout;
 	fout.open(file.c_str(),ofstream::out);
-	fout << dict_num << " " << distance_max << "\n";
-	fout << add_distance_way << " " << oov_backoff << "\n";
+	fout << dict_num << " " << distance_max << " ";
+	fout << add_distance_way << " " << oov_backoff << " " << all_a2z << "\n";
 	string** all = new string*[dict_num];
 	for(HashMap::iterator i = maps->begin();i!=maps->end();i++){
 		if(i->second >= dict_num){
@@ -261,7 +272,7 @@ Dict::Dict(string file)
 	printf("-Reading dict from %s.\n",file.c_str());
 	ifstream fin;
 	fin.open(file.c_str(),ifstream::in);
-	fin >> dict_num >> distance_max >> add_distance_way >> oov_backoff;
+	fin >> dict_num >> distance_max >> add_distance_way >> oov_backoff >> all_a2z;
 	for(int i=0;i<dict_num;i++){
 		string t;
 		fin >> t;
