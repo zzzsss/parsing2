@@ -16,7 +16,6 @@ NNInterface* NNInterface::create_one(parsing_conf* p,FeatureGen* f,int outdim)
 	}
 	else
 		return 0;
-
 }
 
 NNInterface* NNInterface::Read(string name)

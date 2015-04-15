@@ -33,8 +33,9 @@ REAL* CslmInterface::mach_forward(REAL* assign,int all)
 	return mach_y;
 }
 
+const char* cslm_activations[] = {"Tanh","Nope"};
 #define WRITE_CONF_ONE(a1,a2) \
-	fout << parameters->CONF_NN_act << " = " << (int)(a1) << "x" << (int)(a2) << " fanio-init-weights=1.0\n";
+	fout << cslm_activations[parameters->CONF_NN_act] << " = " << (int)(a1) << "x" << (int)(a2) << " fanio-init-weights=1.0\n";
 static inline void write_conf_no_split(parsing_conf* parameters,int dict_count,int xdim,int outdim)
 {
 	//--first write conf
@@ -48,41 +49,6 @@ static inline void write_conf_no_split(parsing_conf* parameters,int dict_count,i
 	for(int i=0;i<xdim;i++)
 		fout << "Tab = " << dict_count << "x" << parameters->CONF_NN_we << "\n";
 	fout << "#End\n";
-	/*
-	if(parameters->CONF_NN_h_size==0){
-		//hidden layer1
-		if(parameters->CONF_NN_hidden_size_portion <= 1){
-			WRITE_CONF_ONE(width,width*parameters->CONF_NN_hidden_size_portion);
-			//fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
-			width = (int)(width*parameters->CONF_NN_hidden_size_portion);
-			//more hidden layers??
-			for(int i=0;i<parameters->CONF_NN_plus_layers;i++){
-				WRITE_CONF_ONE(width,width*parameters->CONF_NN_hidden_size_portion);
-				//fout << "Tanh = " << width << "x" << (int)(width*CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
-				width = (int)(width*parameters->CONF_NN_hidden_size_portion);
-			}
-		}
-		else{
-			WRITE_CONF_ONE(width,parameters->CONF_NN_hidden_size_portion);
-			//fout << "Tanh = " << width << "x" << (int)(CONF_NN_hidden_size_portion) << " fanio-init-weights=1.0\n";
-			width = parameters->CONF_NN_hidden_size_portion;
-			for(int i=0;i<parameters->CONF_NN_plus_layers;i++)
-				WRITE_CONF_ONE(width,width);
-				//fout << "Tanh = " << width << "x" << width << " fanio-init-weights=1.0\n";
-		}
-	}
-	else{
-		//hidden layer1
-		WRITE_CONF_ONE(width,parameters->CONF_NN_h_size[0]);
-		//fout << "Tanh = " << width << "x" << CONF_NN_h_size[0] << " fanio-init-weights=1.0\n";
-		//more hidden layers??
-		for(int i=0;i<parameters->CONF_NN_plus_layers;i++){
-			WRITE_CONF_ONE(parameters->CONF_NN_h_size[i],parameters->CONF_NN_h_size[i+1]);
-			//fout << "Tanh = " << CONF_NN_h_size[i] << "x" << CONF_NN_h_size[i+1] << " fanio-init-weights=1.0\n";
-		}
-		width = parameters->CONF_NN_h_size[parameters->CONF_NN_plus_layers];
-	}
-	*/
 	//2.hidden layers
 	for(int i=0;i<parameters->CONF_NN_plus_layers;i++){
 		WRITE_CONF_ONE(width,parameters->CONF_NN_h_size[i]);
