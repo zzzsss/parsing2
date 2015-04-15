@@ -14,7 +14,7 @@ private:
 
 public:
 	FeatureGenO1(Dict* d,int w,int di,int apos,int d_sys);
-	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center=0);	//mod_center no use for o1
+	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int no_use1=-1,int no_use2=-1);	//mod_center no use for o1
 	//virtual void deal_with_corpus(vector<DependencyInstance*>*);	--- same as base-class
 	virtual ~FeatureGenO1(){}
 

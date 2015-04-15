@@ -19,7 +19,7 @@ FeatureGenO1::FeatureGenO1(Dict* d,int w,int di,int apos,int d_sys):FeatureGen(d
 	}
 }
 
-int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mod,int mod_center)
+int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mod,int no_use1,int no_use2)
 {
 	//head-context-(distance)  |  modifier...
 	int backward = window_size/2;	//window_size should be odd...
@@ -68,6 +68,7 @@ int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mo
 	return xdim;
 }
 
+/*************************@deprecated****************************************/
 void FeatureGenO1::add_filter(vector<DependencyInstance*>* c)
 {
 	filter_map = new IntHashMap();

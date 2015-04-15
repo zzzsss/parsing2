@@ -20,7 +20,7 @@ FeatureGenO2sib::FeatureGenO2sib(Dict* d,int w,int di,int apos,int d_sys):Featur
 }
 
 
-int FeatureGenO2sib::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mod,int mod_center)
+int FeatureGenO2sib::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mod,int mod_center,int no_use)
 {
 	//head-w,mod_center-w,mod-w,head-pos,mod_center-w,mod-pos,distances
 	int backward = window_size/2;	//window_size should be odd...
@@ -113,6 +113,7 @@ int FeatureGenO2sib::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int
 	return xdim;
 }
 
+/*************************@deprecated****************************************/
 //filter based on pos
 void FeatureGenO2sib::add_filter(vector<DependencyInstance*>* c)
 {

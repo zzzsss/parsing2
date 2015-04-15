@@ -26,7 +26,7 @@ using namespace std;
 class Dict{
 	HashMap* maps;	//feature maps
 	int dict_num;
-	vector<string*>* real_word_list;
+	int real_words_start;
 	//used only when building
 	int remove_single;	//remove rare word -- backoff to pos -- indicate the number
 	//some CONFs
@@ -37,8 +37,8 @@ class Dict{
 	int distance_max;	//just const is fine
 public:
 	//symbols
-	static string POS_START,POS_END,POS_UNK;
-	static string WORD_START,WORD_END,WORD_UNK;
+	static string POS_START,POS_END,POS_UNK,POS_ROOTG;
+	static string WORD_START,WORD_END,WORD_UNK,WORD_ROOTG;
 	static string WORD_BACKOFF_POS_PREFIX;
 	//for o2
 	// -- this is: h-dl-c(right-arc) or h-dr-c(left-arc)
@@ -62,7 +62,15 @@ public:
 
 	void write(string file);
 	int get_count(){return dict_num;}
-	vector<string*>* get_real_words() {return real_word_list;}
+	vector<string*>* get_words_list(){	//allocate memory
+		vector<string*>* tmp = new vector<string*>();
+		for(HashMap::iterator i = maps->begin();i!=maps->end();i++){
+			if(i->second >= real_words_start){
+				tmp->push_back(i->first);
+			}
+		}
+		return tmp;
+	}
 
 	Dict(string file);
 	Dict(int remove,int distance_way,int oov_back,int allaz,int dsize=CONS_distance_max);

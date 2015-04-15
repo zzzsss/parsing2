@@ -11,9 +11,11 @@
 string Dict::POS_START = "<pos-s>";
 string Dict::POS_END = "<pos-e>";
 string Dict::POS_UNK = "<pos-unk>";
+string Dict::POS_ROOTG = "<pos-rootg>";	//for high-order grandnode of root
 string Dict::WORD_START = "<w-s>";
 string Dict::WORD_END = "<w-e>";
 string Dict::WORD_UNK = "<w-unk>";
+string Dict::WORD_ROOTG = "<w-rootg>";
 string Dict::WORD_BACKOFF_POS_PREFIX = "_sth_";
 
 string Dict::WORD_DUMMY_L = "<w-dl>";
@@ -31,6 +33,7 @@ Dict::Dict(int remove,int distance_way,int oov_back,int allaz,int dsize){
 	add_distance_way = distance_way;
 	oov_backoff = oov_back;
 	dict_num = 0;
+	real_words_start = 0;
 }
 
 string* Dict::get_distance_str(int n,int way)
@@ -130,9 +133,10 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	maps->insert(pair<string*, int>(&POS_START,dict_num++));
 	maps->insert(pair<string*, int>(&POS_END,dict_num++));
 	maps->insert(pair<string*, int>(&POS_UNK,dict_num++));
+	maps->insert(pair<string*, int>(&POS_ROOTG,dict_num++));
 	maps->insert(pair<string*, int>(&POS_DUMMY_L,dict_num++));
 	maps->insert(pair<string*, int>(&POS_DUMMY_R,dict_num++));
-	num_pos += 5;
+	num_pos += 6;
 	int corpus_size = corpus->size();
 	for(int i=0;i<corpus_size;i++){
 		DependencyInstance* one = corpus->at(i);
@@ -154,15 +158,17 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	maps->insert(pair<string*, int>(&WORD_START,dict_num++));
 	maps->insert(pair<string*, int>(&WORD_END,dict_num++));
 	maps->insert(pair<string*, int>(&WORD_UNK,dict_num++));
+	maps->insert(pair<string*, int>(&WORD_ROOTG,dict_num++));
 	maps->insert(pair<string*, int>(&WORD_DUMMY_L,dict_num++));
 	maps->insert(pair<string*, int>(&WORD_DUMMY_R,dict_num++));
-	num_words += 5;
+	num_words += 6;
 	//3.2-backoff_pos
 	for(vector<string*>::iterator i=real_pos.begin();i!=real_pos.end();i++){
 		string* new_w = new string(WORD_BACKOFF_POS_PREFIX+(**i));
 		num_words++;
 		maps->insert(pair<string*, int>(new_w,dict_num++));
 	}
+	real_words_start = dict_num;	//now the rest is real words
 
 	//3.3-real words
 	HashMap real_words_map(CONS_dict_map_size);
@@ -222,7 +228,6 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 				}
 				else{
 					maps->insert(pair<string*, int>(real_words[i],dict_num++));
-					real_word_list->push_back(real_words[i]);
 				}
 			}
 			printf("-Remove single count words %d:\n",to_remove);
@@ -235,7 +240,6 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	//final adding
 	for(int i=0;i<real_words.size();i++){
 		maps->insert(pair<string*, int>(real_words[i],dict_num++));
-		real_word_list->push_back(real_words[i]);
 	}
 	printf("--Final finish dictionary building, all is %d,distance %d,pos %d,words %d.\n",
 				dict_num,num_distance,num_pos,num_words);
@@ -248,7 +252,7 @@ void Dict::write(string file)
 	printf("-Writing dict to %s.\n",file.c_str());
 	ofstream fout;
 	fout.open(file.c_str(),ofstream::out);
-	fout << dict_num << " " << distance_max << " ";
+	fout << dict_num << " " << real_words_start << " " << distance_max << " ";
 	fout << add_distance_way << " " << oov_backoff << " " << all_a2z << "\n";
 	string** all = new string*[dict_num];
 	for(HashMap::iterator i = maps->begin();i!=maps->end();i++){
@@ -272,7 +276,7 @@ Dict::Dict(string file)
 	printf("-Reading dict from %s.\n",file.c_str());
 	ifstream fin;
 	fin.open(file.c_str(),ifstream::in);
-	fin >> dict_num >> distance_max >> add_distance_way >> oov_backoff >> all_a2z;
+	fin >> dict_num >> real_words_start >> distance_max >> add_distance_way >> oov_backoff >> all_a2z;
 	for(int i=0;i<dict_num;i++){
 		string t;
 		fin >> t;

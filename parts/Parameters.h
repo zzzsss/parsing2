@@ -67,7 +67,6 @@ int CONF_x_window;	//word and pos window size
 int CONF_add_distance;	//whether add distance --- and for different ways
 int CONF_add_distance_parent;	//whether add dummy distance-0
 int CONF_dict_remove;	//remove words appears only less than this times
-int CONF_pos_filter;		//add filters, with pairs seen before
 int CONF_add_pos;		//whether add pos
 int CONF_oov_backoff;	//whether backoff to pos with oov
 int CONF_dict_tolower;	//tolower all the words
@@ -112,7 +111,6 @@ parsing_conf(string conf_file)
 	CONF_add_distance=1;	//whether add distance --- and for different ways
 	CONF_add_distance_parent=0;
 	CONF_dict_remove=0;	//remove words appears only less than this times
-	CONF_pos_filter=0;		//add filters, with pairs seen before
 	CONF_add_pos=1;		//whether add pos
 	CONF_oov_backoff=1;	//whether backoff to pos with oov
 	CONF_dict_tolower=0;
@@ -189,7 +187,6 @@ parsing_conf(string conf_file)
 		else if(buf=="f_distance") fin >> CONF_add_distance;
 		else if(buf=="f_distance_p")	fin >> CONF_add_distance_parent;
 		else if(buf=="f_removes") fin >> CONF_dict_remove;
-		else if(buf=="f_filter") fin >> CONF_pos_filter;
 		else if(buf=="f_pos")	fin >> CONF_add_pos;
 		else if(buf=="f_oov_bo")	fin >> CONF_oov_backoff;
 		else if(buf=="f_tolower") fin >> CONF_dict_tolower;

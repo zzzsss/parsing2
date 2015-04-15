@@ -32,12 +32,12 @@ public:
 	}
 
 	virtual ~FeatureGen(){}
-	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int mod_center=-1)=0;
+	virtual int fill_one(REAL*,DependencyInstance*,int head,int mod,int modc_grand=-1,int grand=-1)=0;	//for all situations
 	virtual void deal_with_corpus(vector<DependencyInstance*>*);
 	FeatureGen(Dict* d,int w,int di,int apos,int d_sys):
 		xdim(0),filter_map(0),dictionary(d),window_size(w),distance(di),pos_add(apos),distance_parent(d_sys){}
 
-	//for extra information(1.filter )
+	//for extra information(1.filter ) --- now @deprecated
 	virtual void add_filter(vector<DependencyInstance*>*)=0;
 	virtual int allowed_pair(DependencyInstance* x,int head,int mod,int opt_other=-1)=0;
 	void read_extra_info(string f);
