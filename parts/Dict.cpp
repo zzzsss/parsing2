@@ -26,7 +26,6 @@ string Dict::DISTANCE_DUMMY = "_distance_dummy_";
 
 Dict::Dict(int remove,int distance_way,int oov_back,int allaz,int dsize){
 	maps = new HashMap(CONS_dict_map_size);
-	real_word_list = new vector<string*>;
 	all_a2z = allaz;
 	remove_single = remove;
 	distance_max = dsize;

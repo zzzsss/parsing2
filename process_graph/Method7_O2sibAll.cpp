@@ -15,7 +15,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 	delete []target;
 	delete []gradient;
 	//for gradient
-	gradient = new REAL[mach->GetBsize()*mach->GetOdim()];
+	gradient = new REAL[mach->GetWidth()*mach->GetOdim()];
 	mach->SetGradOut(gradient);
 	FeatureGenO2sib* feat_o2 = (FeatureGenO2sib*)feat_gen;	//force it
 	int sentences = training_corpus->size();
@@ -37,11 +37,23 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 	FeatureGenO1* feat_temp_o1 = new FeatureGenO1(dict,parameters->CONF_x_window,
 					parameters->CONF_add_distance,parameters->CONF_add_pos,parameters->CONF_add_distance_parent);
 	double** all_scores_o1 = new double*[sentences];
+	int all_tokens_train=0,all_token_filter_wrong=0;
 	for(int i=0;i<sentences;i++){
 		all_scores_o1[i] = 0;
-		if(whether_o1_filter)
-			all_scores_o1[i] = get_scores_o1(training_corpus->at(i),parameters,mach_o1,feat_temp_o1);
+		if(whether_o1_filter){
+			DependencyInstance* x = training_corpus->at(i);
+			all_scores_o1[i] = get_scores_o1(x,parameters,mach_o1,feat_temp_o1);
+			double* scores_o1_filter = all_scores_o1[i];
+			all_tokens_train += x->length();
+			for(int i2=1;i2<x->length();i2++){	//ignore root
+				if(score_noprob(scores_o1_filter[get_index2(x->length(),x->heads->at(i2),i2)]))
+					all_token_filter_wrong ++;
+			}
+		}
 	}
+	if(whether_o1_filter)
+		cout << "For o1 filter: all " << all_tokens_train << ";filter wrong " << all_token_filter_wrong << endl;
+
 	int tmp2_right=0,tmp2_wrong=0,tmp2_bad=0;
 	int tmp3_right=0,tmp3_wrong=0,tmp3_bad=0;
 	for(int i=0;i<sentences;i++){
@@ -58,8 +70,6 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 					tmp2_right++;
 					first_m = m;
 				}
-				else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1))
-					tmp2_bad++;
 				else if(whether_o1_filter &&  score_noprob(score_hm))
 					tmp2_bad++;
 				else
@@ -72,8 +82,6 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 						first_out = one;
 					}
 					else if(whether_o1_filter && (score_noprob(score_hm)||score_noprob(scores_o1_filter[get_index2(length,h,one)])))
-						tmp2_bad++;
-					else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m))
 						tmp3_bad++;
 					else
 						tmp3_wrong++;
@@ -88,8 +96,6 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 					tmp2_right++;
 					first_m = m;
 				}
-				else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1))
-					tmp2_bad++;
 				else if(whether_o1_filter &&  score_noprob(score_hm))
 					tmp2_bad++;
 				else
@@ -101,10 +107,8 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 						tmp3_right++;
 						first_out = one;
 					}
-					else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m))
-						tmp3_bad++;
 					else if(whether_o1_filter && (score_noprob(score_hm)||score_noprob(scores_o1_filter[get_index2(length,h,one)])))
-						tmp2_bad++;
+						tmp3_bad++;
 					else
 						tmp3_wrong++;
 				}
@@ -137,7 +141,6 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 					feat_gen->fill_one(assign_right,x,h,m,-1);assign_right += idim;
 					first_m = m;
 				}
-				else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1)){}
 				else if(whether_o1_filter &&  score_noprob(score_hm)){}
 				else{
 					feat_gen->fill_one(assign_wrong,x,h,m,-1);assign_wrong += idim;
@@ -149,7 +152,6 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 						feat_gen->fill_one(assign_right,x,h,one,m);assign_right += idim;
 						first_out = one;
 					}
-					else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m)){}
 					else if(whether_o1_filter && (score_noprob(score_hm)||score_noprob(scores_o1_filter[get_index2(length,h,one)]))){}
 					else{
 						feat_gen->fill_one(assign_wrong,x,h,one,m);assign_wrong += idim;
@@ -165,7 +167,6 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 					feat_gen->fill_one(assign_right,x,h,m,-1);assign_right += idim;
 					first_m = m;
 				}
-				else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,m,-1)){}
 				else if(whether_o1_filter &&  score_noprob(score_hm)){}
 				else{
 					feat_gen->fill_one(assign_wrong,x,h,m,-1);assign_wrong += idim;
@@ -177,7 +178,6 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 						feat_gen->fill_one(assign_right,x,h,one,m);assign_right += idim;
 						first_out = one;
 					}
-					else if(parameters->CONF_pos_filter && !feat_o2->allowed_pair(x,h,one,m)){}
 					else if(whether_o1_filter && (score_noprob(score_hm)||score_noprob(scores_o1_filter[get_index2(length,h,one)]))){}
 					else{
 						feat_gen->fill_one(assign_wrong,x,h,one,m);assign_wrong += idim;

@@ -101,7 +101,7 @@ void Process::nn_train_one_iter()
 			<< "with lrate " << cur_lrate << std::flush;
 	each_prepare_data_oneiter();	/*************virtual****************/
 	while(1){
-		int n_size = mach->GetBsize();
+		int n_size = mach->GetWidth();
 		/*************virtual****************/
 		REAL* xinput = each_next_data(&n_size);	//this may change n_size, all memory managed not here
 		if(xinput){

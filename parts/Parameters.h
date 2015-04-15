@@ -206,8 +206,8 @@ parsing_conf(string conf_file)
 			"word_esize(%d),plus_layers(%d),resample(%g),bsize(%d),drop_out(%g)",
 			CONF_NN_LRATE,CONF_NN_ITER,CONF_NN_LMULT,CONF_NN_WD,CONF_NN_we,CONF_NN_plus_layers,
 			CONF_NN_resample,CONF_NN_BS,CONF_NN_drop);
-	printf("Feature: xwindow(%d),distance(%d),removes(%d),filter(%d)\n",
-			CONF_x_window,CONF_add_distance,CONF_dict_remove,CONF_pos_filter);
+	printf("Feature: xwindow(%d),distance(%d),removes(%d)\n",
+			CONF_x_window,CONF_add_distance,CONF_dict_remove);
 }
 
 };

@@ -84,9 +84,6 @@ protected:
 			if(! feat_gen){	//when testing
 				feat_gen = new FeatureGenO1(dict,parameters->CONF_x_window,parameters->CONF_add_distance,
 						parameters->CONF_add_pos,parameters->CONF_add_distance_parent);
-				if(parameters->CONF_pos_filter){
-					feat_gen->read_extra_info(parameters->CONF_feature_file);
-				}
 			}
 			feat_gen->deal_with_corpus(dev_test_corpus);
 		}
@@ -94,10 +91,6 @@ protected:
 			feat_gen = new FeatureGenO1(dict,parameters->CONF_x_window,parameters->CONF_add_distance,
 					parameters->CONF_add_pos,parameters->CONF_add_distance_parent);
 			feat_gen->deal_with_corpus(training_corpus);
-			if(parameters->CONF_pos_filter){
-				feat_gen->add_filter(training_corpus);
-				feat_gen->write_extra_info(parameters->CONF_feature_file);
-			}
 		}
 	}
 

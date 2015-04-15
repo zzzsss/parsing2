@@ -18,7 +18,7 @@ void Process::init_embed()
 {
 	if(!(parameters->CONF_NN_WL.length()>0 && parameters->CONF_NN_EM.length()>0))	//nothing to do if not setting
 		return;
-	vector<string*>* real_wl = dict->get_real_words();
+	vector<string*>* real_wl = dict->get_words_list();
 	REAL* to_assign = mach->get_tab();
 
 	//temps

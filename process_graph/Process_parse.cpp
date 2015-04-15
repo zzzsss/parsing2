@@ -39,31 +39,11 @@ double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,NNInterfac
 		for(int j=0;j<length;j++){
 			if(ii!=j){
 				int index = get_index2(length,ii,j);
-				//if filter --- this is the easy way(but waste computation)
-				if(zp->CONF_pos_filter && zf->has_filter()){
-					if(!zf->allowed_pair(x,ii,j)){
-						tmp_scores[index] = DOUBLE_LARGENEG;	//is this neg enough??
-						//skip forward
-						for(int c=0;c<odim;c++)
-							assign_y++;
-						continue;
-					}
-				}
 				if(odim > 1){
-					if(zp->CONF_NN_scoremax){
-						double temp = *assign_y;
-						double ans = 0;
-						for(int c=0;c<odim;c++)
-							if(*assign_y++ > temp)
-								ans = c;
-						tmp_scores[index] = ans;
-					}
-					else{
-						double temp = 0;
-						for(int c=0;c<odim;c++)
-							temp += (*assign_y++)*c;
-						tmp_scores[index] = temp;
-					}
+					double temp = 0;
+					for(int c=0;c<odim;c++)
+						temp += (*assign_y++)*c;
+					tmp_scores[index] = temp;
 				}
 				else
 					tmp_scores[index] = *assign_y++;
@@ -95,19 +75,15 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 	for(int s=0;s<length;s++){
 		for(int t=s+1;t<length;t++){
 			//s<->t
-			if(!zp->CONF_pos_filter || zf->allowed_pair(x,s,t,-1)){
-				if(!whether_o1_filter || !score_o1[get_index2(length,s,t)]){
-					zf->fill_one(assign_x,x,s,t,-1);
-					assign_x += idim;
-					num_togo += 1;
-				}
+			if(!whether_o1_filter || !score_o1[get_index2(length,s,t)]){
+				zf->fill_one(assign_x,x,s,t,-1);
+				assign_x += idim;
+				num_togo += 1;
 			}
-			if(!zp->CONF_pos_filter || zf->allowed_pair(x,t,s,-1)){
-				if(!whether_o1_filter || !score_o1[get_index2(length,t,s)]){
-					zf->fill_one(assign_x,x,t,s,-1);
-					assign_x += idim;
-					num_togo += 1;
-				}
+			if(!whether_o1_filter || !score_o1[get_index2(length,t,s)]){
+				zf->fill_one(assign_x,x,t,s,-1);
+				assign_x += idim;
+				num_togo += 1;
 			}
 		}
 	}
@@ -115,19 +91,15 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 		for(int c=s+1;c<length;c++){
 			for(int t=c+1;t<length;t++){
 				//s c t
-				if(!zp->CONF_pos_filter || zf->allowed_pair(x,s,t,c)){
-					if(!whether_o1_filter || !score_o1[get_index2(length,s,t)] || !score_o1[get_index2(length,s,c)]){
-						zf->fill_one(assign_x,x,s,t,c);
-						assign_x += idim;
-						num_togo += 1;
-					}
+				if(!whether_o1_filter || !score_o1[get_index2(length,s,t)] || !score_o1[get_index2(length,s,c)]){
+					zf->fill_one(assign_x,x,s,t,c);
+					assign_x += idim;
+					num_togo += 1;
 				}
-				if(!zp->CONF_pos_filter || zf->allowed_pair(x,t,s,c)){
-					if(!whether_o1_filter || !score_o1[get_index2(length,t,s)] || !score_o1[get_index2(length,t,c)]){
-						zf->fill_one(assign_x,x,t,s,c);
-						assign_x += idim;
-						num_togo += 1;
-					}
+				if(!whether_o1_filter || !score_o1[get_index2(length,t,s)] || !score_o1[get_index2(length,t,c)]){
+					zf->fill_one(assign_x,x,t,s,c);
+					assign_x += idim;
+					num_togo += 1;
 				}
 			}
 		}
@@ -135,11 +107,9 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 	//forward
 	REAL* mach_y = zm->mach_forward(mach_x,num_togo);
 	//and assign the scores
-#define TMP_GET_MAXINDEX(o_dim,a,assign) {a=0;double temp=*assign;for(int c=0;c<o_dim;c++) if((*assign++)>temp) a=c;}
 #define TMP_GET_ONE(o_dim,a,assign) {\
 	if(o_dim>1){\
-		if(zp->CONF_NN_scoremax){TMP_GET_MAXINDEX(o_dim,a,assign)}\
-		else{a=0;for(int c=0;c<o_dim;c++) a+=(*assign++)*c;}\
+		{a=0;for(int c=0;c<o_dim;c++) a+=(*assign++)*c;}\
 	}\
 	else{a=*assign++;}}
 
@@ -148,17 +118,13 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 	for(int s=0;s<length;s++){
 		for(int t=s+1;t<length;t++){
 			//s<->t
-			if(!zp->CONF_pos_filter || zf->allowed_pair(x,s,t,-1)){
-				if(!whether_o1_filter || !score_o1[get_index2(length,s,t)]){
-					TMP_GET_ONE(odim,answer,assign_y)
-					tmp_scores[get_index2_o2sib(length,s,s,t)] = answer;
-				}
+			if(!whether_o1_filter || !score_o1[get_index2(length,s,t)]){
+				TMP_GET_ONE(odim,answer,assign_y)
+				tmp_scores[get_index2_o2sib(length,s,s,t)] = answer;
 			}
-			if(!zp->CONF_pos_filter || zf->allowed_pair(x,t,s,-1)){
-				if(!whether_o1_filter || !score_o1[get_index2(length,t,s)]){
-					TMP_GET_ONE(odim,answer,assign_y)
-					tmp_scores[get_index2_o2sib(length,t,t,s)] = answer;
-				}
+			if(!whether_o1_filter || !score_o1[get_index2(length,t,s)]){
+				TMP_GET_ONE(odim,answer,assign_y)
+				tmp_scores[get_index2_o2sib(length,t,t,s)] = answer;
 			}
 		}
 	}
@@ -166,17 +132,13 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 		for(int c=s+1;c<length;c++){
 			for(int t=c+1;t<length;t++){
 				//s c t
-				if(!zp->CONF_pos_filter || zf->allowed_pair(x,s,t,c)){
-					if(!whether_o1_filter || !score_o1[get_index2(length,s,t)] || !score_o1[get_index2(length,s,c)]){
-						TMP_GET_ONE(odim,answer,assign_y)
-						tmp_scores[get_index2_o2sib(length,s,c,t)] = answer;
-					}
+				if(!whether_o1_filter || !score_o1[get_index2(length,s,t)] || !score_o1[get_index2(length,s,c)]){
+					TMP_GET_ONE(odim,answer,assign_y)
+					tmp_scores[get_index2_o2sib(length,s,c,t)] = answer;
 				}
-				if(!zp->CONF_pos_filter || zf->allowed_pair(x,t,s,c)){
-					if(!whether_o1_filter || !score_o1[get_index2(length,t,s)] || !score_o1[get_index2(length,t,c)]){
-						TMP_GET_ONE(odim,answer,assign_y)
-						tmp_scores[get_index2_o2sib(length,t,c,s)] = answer;
-					}
+				if(!whether_o1_filter || !score_o1[get_index2(length,t,s)] || !score_o1[get_index2(length,t,c)]){
+					TMP_GET_ONE(odim,answer,assign_y)
+					tmp_scores[get_index2_o2sib(length,t,c,s)] = answer;
 				}
 			}
 		}

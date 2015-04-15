@@ -12,7 +12,7 @@ void Method2_pairs::each_prepare_data_oneiter()
 	delete []gradient;
 
 	//for gradient
-	gradient = new REAL[mach->GetBsize()*mach->GetOdim()];
+	gradient = new REAL[mach->GetWidth()*mach->GetOdim()];
 	mach->SetGradOut(gradient);
 
 	//prepare all
@@ -24,9 +24,6 @@ void Method2_pairs::each_prepare_data_oneiter()
 		//here duplicate right ones and exclude root as mod
 		// -- length-2 excludes self,real-head
 		num_pairs += (length-2)*(length-1)*2;
-	}
-	if(parameters->CONF_NN_example){
-		num_pairs *= 2;	//should be less, but for simplicity
 	}
 	//-- generate all
 	int real_num_pairs = 0;
@@ -41,26 +38,12 @@ void Method2_pairs::each_prepare_data_oneiter()
 			for(int j=0;j<length;j++){	//length-2
 				if(j==head || j==mod)
 					continue;
-				//check filter if set
-				if(parameters->CONF_pos_filter){
-					if(!feat_o1->allowed_pair(x,head,mod))
-						continue;
-				}
 				//always first right and then wrong
 				feat_gen->fill_one(assign_x,x,head,mod);
 				assign_x += mach->GetIdim();
 				feat_gen->fill_one(assign_x,x,j,mod);
 				assign_x += mach->GetIdim();
 				real_num_pairs += 2;
-
-				//change the child, and keep the parent
-				if(parameters->CONF_NN_example && x->heads->at(j)!=head){
-					feat_gen->fill_one(assign_x,x,head,mod);
-					assign_x += mach->GetIdim();
-					feat_gen->fill_one(assign_x,x,head,j);
-					assign_x += mach->GetIdim();
-					real_num_pairs += 2;
-				}
 			}
 		}
 	}

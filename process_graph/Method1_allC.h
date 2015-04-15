@@ -13,7 +13,6 @@
 #include "Process.h"
 
 class Method1_allC: public Process{
-	friend class Method8_O2sibWitho1;
 private:
 	REAL* data;
 	REAL* target;

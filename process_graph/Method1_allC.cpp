@@ -13,7 +13,7 @@ void Method1_allC::each_prepare_data_oneiter()
 	delete []gradient;
 
 	//for gradient
-	gradient = new REAL[mach->GetBsize()*mach->GetOdim()];
+	gradient = new REAL[mach->GetWidth()*mach->GetOdim()];
 	mach->SetGradOut(gradient);
 
 	//prepare all
@@ -39,11 +39,6 @@ void Method1_allC::each_prepare_data_oneiter()
 				if(ii != j){
 					//build mach_x
 					REAL t = 0;
-					//check filter if set
-					if(parameters->CONF_pos_filter && feat_gen->has_filter()){
-						if(!feat_o1->allowed_pair(x,ii,j))
-							continue;
-					}
 					feat_gen->fill_one(assign_x,x,ii,j);
 					if(x->heads->at(j)==ii)
 						t=1;
