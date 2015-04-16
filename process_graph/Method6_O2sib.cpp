@@ -12,6 +12,7 @@
 void Method6_O2sib::each_prepare_data_oneiter()
 {
 	//NOPE--no-use
+	//M6 just just exist for m7...
 }
 
 REAL* Method6_O2sib::each_next_data(int* size)
