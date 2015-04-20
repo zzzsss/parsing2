@@ -1,7 +1,7 @@
 /*
  * EisnerO3g.cpp
  *
- *  Created on: 2015Äê4ÔÂ20ÈÕ
+ *  Created on: 2015.4.20
  *      Author: zzs
  */
 
@@ -41,7 +41,7 @@ static void fill_result_o3g(int length,int *which,vector<int>* result,int g,int 
 			fill_result_o3g(length,which,result,g,s,index,E_INCOM_O3g);
 		}
 	}
-	else if(comp==E_COM_O3g){	//here s must < t
+	else if(comp==E_SIB_O3g){	//here s must < t
 		fill_result_o3g(length,which,result,g,s,index,E_COM_O3g);
 		fill_result_o3g(length,which,result,g,t,index+1,E_COM_O3g);
 	}

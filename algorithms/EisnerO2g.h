@@ -1,7 +1,7 @@
 /*
  * EisnerO2g.h
  *
- *  Created on: 2015Äê4ÔÂ20ÈÕ
+ *  Created on: 2015.4.20
  *      Author: zzs
  */
 

@@ -1,12 +1,17 @@
 /*
- * test1.cpp
+ * test3_o2g.cpp
  *
- *  Created on: Jul 10, 2014
+ *  Created on: Apr 20, 2015
  *      Author: zzs
  */
 
-#define _CRT_SECURE_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE
+/*
+ * test2_o2sib.cpp
+ *
+ *  Created on: Mar 11, 2015
+ *      Author: zzs
+ */
+
 #include<fstream>
 #include<ctime>
 #include<set>
@@ -16,54 +21,39 @@
 #include"DependencyParser.h"
 #include"DependencyParser2.h"
 #include"new_ones.h"
-#include"Eisner.h"
+#include "EisnerO2g.h"
 using namespace std;
 
 extern StringPool* pool;
 extern set<string> punctSet;
 extern set<string> coordSet;
 extern set<string> commaSet;
-
 extern vector<vector<vector<double> > > probs;
-extern vector<vector<vector<double> > > probs_trips;
-extern vector<vector<vector<double> > > probs_sibs;
+extern vector<vector<double> > probs_gchs;
+extern vector<vector<vector<double> > > probs_grands;
 extern vector<vector<vector<vector<double> > > > nt_probs;
-extern string No_type;
 
-extern double* testing_get_probs();
-
-double test_score(int len,double* sco,int a, int b)
+double* testing_get_probs_o2g()
 {
-	int dir = (a>b) ? 1 : 0;
-	int small = (a>b) ? b : a;
-	int large = (a>b) ? a : b;
-	double x1 = sco[small*len*2+large*2+dir];
-	double x2 = probs[small][large][1-dir];
-	if(x1 != x2){
-		cout << x1 << ';' << x2 << endl;
-		return 0;
-	}
-	else
-		return x1;
+	int size = probs.size();
+	double* rr = new double[size*size*size];
+	//g-s-t
+	for(int g=0;g<size;g++)
+		for(int s=0;s<size;s++){
+			for(int t = 0; t<size; t++){
+				if(s<t)
+					rr[get_index2_o2g(size,g,s,t)] = probs[s][t][0]+probs_grands[g][s][t]+probs_gchs[g][t];
+				else
+					rr[get_index2_o2g(size,g,s,t)] = probs[t][s][1]+probs_grands[g][s][t]+probs_gchs[g][t];
+			}
+		}
+	for(int i=0;i<size;i++)
+		rr[get_index2_o2g(size,0,0,i)] = probs[0][i][0];
+	return rr;
 }
 
-void check_two(int s,double *r)
-{
-	if(s!=probs.size())
-		cout << "size-mismatch: " << s << ';' << probs.size() << endl;
-	for(int i=0;i<s;i++)
-			for(int j=0;j<s;j++)
-				for(int t=0;t<2;t++){
-					//differenr directions
-					if (r[i*s*2+j*2+t] != probs[i][j][1-t]){
-						cout << "value-mismatch: "<< endl;
-					}
-				}
-}
-
-
-//test for the Eisner method's implement
-int Test1Main(int argc,char **argv)
+//test for the O2g implement
+int Test3Main(int argc,char **argv)
 {
 	/* 1.init(arguments) --- the same as the original one */
 	punctSet.insert("''");
@@ -71,7 +61,7 @@ int Test1Main(int argc,char **argv)
 	punctSet.insert(".");
 	punctSet.insert(":");
 	punctSet.insert(",");
-	ifstream config_in("config1");
+	ifstream config_in("config3");
 	vector<string*> args;
 	char line[100];
 	while(config_in.getline(line, 100)){
@@ -87,7 +77,7 @@ int Test1Main(int argc,char **argv)
 	config_in.close();
 
 	//testing and timing
-	DependencyPipe* pipe = new DependencyPipe(options);
+	DependencyPipe* pipe = new DependencyPipe2OGrandChildren(options);
 	DependencyParser* dp = new DependencyParser(pipe, options);
 	/* 0.init sth */
 	srand((int)time(0));
@@ -102,23 +92,26 @@ int Test1Main(int argc,char **argv)
 	cout<<"Processing Sentence: \n";
 	DependencyInstance* instance = dp->pipe->nextInstance();
 	int cnt = 0;
+	int ALL_r1time=0,ALL_r2time=0,ALL_error=0;
 	while(instance != NULL){
 		printf("%d: ", cnt++);
 		int length = instance->length();
 		//1.the original one
 		start = clock() / (CLOCKS_PER_SEC/1000);
-		vector<int>*r1 = newone_outputparse_one(dp,instance,1);
+		vector<int>*r1 = newone_outputparse_one(dp,instance,2,0);
 		end = clock() / (CLOCKS_PER_SEC/1000);
 		cout << end-start << "; ";
+		ALL_r1time += end-start;
 		//2.the new one
-		double* temp_probs = testing_get_probs();
+		double* temp_probs = testing_get_probs_o2g();
 
-		check_two(length,temp_probs);
+		//check_two(length,temp_probs);
 
 		start = clock() / (CLOCKS_PER_SEC/1000);
-		vector<int>*r2 = decodeProjective(length,temp_probs);
+		vector<int>*r2 = decodeProjective_o2g(length,temp_probs);
 		end = clock() / (CLOCKS_PER_SEC/1000);
 		cout << end-start << "|| ";
+		ALL_r2time += end-start;
 		//3.compare
 		cout << r1->size() << '-' << r2->size() << "---";
 		if(r1->size() == (r2->size()-1)){
@@ -127,6 +120,7 @@ int Test1Main(int argc,char **argv)
 			for(int i=0;i<r1->size();i++)
 				if((*r1)[i] != (*r2)[i+1])
 					error++;
+			ALL_error += error;
 			cout << error;
 			cout << endl;
 		}
@@ -155,9 +149,11 @@ int Test1Main(int argc,char **argv)
 		delete(instance);
 		instance = dp->pipe->nextInstance();
 	}
+	cout << ALL_error << ";" << ALL_r1time << " vs " << ALL_r2time << endl;
 	dp->pipe->close();
 	return 0;
 }
+
 
 
 

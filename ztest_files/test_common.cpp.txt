@@ -19,11 +19,20 @@
 #include"new_ones.h"
 using namespace std;
 
+//o1
 vector<vector<vector<double> > > probs;
 vector<vector<vector<vector<double> > > > nt_probs;
+//o2sib
 vector<vector<vector<double> > > probs_trips;
 vector<vector<vector<double> > > probs_sibs;
+//o2g
+vector<vector<double> > probs_gchs;
+vector<vector<vector<double> > > probs_grands;
 string No_type = "<nope>";
+//o3g
+vector<vector<vector<vector<double> > > > probs_gtrips;
+vector<vector<vector<vector<double> > > > probs_gsibs;
+vector<vector<vector<double> > > probs_coords;
 
 /* score an instance(sentence) */
 void newone_score(DependencyInstance *instance)
@@ -33,26 +42,51 @@ void newone_score(DependencyInstance *instance)
 		probs = vector<vector<vector<double> > >(Length);
 		probs_trips = vector<vector<vector<double> > >(Length);
 		probs_sibs = vector<vector<vector<double> > >(Length);
+		probs_gchs = vector<vector<double> >(Length);
+		probs_grands = vector<vector<vector<double> > >(Length);
+		probs_gtrips = vector<vector<vector<vector<double> > > >(Length);
+		probs_gsibs = vector<vector<vector<vector<double> > > >(Length);
+		probs_coords = vector<vector<vector<double> > > (Length);
 		for(int i = 0; i < Length; i++){
 			probs[i] = vector<vector<double> >(Length);
 			probs_trips[i] = vector<vector<double> >(Length);
 			probs_sibs[i] = vector<vector<double> >(Length);
+			probs_gchs[i] = vector<double>(Length);
+			probs_grands[i] = vector<vector<double> >(Length);
+			probs_gtrips[i] = vector<vector<vector<double> > >(Length);
+			probs_gsibs[i] = vector<vector<vector<double> > >(Length);
+			probs_coords[i] = vector<vector<double> >(Length);
 			for(int j = 0; j < Length; j++){
 				probs[i][j] = vector<double>(2);
 				probs_trips[i][j] = vector<double>(Length);
 				probs_sibs[i][j] = vector<double>(2);
+				probs_grands[i][j] = vector<double>(Length);
+				probs_gtrips[i][j] = vector<vector<double> >(Length);
+				probs_gsibs[i][j] = vector<vector<double> >(Length);
+				for(int t=0;t<Length;t++){
+					probs_gtrips[i][j][t] = vector<double>(Length);
+					probs_gsibs[i][j][t] = vector<double>(2);
+				}
+				probs_coords[i][j] = vector<double>(Length);
 			}
 		}
 	}
 
 	for (int w1 = 0; w1 < Length; w1++) {
 			for (int w2 = 0; w2 < Length; w2++) {
+				probs_gchs[w1][w2]= ((double)rand()*100/RAND_MAX);
 				for (int ph = 0; ph < 2; ph++) {
 					probs[w1][w2][ph] = ((double)rand()*100/RAND_MAX);
 					probs_sibs[w1][w2][ph] = ((double)rand()*100/RAND_MAX);
 				}
 				for (int ph = 0; ph < Length; ph++) {
 					probs_trips[w1][w2][ph] = ((double)rand()*100/RAND_MAX);
+					probs_grands[w1][w2][ph] = ((double)rand()*100/RAND_MAX);
+					probs_coords[w1][w2][ph] = ((double)rand()*100/RAND_MAX);
+					for(int i=0;i<2;i++)
+						probs_gsibs[w1][w2][ph][i] = ((double)rand()*100/RAND_MAX);
+					for(int i=0;i<Length;i++)
+						probs_gtrips[w1][w2][ph][i] = ((double)rand()*100/RAND_MAX);
 				}
 			}
 		}
@@ -75,7 +109,7 @@ double* testing_get_probs()
 /* process one sentence
  * 	--- mainly transformed from OnlineTrainer::outputParses
  */
-vector<int>* newone_outputparse_one(DependencyParser* dp,DependencyInstance *instance,int order)
+vector<int>* newone_outputparse_one(DependencyParser* dp,DependencyInstance *instance,int order,int model)
 {
 	//get probs
 	newone_score(instance);
@@ -87,8 +121,15 @@ vector<int>* newone_outputparse_one(DependencyParser* dp,DependencyInstance *ins
 
 	if(order == 1)
 		d = dp->decoder->decodeProjective(instance, probs, nt_probs, K);
-	else
-		d = ((DependencyDecoder2OSibling*)dp->decoder)->decodeProjective(instance,probs,probs_trips,probs_sibs,nt_probs,K);
+	else if(order==2){
+		if(model==-1)
+			d=((DependencyDecoder2OSibling*)dp->decoder)->decodeProjective(instance,probs,probs_trips,probs_sibs,nt_probs,K);
+		else
+			d=((DependencyDecoder2OGrandChildren*)dp->decoder)->decodeProjective(instance,probs,probs_grands,probs_gchs,nt_probs,K);
+	}
+	else{
+		d=((DependencyDecoder3OGSibling*)dp->decoder)->decodeProjective(instance,probs,probs_trips,probs_sibs,probs_grands,probs_gchs,probs_gtrips,probs_gsibs,probs_coords,nt_probs,K);
+	}
 
 	vector<string*>* res = Util::split((*d)[0].second, ' ');
 	vector<string*>* forms = instance->forms;

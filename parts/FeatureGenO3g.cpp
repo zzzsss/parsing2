@@ -19,7 +19,7 @@ FeatureGenO3g::FeatureGenO3g(Dict* d,int w,int di,int apos,int d_sys):FeatureGen
 	}
 }
 
-int FeatureGenO2sib::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mod,int mod_center,int g)
+int FeatureGenO3g::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mod,int mod_center,int g)
 {
 	//head-w,mod_center-w,mod-w,g-w,head-pos,mod_center-w,mod-pos,g-pos,distances
 	int backward = window_size/2;	//window_size should be odd...
@@ -110,7 +110,7 @@ int FeatureGenO2sib::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int
 	}
 
 	//4.grand-parent
-	if(g==0 && h==0){
+	if(g==0 && head==0){
 		for(int i=g-backward;i<=g+backward;i++){
 			*to_fill = dictionary->get_index(&dictionary->WORD_ROOTG,0);
 			to_fill++;

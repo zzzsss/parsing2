@@ -1,7 +1,7 @@
 /*
  * EisnerO2g.cpp
  *
- *  Created on: 2015Äê4ÔÂ20ÈÕ
+ *  Created on: 2015.4.20
  *      Author: zzs
  */
 
@@ -20,14 +20,20 @@ static inline void assign_one_o2g(vector<int>* result,int index,int v)
 }
 
 static void fill_result_o2g(int length,int *which,vector<int>* result,int g,int s,int t,int comp)
-{
+{	//s is head
 	if(s==t)
 		return;
 	int index_it = get_index_o2g(length,g,s,t,comp);
 	int index = which[index_it];
 	if(comp==E_INCOM_O2g){
-		fill_result_o2g(length,which,result,g,s,index,E_COM_O2g);
-		fill_result_o2g(length,which,result,s,t,index+1,E_COM_O2g);
+		if(t>s){
+			fill_result_o2g(length,which,result,g,s,index,E_COM_O2g);
+			fill_result_o2g(length,which,result,s,t,index+1,E_COM_O2g);
+		}
+		else{
+			fill_result_o2g(length,which,result,g,s,index+1,E_COM_O2g);
+			fill_result_o2g(length,which,result,s,t,index,E_COM_O2g);
+		}
 	}
 	else{
 		assign_one_o2g(result,index,s);
@@ -107,29 +113,29 @@ vector<int>* decodeProjective_o2g(int length,double* scores)
 					max_score = Negative_Infinity_O2g;
 					u = -2;
 					for(int r = s; r < t; r++){
-						double tmp = scores_table[get_index(length,t,r,s,E_COM_O2g)]
-					                          +scores_table[get_index(length,g,t,r,E_INCOM_O2g)];
+						double tmp = scores_table[get_index_o2g(length,t,r,s,E_COM_O2g)]
+					                          +scores_table[get_index_o2g(length,g,t,r,E_INCOM_O2g)];
 						if(tmp >= max_score){
 							max_score = tmp;
 							u = r;
 						}
 					}
-					the_ind = get_index(length,g,t,s,E_COM_O2g);
+					the_ind = get_index_o2g(length,g,t,s,E_COM_O2g);
 					scores_table[the_ind]=max_score;
 					which[the_ind]=u;
 				}
 				//(2.2) left->right
-				max_score = Negative_Infinity;
+				max_score = Negative_Infinity_O2g;
 				u = -2;
 				for(int r = s+1; r <= t; r++){
-					double tmp = scores_table[get_index(length,g,s,r,E_INCOM_O2g)]
-					                          +scores_table[get_index(length,s,r,t,E_COM_O2g)];
+					double tmp = scores_table[get_index_o2g(length,g,s,r,E_INCOM_O2g)]
+					                          +scores_table[get_index_o2g(length,s,r,t,E_COM_O2g)];
 					if(tmp >= max_score){
 						max_score = tmp;
 						u = r;
 					}
 				}
-				the_ind = get_index(length,g,s,t,E_COM_O2g);
+				the_ind = get_index_o2g(length,g,s,t,E_COM_O2g);
 				scores_table[the_ind]=max_score;
 				which[the_ind]=u;
 			}
