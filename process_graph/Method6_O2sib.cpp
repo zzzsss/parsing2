@@ -37,8 +37,8 @@ vector<int>* Method6_O2sib::each_test_one(DependencyInstance* x)
 {
 	vector<int>* ret;
 	//combine o1 scores
-	if(parameters->CONF_NN_O2sib_o1mach.length() > 0 &&
-			(parameters->CONF_NN_O2sib_score_combine || parameters->CONF_NN_o2sib_o1filter)){
+	if(parameters->CONF_NN_highO_o1mach.length() > 0 &&
+			(parameters->CONF_NN_highO_score_combine || parameters->CONF_NN_highO_o1filter)){
 		FeatureGenO1* feat_temp_o1 = new FeatureGenO1(dict,parameters->CONF_x_window,
 				parameters->CONF_add_distance,parameters->CONF_add_pos,parameters->CONF_add_distance_parent);
 		double* scores_o1 = get_scores_o1(x,parameters,mach_o1,feat_temp_o1);	//same parameters
@@ -55,7 +55,7 @@ vector<int>* Method6_O2sib::each_test_one(DependencyInstance* x)
 //maybe init embedding from o1 machine
 void Method6_O2sib::init_embed()
 {
-	if(parameters->CONF_NN_O2sib_o1mach.length() > 0 && parameters->CONF_NN_O2sib_embed_init){
+	if(parameters->CONF_NN_highO_o1mach.length() > 0 && parameters->CONF_NN_highO_embed_init){
 		//special structure
 		int all = parameters->CONF_NN_we * dict->get_count();
 		mach->clone_tab(mach_o1->get_tab(),all);

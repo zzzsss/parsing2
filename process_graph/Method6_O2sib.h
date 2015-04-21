@@ -29,8 +29,8 @@ public:
 		current = end = 0;
 		data = 0;
 		gradient = 0;
-		if(parameters->CONF_NN_O2sib_o1mach.length() > 0){
-			mach_o1 = NNInterface::Read(parameters->CONF_NN_O2sib_o1mach);
+		if(parameters->CONF_NN_highO_o1mach.length() > 0){
+			mach_o1 = NNInterface::Read(parameters->CONF_NN_highO_o1mach);
 		}
 		else
 			mach_o1 = 0;

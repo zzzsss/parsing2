@@ -57,11 +57,13 @@ protected:
 	//parse
 	static double* get_scores_o1(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf);		//double[l*l]
 	static double* get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf,bool* score_o1=0);	//double[l*l*l]
+	static double* get_scores_o2g(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf,bool* score_o1=0);	//double[l*l*l]
 	vector<int>* parse_o1(DependencyInstance* x);
 	vector<int>* parse_o2sib(DependencyInstance* x,double* score_of_o1=0);
+	vector<int>* parse_o2g(DependencyInstance* x,double* score_of_o1=0);
 	int score_noprob(double score){
 		//impossible scores-prob for o2-o1-pruning
-		return score < parameters->CONF_NN_o2sib_o1filter_cut;
+		return score < parameters->CONF_NN_highO_o1filter_cut;
 	}
 
 	//train and test

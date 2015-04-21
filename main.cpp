@@ -12,6 +12,7 @@
 #include "process_graph/Method2_pairs.h"
 #include "process_graph/Method6_O2sib.h"
 #include "process_graph/Method7_O2sibAll.h"
+#include "process_graph/Method8_O2g.h"
 #include "parts/Parameters.h"
 
 //usage: command conf_file ...
@@ -36,6 +37,9 @@ int main(int argc,char **argv)
 		break;
 	case 7:
 		x = new Method7_O2sibAll(conf);
+		break;
+	case 8:
+		x = new Method8_O2g(conf);
 		break;
 	default:
 		x = 0;

@@ -61,7 +61,7 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 	int idim = zf->get_xdim();
 	int odim = zm->GetOdim();
 	int whether_o1_filter = 0;
-	if(score_o1 && zp->CONF_NN_o2sib_o1filter)
+	if(score_o1 && zp->CONF_NN_highO_o1filter)
 		whether_o1_filter = 1;
 	// one sentence
 	int length = x->forms->size();
@@ -148,78 +148,7 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 	return tmp_scores;
 }
 
-//--------------------transfrom scores only for (0,1)--------------------------
-#include <cmath>
-#define SET_LOG_HERE(tmp_yes,tmp_nope,ind,prob) \
-	if(prob <= 0){tmp_yes[ind] = DOUBLE_LARGENEG;tmp_nope[ind] = 0;}\
-	else if(prob < 1){tmp_yes[ind] = log(prob);tmp_nope[ind] = log(1-prob);}\
-	else{tmp_yes[ind] = 0;tmp_nope[ind] = DOUBLE_LARGENEG;}
-
-static void trans_o1(double* s,int len)
-{
-	double* tmp_yes = new double[len*len];
-	double* tmp_nope = new double[len*len];
-	//to log number
-	for(int i=0;i<len*len;i++){
-		SET_LOG_HERE(tmp_yes,tmp_nope,i,s[i]);
-	}
-	//sum
-	for(int m=1;m<len;m++){
-		double all_nope = 0;
-		for(int h=0;h<len;h++){
-			if(h==m)
-				continue;
-			all_nope += tmp_nope[get_index2(len,h,m)];
-		}
-		for(int h=0;h<len;h++){
-			if(h==m)
-				continue;
-			int ind = get_index2(len,h,m);
-			s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
-		}
-	}
-	delete []tmp_yes;
-	delete []tmp_nope;
-}
-static void trans_o2sib(double* s,int len)
-{
-	double* tmp_yes = new double[len*len*len];
-	double* tmp_nope = new double[len*len*len];
-	//to log number
-	for(int i=0;i<len*len*len;i++){
-		SET_LOG_HERE(tmp_yes,tmp_nope,i,s[i]);
-	}
-	//sum
-	for(int m=1;m<len;m++){
-		double all_nope = 0;
-		for(int h=0;h<len;h++){
-			if(h==m)
-				continue;
-			all_nope += tmp_nope[get_index2_o2sib(len,h,h,m)];
-			for(int c=h+1;c<m;c++)
-				all_nope += tmp_nope[get_index2_o2sib(len,h,c,m)];
-			for(int c=m+1;c<h;c++)
-				all_nope += tmp_nope[get_index2_o2sib(len,h,c,m)];
-		}
-		for(int h=0;h<len;h++){
-			if(h==m)
-				continue;
-			int ind = get_index2_o2sib(len,h,h,m);
-			s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
-			for(int c=h+1;c<m;c++){
-				int ind = get_index2_o2sib(len,h,c,m);
-				s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
-			}
-			for(int c=m+1;c<h;c++){
-				int ind = get_index2_o2sib(len,h,c,m);
-				s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
-			}
-		}
-	}
-	delete []tmp_yes;
-	delete []tmp_nope;
-}
-
+#include "Process_helper.cpp"	//static functions
 //-------------------- parsing non-static methods -----------------------------
 vector<int>* Process::parse_o1(DependencyInstance* x)
 {
@@ -235,7 +164,7 @@ vector<int>* Process::parse_o2sib(DependencyInstance* x,double* score_of_o1)
 {
 	int length = x->length();
 	bool *whether_cut_o1 = 0;
-	if(score_of_o1 && parameters->CONF_NN_o2sib_o1filter){
+	if(score_of_o1 && parameters->CONF_NN_highO_o1filter){
 		whether_cut_o1 = new bool[length*length];
 		for(int i=0;i<length*length;i++){
 			whether_cut_o1[i] = (score_noprob(score_of_o1[i])) ? true : false;
@@ -245,7 +174,7 @@ vector<int>* Process::parse_o2sib(DependencyInstance* x,double* score_of_o1)
 	delete []whether_cut_o1;
 	if(parameters->CONF_score_prob)
 		trans_o2sib(tmp_scores,length);
-	if(score_of_o1 && parameters->CONF_NN_O2sib_score_combine){
+	if(score_of_o1 && parameters->CONF_NN_highO_score_combine){
 		if(parameters->CONF_score_prob)
 			trans_o1(score_of_o1,length);
 		for(int i=0;i<length;i++){

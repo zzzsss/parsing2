@@ -29,7 +29,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 	static int tmpall_wrong=0;
 	static int tmpall_bad=0;
 	int whether_o1_filter = 0;
-	if(parameters->CONF_NN_O2sib_o1mach.length() > 0 && parameters->CONF_NN_o2sib_o1filter)
+	if(parameters->CONF_NN_highO_o1mach.length() > 0 && parameters->CONF_NN_highO_o1filter)
 		whether_o1_filter = 1;
 
 	if(data_right==0 || !whether_o1_filter){
