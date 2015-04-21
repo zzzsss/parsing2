@@ -101,6 +101,8 @@ public:
 	virtual ~Process(){}
 	virtual void train();
 	virtual void test(string);
+	//special checking for o1-filter
+	void check_o1_filter(string,string);
 };
 
 

@@ -18,7 +18,7 @@ void Method8_O2g::each_prepare_data_oneiter()
 	//for gradient
 	gradient = new REAL[mach->GetWidth()*mach->GetOdim()];
 	mach->SetGradOut(gradient);
-	FeatureGenO2sib* feat_o2 = (FeatureGenO2sib*)feat_gen;	//force it
+	//FeatureGenO2sib* feat_o2 = (FeatureGenO2sib*)feat_gen;	//force it
 	int sentences = training_corpus->size();
 	int idim = mach->GetIdim();
 	int odim = mach->GetOdim();
@@ -62,10 +62,18 @@ void Method8_O2g::each_prepare_data_oneiter()
 	if(whether_o1_filter)
 		cout << "For o1 filter: all " << all_tokens_train << ";filter wrong " << all_token_filter_wrong << endl;
 
+	int length_sofar_fordebugging = 0;
 	for(int i=0;i<sentences;i++){
 		DependencyInstance* x = training_corpus->at(i);
 		double* scores_o1_filter = all_scores_o1[i];
 		int length = x->length();
+		/*
+		//------debugging------ ###tmpall_becauseof_unprojective###
+		length_sofar_fordebugging += length - 1;
+		if(!whether_o1_filter)
+			scores_o1_filter = new double[length*length];
+		//------debugging------
+		*/
 		//first special (0,0,m)
 		for(int m=0;m<length;m++){
 			if(x->heads->at(m) == 0)
@@ -81,27 +89,35 @@ void Method8_O2g::each_prepare_data_oneiter()
 				int nope_st = score_noprob(scores_o1_filter[get_index2(length,s,t)]);
 				int nope_ts = score_noprob(scores_o1_filter[get_index2(length,t,s)]);
 				for(int g=0;g<length;g++){
-					if(g>=s && g<=t)
-						continue;
+					//if(g>=s && g<=t)continue;	###allow unprojective here###
 					int nope_gs = score_noprob(scores_o1_filter[get_index2(length,g,s)]);
 					int nope_gt = score_noprob(scores_o1_filter[get_index2(length,g,t)]);
 					//s->t
 					if(x->heads->at(t)==s && x->heads->at(s)==g)
 						tmpall_right++;
-					else if(nope_st || nope_gs)
+					else if(nope_st || nope_gs || (g>=s && g<=t))
 						tmpall_bad++;
 					else
 						tmpall_wrong++;
 					//t->s
 					if(x->heads->at(s)==t && x->heads->at(t)==g)
 						tmpall_right++;
-					else if(nope_ts || nope_gt)
+					else if(nope_ts || nope_gt || (g>=s && g<=t))
 						tmpall_bad++;
 					else
 						tmpall_wrong++;
 				}
 			}
 		}
+		/*
+		//------debugging------
+		if(tmpall_right != length_sofar_fordebugging){
+			cout << i << ": sth strange happen" << endl;
+		}
+		if(!whether_o1_filter)
+			delete [] scores_o1_filter;
+		//------debugging------
+		*/
 	}
 	printf("--Stat:%d,%d,%d\n",tmpall_right,tmpall_wrong,tmpall_bad);
 
@@ -131,15 +147,14 @@ void Method8_O2g::each_prepare_data_oneiter()
 				int nope_st = score_noprob(scores_o1_filter[get_index2(length,s,t)]);
 				int nope_ts = score_noprob(scores_o1_filter[get_index2(length,t,s)]);
 				for(int g=0;g<length;g++){
-					if(g>=s && g<=t)
-						continue;
+					//if(g>=s && g<=t)continue;
 					int nope_gs = score_noprob(scores_o1_filter[get_index2(length,g,s)]);
 					int nope_gt = score_noprob(scores_o1_filter[get_index2(length,g,t)]);
 					//s->t
 					if(x->heads->at(t)==s && x->heads->at(s)==g){
 						feat_gen->fill_one(assign_right,x,s,t,g);assign_right += idim;
 					}
-					else if(nope_st || nope_gs){}
+					else if(nope_st || nope_gs || (g>=s && g<=t)){}
 					else{
 						feat_gen->fill_one(assign_wrong,x,s,t,g);assign_wrong += idim;
 					}
@@ -147,7 +162,7 @@ void Method8_O2g::each_prepare_data_oneiter()
 					if(x->heads->at(s)==t && x->heads->at(t)==g){
 						feat_gen->fill_one(assign_right,x,t,s,g);assign_right += idim;
 					}
-					else if(nope_ts || nope_gt){}
+					else if(nope_ts || nope_gt || (g>=s && g<=t)){}
 					else{
 						feat_gen->fill_one(assign_wrong,x,t,s,g);assign_wrong += idim;
 					}

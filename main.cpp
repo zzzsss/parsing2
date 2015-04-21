@@ -54,9 +54,12 @@ int main(int argc,char **argv)
 			x->test(mach_best_name);
 		}
 	}
-	else{
+	else if(argc == 3){
 		//only testing
 		x->test(string(argv[2]));
+	}
+	else if(argc == 4){
+		x->check_o1_filter(string(argv[2]),string(argv[3]));
 	}
 	return 0;
 }

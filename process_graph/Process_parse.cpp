@@ -196,5 +196,38 @@ vector<int>* Process::parse_o2sib(DependencyInstance* x,double* score_of_o1)
 	return ret;
 }
 
+void Process::check_o1_filter(string m_name,string cutting)
+{
+	//MUST BE O1 MACH
+	cout << "----- Check o1 filter(must be o1-mach)-----" << endl;
+	parameters->CONF_NN_highO_o1filter_cut = atof(cutting.c_str());
+	dict = new Dict(parameters->CONF_dict_file);
+	mach = NNInterface::Read(m_name);
+	dev_test_corpus = read_corpus(parameters->CONF_test_file);
+	FeatureGenO1* feat_temp_o1 = new FeatureGenO1(dict,parameters->CONF_x_window,
+			parameters->CONF_add_distance,parameters->CONF_add_pos,parameters->CONF_add_distance_parent);
+	feat_temp_o1->deal_with_corpus(dev_test_corpus);
+	if(mach->GetIdim() != feat_temp_o1->get_xdim()){
+		cout << "Wrong mach...\n";
+		exit(1);
+	}
+	int token_num = 0;	//token number
+	int filter_wrong_count = 0;
+	for(int ii=0;ii<dev_test_corpus->size();ii++){
+		if(ii%100 == 0)
+			cout << filter_wrong_count << "/" << token_num << endl;
+		DependencyInstance* x = dev_test_corpus->at(ii);
+		int length = x->forms->size();
+		token_num += length - 1;
+		double* scores_o1 = get_scores_o1(x,parameters,mach,feat_temp_o1);	//same parameters
+		for(int i=1;i<length;i++){
+			if(score_noprob(scores_o1[get_index2(length,x->heads->at(i),i)]))
+				filter_wrong_count++;
+			token_num++;
+		}
+		delete []scores_o1;
+	}
+	cout << "FINAL:" << filter_wrong_count << "/" << token_num << endl;
+}
 
 
