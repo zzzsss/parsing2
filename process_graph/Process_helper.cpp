@@ -7,6 +7,7 @@
 #include "../algorithms/Eisner.h"
 #include "../algorithms/EisnerO2sib.h"
 #include "../algorithms/EisnerO2g.h"
+#include "../algorithms/EisnerO3g.h"
 #include "../parts/Parameters.h"
 
 //--------------------transfrom scores only for (0,1)--------------------------
@@ -126,3 +127,66 @@ static void trans_o2g(double* s,int len)
 	delete []tmp_nope;
 }
 
+static void trans_o3g(double* s,int len)
+{
+	double* tmp_yes = new double[len*len*len*len];
+	double* tmp_nope = new double[len*len*len*len];
+	//to log number
+	for(int i=0;i<len*len*len*len;i++){
+		SET_LOG_HERE(tmp_yes,tmp_nope,i,s[i]);
+	}
+	//sum
+	for(int m=1;m<len;m++){
+		double all_nope = 0;
+		for(int h=0;h<len;h++){
+			if(h==m)
+				continue;
+			int small = GET_MIN_ONE(h,m);
+			int large = GET_MAX_ONE(h,m);
+			for(int g=0;g<small;g++){
+				all_nope += tmp_nope[get_index2_o3g(len,g,h,h,m)];	//g,h,h,m
+				for(int c=small+1;c<large;c++)
+					all_nope += tmp_nope[get_index2_o3g(len,g,h,c,m)];	//g,h,c,m
+			}
+			for(int g=large+1;g<len;g++){
+				all_nope += tmp_nope[get_index2_o3g(len,g,h,h,m)];	//g,h,h,m
+				for(int c=small+1;c<large;c++)
+					all_nope += tmp_nope[get_index2_o3g(len,g,h,c,m)];	//g,h,c,m
+			}
+			all_nope += tmp_nope[get_index2_o3g(len,0,0,0,m)];	//special one
+			for(int c=m-1;c>0;c--)
+				all_nope += tmp_nope[get_index2_o3g(len,0,0,c,m)];	//0,0,c,m
+		}
+		for(int h=0;h<len;h++){
+			int ind = 0;
+			if(h==m)
+				continue;
+			int small = GET_MIN_ONE(h,m);
+			int large = GET_MAX_ONE(h,m);
+			for(int g=0;g<small;g++){
+				ind = get_index2_o3g(len,g,h,h,m);	//g,h,h,m
+				s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+				for(int c=small+1;c<large;c++){
+					ind = get_index2_o3g(len,g,h,c,m);	//g,h,c,m
+					s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+				}
+			}
+			for(int g=large+1;g<len;g++){
+				ind = get_index2_o3g(len,g,h,h,m);	//g,h,h,m
+				s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+				for(int c=small+1;c<large;c++){
+					ind = get_index2_o3g(len,g,h,c,m);	//g,h,c,m
+					s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+				}
+			}
+			ind = get_index2_o3g(len,0,0,0,m);	//special one
+			s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+			for(int c=m-1;c>0;c--){
+				ind = get_index2_o3g(len,0,0,c,m);	//0,0,c,m
+				s[ind] = all_nope-tmp_nope[ind]+tmp_yes[ind];
+			}
+		}
+	}
+	delete []tmp_yes;
+	delete []tmp_nope;
+}

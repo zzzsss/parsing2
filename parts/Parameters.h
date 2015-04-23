@@ -54,11 +54,17 @@ int CONF_NN_act;	//activation functions
 
 //use o1-mach for higher-order <must with the same other parameters>
 int CONF_NN_highO_embed_init;
-int CONF_NN_highO_score_combine;
-string CONF_NN_highO_o1mach;	//combine score with o1 mach
+int CONF_NN_highO_score_combine;	//combine score with o1 mach
+string CONF_NN_highO_o1mach;
 //o1-mach as filter --- only 0-1 models(thus M7)
 int CONF_NN_highO_o1filter;
 double CONF_NN_highO_o1filter_cut;	//filter out when < this
+//**high-order machines(used in o3g)
+string CONF_NN_highO_o2sibmach;
+string CONF_NN_highO_o2gmach;
+int CONF_NN_highO_score_combine_o2sib;
+int CONF_NN_highO_score_combine_o2g;
+int CONF_NN_highO_score_combine_o3g_self;	//maybe no gsib score in o3g(in fact not order3)
 //1.3.5 -- init embedings
 string CONF_NN_WL;
 string CONF_NN_EM;
@@ -117,6 +123,10 @@ parsing_conf(string conf_file)
 	CONF_dict_tolower=0;
 	CONF_random_seed=12345;
 	CONF_score_prob=1;
+	//for o3g
+	CONF_NN_highO_score_combine_o2sib = 1;
+	CONF_NN_highO_score_combine_o2g = 1;
+	CONF_NN_highO_score_combine_o3g_self = 1;
 	//read in conf-file
 #define DATA_LINE_LEN 10000
 	ifstream fin(conf_file.c_str());
@@ -179,6 +189,12 @@ parsing_conf(string conf_file)
 		else if(buf=="nn_o1mach_combine") fin >> CONF_NN_highO_score_combine;
 		else if(buf=="nn_o1mach_filter") fin >> CONF_NN_highO_o1filter;
 		else if(buf=="nn_o1mach_filter_cut") fin >> CONF_NN_highO_o1filter_cut;
+		//o3g use o2...
+		else if(buf=="nn_o2sibmach") fin >> CONF_NN_highO_o2sibmach;
+		else if(buf=="nn_o2gmach") fin >> CONF_NN_highO_o2gmach;
+		else if(buf=="nn_o2sib_combine") fin >> CONF_NN_highO_score_combine_o2sib;
+		else if(buf=="nn_o2g_combine") fin >> CONF_NN_highO_score_combine_o2g;
+		else if(buf=="nn_o3g_combine") fin >> CONF_NN_highO_score_combine_o3g_self;
 		//1.3.5
 		else if(buf=="nn_init_wl") fin >> CONF_NN_WL;
 		else if(buf=="nn_init_em") fin >> CONF_NN_EM;
