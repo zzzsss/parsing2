@@ -339,11 +339,10 @@ vector<int>* Method9_O3g::each_test_one(DependencyInstance* x)
 		scores_o2sib = get_scores_o2sib(x,parameters,mach_o2sib,feat_temp_o2sib,whether_cut_o1);	//same parameters
 		delete feat_temp_o2sib;
 	}
-	if(parameters->CONF_NN_highO_o1mach.length() > 0 &&
-			(parameters->CONF_NN_highO_score_combine || parameters->CONF_NN_highO_o1filter)){
+	if(parameters->CONF_NN_highO_o2gmach.length() > 0 && parameters->CONF_NN_highO_score_combine_o2g){
 		FeatureGenO2g* feat_temp_o2g = new FeatureGenO2g(dict,parameters->CONF_x_window,
 				parameters->CONF_add_distance,parameters->CONF_add_pos,parameters->CONF_add_distance_parent);
-		double* scores_o2g = get_scores_o2g(x,parameters,mach_o2g,feat_temp_o2g,whether_cut_o1);	//same parameters
+		scores_o2g = get_scores_o2g(x,parameters,mach_o2g,feat_temp_o2g,whether_cut_o1);	//same parameters
 		delete feat_temp_o2g;
 	}
 	ret = parse_o3g(x,scores_o1,scores_o2sib,scores_o2g);
