@@ -9,6 +9,12 @@
 #include "../algorithms/Eisner.h"
 #include "../algorithms/EisnerO2sib.h"
 
+#define TMP_GET_ONE(o_dim,a,assign) {\
+	if(o_dim>1){\
+		{a=0;for(int c=0;c<o_dim;c++) a+=(*assign++)*c;}\
+	}\
+	else{a=*assign++;}}
+
 //-------------------- these two also static methods -----------------------------
 //return Score[length][length]
 double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf)
@@ -22,31 +28,26 @@ double* Process::get_scores_o1(DependencyInstance* x,parsing_conf* zp,NNInterfac
 		tmp_scores[i] = DOUBLE_LARGENEG;
 	//construct scores using nn
 	int num_pair = length*(length-1);	//2 * (0+(l-1))*l/2
+	int num_pair_togo = 0;
 	REAL *mach_x = new REAL[num_pair*idim];
 	REAL* assign_x = mach_x;
-	for(int ii=0;ii<length;ii++){
-		for(int j=0;j<length;j++){
-			//ii -> j
-			if(ii != j){
-				zf->fill_one(assign_x,x,ii,j);
+	for(int m=1;m<length;m++){
+		for(int h=0;h<length;h++){
+			if(m != h){
+				zf->fill_one(assign_x,x,h,m);
 				assign_x += idim;
+				num_pair_togo ++;
 			}
 		}
 	}
-	REAL* mach_y = zm->mach_forward(mach_x,num_pair);
+	REAL* mach_y = zm->mach_forward(mach_x,num_pair_togo);
 	REAL* assign_y = mach_y;
-	for(int ii=0;ii<length;ii++){
-		for(int j=0;j<length;j++){
-			if(ii!=j){
-				int index = get_index2(length,ii,j);
-				if(odim > 1){
-					double temp = 0;
-					for(int c=0;c<odim;c++)
-						temp += (*assign_y++)*c;
-					tmp_scores[index] = temp;
-				}
-				else
-					tmp_scores[index] = *assign_y++;
+	double answer = 0;
+	for(int m=1;m<length;m++){
+		for(int h=0;h<length;h++){
+			if(m != h){
+				TMP_GET_ONE(odim,answer,assign_y)
+				tmp_scores[get_index2(length,h,m)] = answer;
 			}
 		}
 	}
@@ -107,11 +108,6 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 	//forward
 	REAL* mach_y = zm->mach_forward(mach_x,num_togo);
 	//and assign the scores
-#define TMP_GET_ONE(o_dim,a,assign) {\
-	if(o_dim>1){\
-		{a=0;for(int c=0;c<o_dim;c++) a+=(*assign++)*c;}\
-	}\
-	else{a=*assign++;}}
 
 	REAL* assign_y = mach_y;
 	double answer = 0;

@@ -34,13 +34,13 @@ void Method1_allC::each_prepare_data_oneiter()
 	for(int i=0;i<sentences;i++){
 		DependencyInstance* x = training_corpus->at(i);
 		int length = x->length();
-		for(int ii=0;ii<length;ii++){
-			for(int j=0;j<length;j++){
-				if(ii != j){
+		for(int m=1;m<length;m++){
+			for(int h=0;h<length;h++){
+				if(h != m){
 					//build mach_x
 					REAL t = 0;
-					feat_gen->fill_one(assign_x,x,ii,j);
-					if(x->heads->at(j)==ii)
+					feat_gen->fill_one(assign_x,x,h,m);
+					if(x->heads->at(m)==h)
 						t=1;
 					*assign_y = t;
 					assign_x += mach->GetIdim();
