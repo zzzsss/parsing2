@@ -11,8 +11,7 @@
 #include "../algorithms/EisnerO2g.h"
 #include "../algorithms/EisnerO3g.h"
 
-#define GET_MAX_ONE(a,b) (((a)>(b))?(a):(b))
-#define GET_MIN_ONE(a,b) (((a)>(b))?(b):(a))
+
 double* Process::get_scores_o3g(DependencyInstance* x,parsing_conf* zp,NNInterface * zm,FeatureGen* zf,bool* whether_cut_o1)
 {
 	bool* score_o1 = whether_cut_o1;

@@ -10,7 +10,6 @@
 #include "process_graph/Process.h"
 #include "process_graph/Method1_allC.h"
 #include "process_graph/Method2_pairs.h"
-#include "process_graph/Method6_O2sib.h"
 #include "process_graph/Method7_O2sibAll.h"
 #include "process_graph/Method8_O2g.h"
 #include "process_graph/Method9_O3g.h"
@@ -33,9 +32,6 @@ int main(int argc,char **argv)
 		break;
 	case 2:
 		x = new Method2_pairs(conf);
-	case 6:
-		x = new Method6_O2sib(conf);
-		break;
 	case 7:
 		x = new Method7_O2sibAll(conf);
 		break;

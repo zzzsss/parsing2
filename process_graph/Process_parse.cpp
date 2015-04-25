@@ -73,34 +73,27 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 		tmp_scores[i] = DOUBLE_LARGENEG;
 	REAL *mach_x = new REAL[num_allocated*idim];	//num_allocated is more than needed
 	REAL* assign_x = mach_x;
-	for(int s=0;s<length;s++){
-		for(int t=s+1;t<length;t++){
-			//s<->t
-			if(!whether_o1_filter || !score_o1[get_index2(length,s,t)]){
-				zf->fill_one(assign_x,x,s,t,-1);
+	for(int m=1;m<length;m++){
+		for(int h=0;h<length;h++){
+			if(h==m)
+				continue;
+			bool norpob_hm = score_o1[get_index2(length,h,m)];
+			//h,m,-1
+			if(!whether_o1_filter || !norpob_hm){
+				zf->fill_one(assign_x,x,h,m,-1);
 				assign_x += idim;
 				num_togo += 1;
 			}
-			if(!whether_o1_filter || !score_o1[get_index2(length,t,s)]){
-				zf->fill_one(assign_x,x,t,s,-1);
-				assign_x += idim;
-				num_togo += 1;
-			}
-		}
-	}
-	for(int s=0;s<length;s++){
-		for(int c=s+1;c<length;c++){
-			for(int t=c+1;t<length;t++){
-				//s c t
-				if(!whether_o1_filter || !score_o1[get_index2(length,s,t)] || !score_o1[get_index2(length,s,c)]){
-					zf->fill_one(assign_x,x,s,t,c);
-					assign_x += idim;
-					num_togo += 1;
-				}
-				if(!whether_o1_filter || !score_o1[get_index2(length,t,s)] || !score_o1[get_index2(length,t,c)]){
-					zf->fill_one(assign_x,x,t,s,c);
-					assign_x += idim;
-					num_togo += 1;
+			//h,m,c
+			int small = GET_MIN_ONE(m,h);
+			int large = GET_MAX_ONE(m,h);
+			if(!whether_o1_filter || !norpob_hm){
+				for(int c=small+1;c<large;c++){
+					if(!whether_o1_filter || !score_o1[get_index2(length,h,c)]){
+						zf->fill_one(assign_x,x,h,m,c);
+						assign_x += idim;
+						num_togo += 1;
+					}
 				}
 			}
 		}
@@ -108,33 +101,27 @@ double* Process::get_scores_o2sib(DependencyInstance* x,parsing_conf* zp,NNInter
 	//forward
 	REAL* mach_y = zm->mach_forward(mach_x,num_togo);
 	//and assign the scores
-
 	REAL* assign_y = mach_y;
 	double answer = 0;
-	for(int s=0;s<length;s++){
-		for(int t=s+1;t<length;t++){
-			//s<->t
-			if(!whether_o1_filter || !score_o1[get_index2(length,s,t)]){
+	for(int m=1;m<length;m++){
+		for(int h=0;h<length;h++){
+			if(h==m)
+				continue;
+			bool norpob_hm = score_o1[get_index2(length,h,m)];
+			//h,m,-1
+			if(!whether_o1_filter || !norpob_hm){
 				TMP_GET_ONE(odim,answer,assign_y)
-				tmp_scores[get_index2_o2sib(length,s,s,t)] = answer;
+				tmp_scores[get_index2_o2sib(length,h,h,m)] = answer;
 			}
-			if(!whether_o1_filter || !score_o1[get_index2(length,t,s)]){
-				TMP_GET_ONE(odim,answer,assign_y)
-				tmp_scores[get_index2_o2sib(length,t,t,s)] = answer;
-			}
-		}
-	}
-	for(int s=0;s<length;s++){
-		for(int c=s+1;c<length;c++){
-			for(int t=c+1;t<length;t++){
-				//s c t
-				if(!whether_o1_filter || !score_o1[get_index2(length,s,t)] || !score_o1[get_index2(length,s,c)]){
-					TMP_GET_ONE(odim,answer,assign_y)
-					tmp_scores[get_index2_o2sib(length,s,c,t)] = answer;
-				}
-				if(!whether_o1_filter || !score_o1[get_index2(length,t,s)] || !score_o1[get_index2(length,t,c)]){
-					TMP_GET_ONE(odim,answer,assign_y)
-					tmp_scores[get_index2_o2sib(length,t,c,s)] = answer;
+			//h,m,c
+			int small = GET_MIN_ONE(m,h);
+			int large = GET_MAX_ONE(m,h);
+			if(!whether_o1_filter || !norpob_hm){
+				for(int c=small+1;c<large;c++){
+					if(!whether_o1_filter || !score_o1[get_index2(length,h,c)]){
+						TMP_GET_ONE(odim,answer,assign_y)
+						tmp_scores[get_index2_o2sib(length,h,c,m)] = answer;
+					}
 				}
 			}
 		}
@@ -173,16 +160,15 @@ vector<int>* Process::parse_o2sib(DependencyInstance* x,double* score_of_o1)
 	if(score_of_o1 && parameters->CONF_NN_highO_score_combine){
 		if(parameters->CONF_score_prob)
 			trans_o1(score_of_o1,length);
-		for(int i=0;i<length;i++){
-			for(int j=0;j<length;j++){
-				if(i!=j){
-					double score_tmp = score_of_o1[get_index2(length,i,j)];
-					tmp_scores[get_index2_o2sib(length,i,i,j)] += score_tmp;
-					//really lazy here: (i,j)
-					for(int c=i+1;c<j;c++)
-						tmp_scores[get_index2_o2sib(length,i,c,j)] += score_tmp;
-					for(int c=j+1;c<i;c++)
-						tmp_scores[get_index2_o2sib(length,i,c,j)] += score_tmp;
+		for(int m=1;m<length;m++){
+			for(int h=0;h<length;h++){
+				if(m!=h){
+					double score_tmp = score_of_o1[get_index2(length,h,m)];
+					tmp_scores[get_index2_o2sib(length,h,h,m)] += score_tmp;
+					for(int c=h+1;c<m;c++)
+						tmp_scores[get_index2_o2sib(length,h,c,m)] += score_tmp;
+					for(int c=m+1;c<h;c++)
+						tmp_scores[get_index2_o2sib(length,h,c,m)] += score_tmp;
 				}
 			}
 		}

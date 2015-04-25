@@ -53,6 +53,14 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 	}
 	if(whether_o1_filter)
 		cout << "For o1 filter: all " << all_tokens_train << ";filter wrong " << all_token_filter_wrong << endl;
+	time_t now;
+	time(&now);cout << "#Finish o1-filter at " << ctime(&now) << endl;
+	//************WE MUST SPECIFY O1_FILTER****************//
+	if(!whether_o1_filter){
+		cout << "No o1-filter for o2sib, too expensive!!" << endl;
+		exit(1);
+	}
+	//************WE MUST SPECIFY O1_FILTER****************//
 
 	int tmp2_right=0,tmp2_wrong=0,tmp2_bad=0;
 	int tmp3_right=0,tmp3_wrong=0,tmp3_bad=0;
@@ -60,54 +68,42 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 		DependencyInstance* x = training_corpus->at(i);
 		double* scores_o1_filter = all_scores_o1[i];
 		int length = x->length();
-		for(int h=0;h<length;h++){
-			//left
-			int first_m = -1;
-			for(int m=h-1;m>=0;m--){
-				double score_hm = whether_o1_filter ? scores_o1_filter[get_index2(length,h,m)] : 0;
-				// h - m
-				if(x->heads->at(m)==h && first_m<0){
-					tmp2_right++;
-					first_m = m;
+		for(int m=1;m<length;m++){
+			for(int h=0;h<length;h++){
+				if(h==m)
+					continue;
+				//get information
+				int small = GET_MIN_ONE(m,h);
+				int large = GET_MAX_ONE(m,h);
+				bool link_hm = (x->heads->at(m)==h);
+				int noprob_hm = score_noprob(scores_o1_filter[get_index2(length,h,m)]);
+				int c=-1;	//inside sibling
+				if(link_hm){
+				if(h>m){
+					for(int i=m+1;i<h;i++)
+						if(x->heads->at(i)==h){
+							c = i;
+							break;
+						}
 				}
-				else if(whether_o1_filter &&  score_noprob(score_hm))
+				else{
+					for(int i=m-1;i>h;i--)
+						if(x->heads->at(i)==h){
+							c = i;
+							break;
+						}
+				}}
+				//assign
+				if(link_hm && c<0)
+					tmp2_right++;
+				else if(noprob_hm)
 					tmp2_bad++;
 				else
 					tmp2_wrong++;
-				//h m out-one
-				int first_out = -1;
-				for(int one=m-1;one>=0;one--){
-					if(x->heads->at(m)==h && x->heads->at(one)==h && first_out<0){
+				for(int mid=small+1;mid<large;mid++){
+					if(link_hm && mid==c)
 						tmp3_right++;
-						first_out = one;
-					}
-					else if(whether_o1_filter && (score_noprob(score_hm)||score_noprob(scores_o1_filter[get_index2(length,h,one)])))
-						tmp3_bad++;
-					else
-						tmp3_wrong++;
-				}
-			}
-			//right
-			first_m = -1;
-			for(int m=h+1;m<length;m++){
-				double score_hm = whether_o1_filter ? scores_o1_filter[get_index2(length,h,m)] : 0;
-				// h - m
-				if(x->heads->at(m)==h && first_m<0){
-					tmp2_right++;
-					first_m = m;
-				}
-				else if(whether_o1_filter &&  score_noprob(score_hm))
-					tmp2_bad++;
-				else
-					tmp2_wrong++;
-				//h m out-one
-				int first_out = -1;
-				for(int one=m+1;one<length;one++){
-					if(x->heads->at(m)==h && x->heads->at(one)==h && first_out<0){
-						tmp3_right++;
-						first_out = one;
-					}
-					else if(whether_o1_filter && (score_noprob(score_hm)||score_noprob(scores_o1_filter[get_index2(length,h,one)])))
+					else if(noprob_hm || score_noprob(scores_o1_filter[get_index2(length,h,mid)]))
 						tmp3_bad++;
 					else
 						tmp3_wrong++;
@@ -131,56 +127,46 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 		DependencyInstance* x = training_corpus->at(i);
 		int length = x->length();
 		double* scores_o1_filter = all_scores_o1[i];
-		for(int h=0;h<length;h++){
-			//left
-			int first_m = -1;
-			for(int m=h-1;m>=0;m--){
-				double score_hm = whether_o1_filter ? scores_o1_filter[get_index2(length,h,m)] : 0;
-				// h - m
-				if(x->heads->at(m)==h && first_m<0){
-					feat_gen->fill_one(assign_right,x,h,m,-1);assign_right += idim;
-					first_m = m;
+		for(int m=1;m<length;m++){
+			for(int h=0;h<length;h++){
+				if(h==m)
+					continue;
+				//get information
+				int small = GET_MIN_ONE(m,h);
+				int large = GET_MAX_ONE(m,h);
+				bool link_hm = (x->heads->at(m)==h);
+				int noprob_hm = score_noprob(scores_o1_filter[get_index2(length,h,m)]);
+				int c=-1;	//inside sibling
+				if(link_hm){
+				if(h>m){
+					for(int i=m+1;i<h;i++)
+						if(x->heads->at(i)==h){
+							c = i;
+							break;
+						}
 				}
-				else if(whether_o1_filter &&  score_noprob(score_hm)){}
+				else{
+					for(int i=m-1;i>h;i--)
+						if(x->heads->at(i)==h){
+							c = i;
+							break;
+						}
+				}}
+				//assign
+				if(link_hm && c<0){
+					feat_gen->fill_one(assign_right,x,h,m,-1);assign_right += idim;
+				}
+				else if(noprob_hm){}
 				else{
 					feat_gen->fill_one(assign_wrong,x,h,m,-1);assign_wrong += idim;
 				}
-				//h m out-one
-				int first_out = -1;
-				for(int one=m-1;one>=0;one--){
-					if(x->heads->at(m)==h && x->heads->at(one)==h && first_out<0){
-						feat_gen->fill_one(assign_right,x,h,one,m);assign_right += idim;
-						first_out = one;
+				for(int mid=small+1;mid<large;mid++){
+					if(link_hm && mid==c){
+						feat_gen->fill_one(assign_right,x,h,m,mid);assign_right += idim;
 					}
-					else if(whether_o1_filter && (score_noprob(score_hm)||score_noprob(scores_o1_filter[get_index2(length,h,one)]))){}
+					else if(noprob_hm || score_noprob(scores_o1_filter[get_index2(length,h,mid)])){}
 					else{
-						feat_gen->fill_one(assign_wrong,x,h,one,m);assign_wrong += idim;
-					}
-				}
-			}
-			//right
-			first_m = -1;
-			for(int m=h+1;m<length;m++){
-				double score_hm = whether_o1_filter ? scores_o1_filter[get_index2(length,h,m)] : 0;
-				// h - m
-				if(x->heads->at(m)==h && first_m<0){
-					feat_gen->fill_one(assign_right,x,h,m,-1);assign_right += idim;
-					first_m = m;
-				}
-				else if(whether_o1_filter &&  score_noprob(score_hm)){}
-				else{
-					feat_gen->fill_one(assign_wrong,x,h,m,-1);assign_wrong += idim;
-				}
-				//h m out-one
-				int first_out = -1;
-				for(int one=m+1;one<length;one++){
-					if(x->heads->at(m)==h && x->heads->at(one)==h && first_out<0){
-						feat_gen->fill_one(assign_right,x,h,one,m);assign_right += idim;
-						first_out = one;
-					}
-					else if(whether_o1_filter && (score_noprob(score_hm)||score_noprob(scores_o1_filter[get_index2(length,h,one)]))){}
-					else{
-						feat_gen->fill_one(assign_wrong,x,h,one,m);assign_wrong += idim;
+						feat_gen->fill_one(assign_wrong,x,h,m,mid);assign_wrong += idim;
 					}
 				}
 			}
@@ -191,6 +177,7 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 		delete [](all_scores_o1[i]);
 	}
 	delete []all_scores_o1;
+	time(&now);cout << "#Finish data-gen at " << ctime(&now) << endl;
 	}
 
 	//then considering CONF_NN_resample and copy them to finish data
@@ -219,9 +206,51 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 	}
 }
 
+REAL* Method7_O2sibAll::each_next_data(int* size)
+{
+	//size must be even number, if no universal rays, it should be that...
+	if(current >= end)
+		return 0;
+	if(current + *size > end)
+		*size = end - current;
+	//!!not adding current here
+	return (data+current*mach->GetIdim());
+}
+
 void Method7_O2sibAll::each_get_grad(int size)
 {
 	set_softmax_gradient(target+current,mach->GetDataOut(),gradient,size,mach->GetOdim());
 	//!! here add it
 	current += size;
+}
+
+vector<int>* Method7_O2sibAll::each_test_one(DependencyInstance* x)
+{
+	vector<int>* ret;
+	//combine o1 scores
+	if(parameters->CONF_NN_highO_o1mach.length() > 0 &&
+			(parameters->CONF_NN_highO_score_combine || parameters->CONF_NN_highO_o1filter)){
+		FeatureGenO1* feat_temp_o1 = new FeatureGenO1(dict,parameters->CONF_x_window,
+				parameters->CONF_add_distance,parameters->CONF_add_pos,parameters->CONF_add_distance_parent);
+		double* scores_o1 = get_scores_o1(x,parameters,mach_o1,feat_temp_o1);	//same parameters
+		ret = parse_o2sib(x,scores_o1);
+		delete []scores_o1;
+		delete feat_temp_o1;
+	}
+	else{
+		ret = parse_o2sib(x);
+	}
+	return ret;
+}
+
+//maybe init embedding from o1 machine
+void Method7_O2sibAll::init_embed()
+{
+	if(parameters->CONF_NN_highO_o1mach.length() > 0 && parameters->CONF_NN_highO_embed_init){
+		//special structure
+		int all = parameters->CONF_NN_we * dict->get_count();
+		mach->clone_tab(mach_o1->get_tab(),all);
+	}
+	else
+		Process::init_embed();
 }

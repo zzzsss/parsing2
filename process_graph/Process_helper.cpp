@@ -9,6 +9,7 @@
 #include "../algorithms/EisnerO2g.h"
 #include "../algorithms/EisnerO3g.h"
 #include "../parts/Parameters.h"
+#include "Process.h"
 
 //--------------------transfrom scores only for (0,1)--------------------------
 #include <cmath>
@@ -82,8 +83,6 @@ static void trans_o2sib(double* s,int len)
 	delete []tmp_nope;
 }
 
-#define GET_MAX_ONE(a,b) (((a)>(b))?(a):(b))
-#define GET_MIN_ONE(a,b) (((a)>(b))?(b):(a))
 static void trans_o2g(double* s,int len)
 {
 	double* tmp_yes = new double[len*len*len];

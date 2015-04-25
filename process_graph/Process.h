@@ -22,6 +22,9 @@
 #include <iostream>
 using namespace std;
 
+#define GET_MAX_ONE(a,b) (((a)>(b))?(a):(b))
+#define GET_MIN_ONE(a,b) (((a)>(b))?(b):(a))
+
 class Process{
 protected:
 	//data
