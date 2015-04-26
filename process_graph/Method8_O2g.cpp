@@ -61,6 +61,8 @@ void Method8_O2g::each_prepare_data_oneiter()
 	}
 	if(whether_o1_filter)
 		cout << "For o1 filter: all " << all_tokens_train << ";filter wrong " << all_token_filter_wrong << endl;
+	time_t now;
+	time(&now);cout << "#Finish o1-filter at " << ctime(&now) << flush;
 
 	int length_sofar_fordebugging = 0;
 	for(int i=0;i<sentences;i++){
@@ -74,35 +76,30 @@ void Method8_O2g::each_prepare_data_oneiter()
 			scores_o1_filter = new double[length*length];
 		//------debugging------
 		*/
-		//first special (0,0,m)
-		for(int m=0;m<length;m++){
+		for(int m=1;m<length;m++){
+			//first special (0,0,m)
 			if(x->heads->at(m) == 0)
 				tmpall_right++;
 			else if(score_noprob(scores_o1_filter[get_index2(length,0,m)]))
 				tmpall_bad++;
 			else
 				tmpall_wrong++;
-		}
-		//then (g,h,m)
-		for(int s=0;s<length;s++){
-			for(int t=s+1;t<length;t++){
-				int nope_st = score_noprob(scores_o1_filter[get_index2(length,s,t)]);
-				int nope_ts = score_noprob(scores_o1_filter[get_index2(length,t,s)]);
+			//then (g,h,m)
+			for(int h=1;h<length;h++){
+				if(m==h)
+					continue;
+				int nope_hm = score_noprob(scores_o1_filter[get_index2(length,h,m)]);
+				int link_hm = (x->heads->at(m)==h);
+				int small = GET_MIN_ONE(m,h);
+				int large = GET_MAX_ONE(m,h);
 				for(int g=0;g<length;g++){
-					//if(g>=s && g<=t)continue;	###allow unprojective here###
-					int nope_gs = score_noprob(scores_o1_filter[get_index2(length,g,s)]);
-					int nope_gt = score_noprob(scores_o1_filter[get_index2(length,g,t)]);
-					//s->t
-					if(x->heads->at(t)==s && x->heads->at(s)==g)
+					if(g==h || g==m)
+						continue;
+					//if(g>=s && g<=t)continue;	###allow non-projective here###
+					int nope_gh = score_noprob(scores_o1_filter[get_index2(length,g,h)]);
+					if(link_hm && x->heads->at(h)==g)
 						tmpall_right++;
-					else if(nope_st || nope_gs || (g>=s && g<=t))
-						tmpall_bad++;
-					else
-						tmpall_wrong++;
-					//t->s
-					if(x->heads->at(s)==t && x->heads->at(t)==g)
-						tmpall_right++;
-					else if(nope_ts || nope_gt || (g>=s && g<=t))
+					else if(nope_hm || nope_gh || (g>=small && g<=large))	//no non-projective
 						tmpall_bad++;
 					else
 						tmpall_wrong++;
@@ -131,8 +128,8 @@ void Method8_O2g::each_prepare_data_oneiter()
 		DependencyInstance* x = training_corpus->at(i);
 		int length = x->length();
 		double* scores_o1_filter = all_scores_o1[i];
-		//first special (0,0,m)
-		for(int m=0;m<length;m++){
+		for(int m=1;m<length;m++){
+			//first special (0,0,m)
 			if(x->heads->at(m) == 0){
 				feat_gen->fill_one(assign_right,x,0,m,0);assign_right += idim;
 			}
@@ -140,31 +137,26 @@ void Method8_O2g::each_prepare_data_oneiter()
 			else{
 				feat_gen->fill_one(assign_wrong,x,0,m,0);assign_wrong += idim;
 			}
-		}
-		//then (g,h,m)
-		for(int s=0;s<length;s++){
-			for(int t=s+1;t<length;t++){
-				int nope_st = score_noprob(scores_o1_filter[get_index2(length,s,t)]);
-				int nope_ts = score_noprob(scores_o1_filter[get_index2(length,t,s)]);
+			//then (g,h,m)
+			for(int h=1;h<length;h++){
+				if(m==h)
+					continue;
+				int nope_hm = score_noprob(scores_o1_filter[get_index2(length,h,m)]);
+				int link_hm = (x->heads->at(m)==h);
+				int small = GET_MIN_ONE(m,h);
+				int large = GET_MAX_ONE(m,h);
 				for(int g=0;g<length;g++){
-					//if(g>=s && g<=t)continue;
-					int nope_gs = score_noprob(scores_o1_filter[get_index2(length,g,s)]);
-					int nope_gt = score_noprob(scores_o1_filter[get_index2(length,g,t)]);
-					//s->t
-					if(x->heads->at(t)==s && x->heads->at(s)==g){
-						feat_gen->fill_one(assign_right,x,s,t,g);assign_right += idim;
+					if(g==h || g==m)
+						continue;
+					//if(g>=s && g<=t)continue;	###allow non-projective here###
+					int nope_gh = score_noprob(scores_o1_filter[get_index2(length,g,h)]);
+					if(link_hm && x->heads->at(h)==g){
+						feat_gen->fill_one(assign_right,x,h,m,g);assign_right += idim;
 					}
-					else if(nope_st || nope_gs || (g>=s && g<=t)){}
+					else if(nope_hm || nope_gh || (g>=small && g<=large))	//no non-projective
+					{}
 					else{
-						feat_gen->fill_one(assign_wrong,x,s,t,g);assign_wrong += idim;
-					}
-					//t->s
-					if(x->heads->at(s)==t && x->heads->at(t)==g){
-						feat_gen->fill_one(assign_right,x,t,s,g);assign_right += idim;
-					}
-					else if(nope_ts || nope_gt || (g>=s && g<=t)){}
-					else{
-						feat_gen->fill_one(assign_wrong,x,t,s,g);assign_wrong += idim;
+						feat_gen->fill_one(assign_wrong,x,h,m,g);assign_wrong += idim;
 					}
 				}
 			}
@@ -175,6 +167,7 @@ void Method8_O2g::each_prepare_data_oneiter()
 		delete [](all_scores_o1[i]);
 	}
 	delete []all_scores_o1;
+	time(&now);cout << "#Finish data-gen at " << ctime(&now) << flush;
 	}
 
 	//then considering CONF_NN_resample and copy them to finish data
