@@ -80,16 +80,16 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 				int c=-1;	//inside sibling
 				if(link_hm){
 				if(h>m){
-					for(int i=m+1;i<h;i++)
-						if(x->heads->at(i)==h){
-							c = i;
+					for(int ii=m+1;ii<h;ii++)
+						if(x->heads->at(ii)==h){
+							c = ii;
 							break;
 						}
 				}
 				else{
-					for(int i=m-1;i>h;i--)
-						if(x->heads->at(i)==h){
-							c = i;
+					for(int ii=m-1;ii>h;ii--)
+						if(x->heads->at(ii)==h){
+							c = ii;
 							break;
 						}
 				}}
@@ -139,16 +139,16 @@ void Method7_O2sibAll::each_prepare_data_oneiter()
 				int c=-1;	//inside sibling
 				if(link_hm){
 				if(h>m){
-					for(int i=m+1;i<h;i++)
-						if(x->heads->at(i)==h){
-							c = i;
+					for(int ii=m+1;ii<h;ii++)
+						if(x->heads->at(ii)==h){
+							c = ii;
 							break;
 						}
 				}
 				else{
-					for(int i=m-1;i>h;i--)
-						if(x->heads->at(i)==h){
-							c = i;
+					for(int ii=m-1;ii>h;ii--)
+						if(x->heads->at(ii)==h){
+							c = ii;
 							break;
 						}
 				}}

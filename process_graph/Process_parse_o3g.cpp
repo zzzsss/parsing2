@@ -46,7 +46,7 @@ double* Process::get_scores_o3g(DependencyInstance* x,parsing_conf* zp,NNInterfa
 	//2. g,h,c,m
 	for(int h=1;h<length;h++){
 		for(int m=1;m<length;m++){
-			if(h!=m)
+			if(h==m)
 				continue;
 			if(!whether_o1_filter || !score_o1[get_index2(length,h,m)]){
 				int small = GET_MIN_ONE(h,m);
@@ -101,7 +101,7 @@ double* Process::get_scores_o3g(DependencyInstance* x,parsing_conf* zp,NNInterfa
 	//2. g,h,c,m
 	for(int h=1;h<length;h++){
 		for(int m=1;m<length;m++){
-			if(h!=m)
+			if(h==m)
 				continue;
 			if(!whether_o1_filter || !score_o1[get_index2(length,h,m)]){
 				int small = GET_MIN_ONE(h,m);

@@ -57,6 +57,8 @@ void Method9_O3g::each_prepare_data_oneiter()
 		}
 	}
 	cout << "For o1 filter: all " << all_tokens_train << ";filter wrong " << all_token_filter_wrong << endl;
+	time_t now;
+	time(&now);cout << "#Finish o1-filter at " << ctime(&now) << flush;
 
 	//2.first pass --- figure out the numbers
 	int tmp2_right=0,tmp2_wrong=0,tmp2_bad=0;
@@ -65,90 +67,73 @@ void Method9_O3g::each_prepare_data_oneiter()
 		DependencyInstance* x = training_corpus->at(i);
 		double* scores_o1_filter = all_scores_o1[i];
 		int length = x->length();
-		//2.1 special (0,0,c,m)	when h==0
-		int first_m = -1;
 		for(int m=1;m<length;m++){
-			//0 - m
-			double score_0m = scores_o1_filter[get_index2(length,0,m)];
-			if(x->heads->at(m)==0 && first_m<0){
-				tmp2_right++;
-				first_m = m;
+			//2.1 special (0,0,c,m)	when h==0
+			int noprob_0m = score_noprob(scores_o1_filter[get_index2(length,0,m)]);
+			int link_0m = (x->heads->at(m)==0);
+			int c = -1;
+			for(int mid=m-1;mid>0;mid--){
+				if(x->heads->at(mid)==0){
+					c = mid;
+					break;
+				}
 			}
-			else if(score_noprob(score_0m))
+			if(link_0m && c<0)
+				tmp2_right++;
+			else if(noprob_0m)
 				tmp2_bad++;
 			else
 				tmp2_wrong++;
-			//0 m out-one
-			int first_out = -1;
-			for(int one=m+1;one<length;one++){
-				if(x->heads->at(m)==0 && x->heads->at(one)==0 && first_out<0){
+			for(int mid=1;mid<m;mid++){
+				if(link_0m && mid==c)
 					tmp3_right++;
-					first_out = one;
-				}
-				else if(score_noprob(score_0m) || score_noprob(scores_o1_filter[get_index2(length,0,one)]))
+				else if(noprob_0m || score_noprob(scores_o1_filter[get_index2(length,0,mid)]))
 					tmp3_bad++;
 				else
 					tmp3_wrong++;
 			}
-		}
-		//2.2. ordinary ones
-		for(int h=1;h<length;h++){	//h>=1
-			//left
-			int first_m = -1;
-			for(int m=h-1;m>=0;m--){
-				double score_hm = scores_o1_filter[get_index2(length,h,m)];
-				bool link_hm = x->heads->at(m)==h;
-				for(int g=0;g<length;g++){	//allow non-projective right ones
-					bool link_gh = x->heads->at(h)==g;
-					double score_gh = scores_o1_filter[get_index2(length,g,h)];
-					// h - m
-					if(link_hm && link_gh && first_m<0){
-						tmp2_right++;
-						first_m = m;
-					}
-					else if(score_noprob(score_hm) || score_noprob(score_gh) || (g>=m && g<=h))
-						tmp2_bad++;
-					else
-						tmp2_wrong++;
-					//h m out-one
-					int first_out = -1;
-					for(int one=m-1;one>=0;one--){
-						if(link_hm && link_gh && x->heads->at(one)==h && first_out<0){
-							tmp3_right++;
-							first_out = one;
+			//2.2. ordinary ones
+			for(int h=1;h<length;h++){	//h>=1
+				if(h==m)
+					continue;
+				//get information
+				int small = GET_MIN_ONE(m,h);
+				int large = GET_MAX_ONE(m,h);
+				bool link_hm = (x->heads->at(m)==h);
+				int noprob_hm = score_noprob(scores_o1_filter[get_index2(length,h,m)]);
+				int c=-1;	//inside sibling
+				if(link_hm){
+				if(h>m){
+					for(int ii=m+1;ii<h;ii++)
+						if(x->heads->at(ii)==h){
+							c = ii;
+							break;
 						}
-						else if(score_noprob(score_hm) || score_noprob(score_gh) || (g>=one && g<=h) || score_noprob(scores_o1_filter[get_index2(length,h,one)]))
-							tmp3_bad++;
-						else
-							tmp3_wrong++;
-					}
 				}
-			}
-			//right
-			first_m = -1;
-			for(int m=h+1;m<length;m++){
-				double score_hm = scores_o1_filter[get_index2(length,h,m)];
-				bool link_hm = x->heads->at(m)==h;
-				for(int g=0;g<length;g++){	//allow non-projective right ones
-					bool link_gh = x->heads->at(h)==g;
-					double score_gh = scores_o1_filter[get_index2(length,g,h)];
-					// h - m
-					if(link_hm && link_gh && first_m<0){
+				else{
+					for(int ii=m-1;ii>h;ii--)
+						if(x->heads->at(ii)==h){
+							c = ii;
+							break;
+						}
+				}}
+				//for g and c
+				for(int g=0;g<length;g++){
+					if(g==h || g==m || g==c)
+						continue;
+					bool link_gh = (x->heads->at(h)==g);
+					int noprob_gh = score_noprob(scores_o1_filter[get_index2(length,g,h)]);
+					int nonproj_g = (g>=small && g<=large);
+					if(link_hm && link_gh && c<0)
 						tmp2_right++;
-						first_m = m;
-					}
-					else if(score_noprob(score_hm) || score_noprob(score_gh) || (g>=h && g<=m))
+					else if(noprob_hm || noprob_gh || nonproj_g)
 						tmp2_bad++;
 					else
 						tmp2_wrong++;
-					//h m out-one
-					int first_out = -1;
-					for(int one=m+1;one<length;one++){
-						if(link_hm && link_gh && x->heads->at(one)==h && first_out<0){
+					for(int mid=small+1;mid<large;mid++){
+						if(link_hm && link_gh && mid==c)
 							tmp3_right++;
-							first_out = one;
-						}
-						else if(score_noprob(score_hm) || score_noprob(score_gh) || (g>=h && g<=one) || score_noprob(scores_o1_filter[get_index2(length,h,one)]))
+						else if(noprob_hm || noprob_gh || nonproj_g || score_noprob(scores_o1_filter[get_index2(length,h,mid)]))
 							tmp3_bad++;
 						else
 							tmp3_wrong++;
@@ -173,94 +158,79 @@ void Method9_O3g::each_prepare_data_oneiter()
 		DependencyInstance* x = training_corpus->at(i);
 		double* scores_o1_filter = all_scores_o1[i];
 		int length = x->length();
-		//2.1 special (0,0,c,m)	when h==0
-		int first_m = -1;
 		for(int m=1;m<length;m++){
-			//0 - m
-			double score_0m = scores_o1_filter[get_index2(length,0,m)];
-			if(x->heads->at(m)==0 && first_m<0){
-				feat_gen->fill_one(assign_right,x,0,m,-1,0);assign_right += idim;
-				first_m = m;
+			//2.1 special (0,0,c,m)	when h==0
+			int noprob_0m = score_noprob(scores_o1_filter[get_index2(length,0,m)]);
+			int link_0m = (x->heads->at(m)==0);
+			int c = -1;
+			for(int mid=m-1;mid>0;mid--){
+				if(x->heads->at(mid)==0){
+					c = mid;
+					break;
+				}
 			}
-			else if(score_noprob(score_0m)){}
+			if(link_0m && c<0){
+				feat_gen->fill_one(assign_right,x,0,m,-1,0);assign_right += idim;
+			}
+			else if(noprob_0m){}
 			else{
 				feat_gen->fill_one(assign_wrong,x,0,m,-1,0);assign_wrong += idim;
 			}
-			//0 m out-one
-			int first_out = -1;
-			for(int one=m+1;one<length;one++){
-				if(x->heads->at(m)==0 && x->heads->at(one)==0 && first_out<0){
-					feat_gen->fill_one(assign_right,x,0,one,m,0);assign_right += idim;
-					first_out = one;
+			for(int mid=1;mid<m;mid++){
+				if(link_0m && mid==c){
+					feat_gen->fill_one(assign_right,x,0,m,mid,0);assign_right += idim;
 				}
-				else if(score_noprob(score_0m) || score_noprob(scores_o1_filter[get_index2(length,0,one)])){}
+				else if(noprob_0m || score_noprob(scores_o1_filter[get_index2(length,0,mid)])){}
 				else{
-					feat_gen->fill_one(assign_wrong,x,0,one,m,0);assign_wrong += idim;
+					feat_gen->fill_one(assign_wrong,x,0,m,mid,0);assign_wrong += idim;
 				}
 			}
-		}
-		//2.2. ordinary ones
-		for(int h=1;h<length;h++){	//h>=1
-			//left
-			int first_m = -1;
-			for(int m=h-1;m>=0;m--){
-				double score_hm = scores_o1_filter[get_index2(length,h,m)];
-				bool link_hm = x->heads->at(m)==h;
-				for(int g=0;g<length;g++){	//allow non-projective right ones
-					bool link_gh = x->heads->at(h)==g;
-					double score_gh = scores_o1_filter[get_index2(length,g,h)];
-					// h - m
-					if(link_hm && link_gh && first_m<0){
+			//2.2. ordinary ones
+			for(int h=1;h<length;h++){	//h>=1
+				if(h==m)
+					continue;
+				//get information
+				int small = GET_MIN_ONE(m,h);
+				int large = GET_MAX_ONE(m,h);
+				bool link_hm = (x->heads->at(m)==h);
+				int noprob_hm = score_noprob(scores_o1_filter[get_index2(length,h,m)]);
+				int c=-1;	//inside sibling
+				if(link_hm){
+				if(h>m){
+					for(int ii=m+1;ii<h;ii++)
+						if(x->heads->at(ii)==h){
+							c = ii;
+							break;
+						}
+				}
+				else{
+					for(int ii=m-1;ii>h;ii--)
+						if(x->heads->at(ii)==h){
+							c = ii;
+							break;
+						}
+				}}
+				//for g and c
+				for(int g=0;g<length;g++){
+					if(g==h || g==m || g==c)
+						continue;
+					bool link_gh = (x->heads->at(h)==g);
+					int noprob_gh = score_noprob(scores_o1_filter[get_index2(length,g,h)]);
+					int nonproj_g = (g>=small && g<=large);
+					if(link_hm && link_gh && c<0){
 						feat_gen->fill_one(assign_right,x,h,m,-1,g);assign_right += idim;
-						first_m = m;
 					}
-					else if(score_noprob(score_hm) || score_noprob(score_gh) || (g>=m && g<=h)){}
+					else if(noprob_hm || noprob_gh || nonproj_g){}
 					else{
 						feat_gen->fill_one(assign_wrong,x,h,m,-1,g);assign_wrong += idim;
 					}
-					//h m out-one
-					int first_out = -1;
-					for(int one=m-1;one>=0;one--){
-						if(link_hm && link_gh && x->heads->at(one)==h && first_out<0){
-							feat_gen->fill_one(assign_right,x,h,one,m,g);assign_right += idim;
-							first_out = one;
+					for(int mid=small+1;mid<large;mid++){
+						if(link_hm && link_gh && mid==c){
+							feat_gen->fill_one(assign_right,x,h,m,mid,g);assign_right += idim;
 						}
-						else if(score_noprob(score_hm) || score_noprob(score_gh) || (g>=one && g<=h) || score_noprob(scores_o1_filter[get_index2(length,h,one)]))
-						{}
+						else if(noprob_hm || noprob_gh || nonproj_g || score_noprob(scores_o1_filter[get_index2(length,h,mid)])){}
 						else{
-							feat_gen->fill_one(assign_wrong,x,h,one,m,g);assign_wrong += idim;
-						}
-					}
-				}
-			}
-			//right
-			first_m = -1;
-			for(int m=h+1;m<length;m++){
-				double score_hm = scores_o1_filter[get_index2(length,h,m)];
-				bool link_hm = x->heads->at(m)==h;
-				for(int g=0;g<length;g++){	//allow non-projective right ones
-					bool link_gh = x->heads->at(h)==g;
-					double score_gh = scores_o1_filter[get_index2(length,g,h)];
-					// h - m
-					if(link_hm && link_gh && first_m<0){
-						feat_gen->fill_one(assign_right,x,h,m,-1,g);assign_right += idim;
-						first_m = m;
-					}
-					else if(score_noprob(score_hm) || score_noprob(score_gh) || (g>=h && g<=m)){}
-					else{
-						feat_gen->fill_one(assign_wrong,x,h,m,-1,g);assign_wrong += idim;
-					}
-					//h m out-one
-					int first_out = -1;
-					for(int one=m+1;one<length;one++){
-						if(link_hm && link_gh && x->heads->at(one)==h && first_out<0){
-							feat_gen->fill_one(assign_right,x,h,one,m,g);assign_right += idim;
-							first_out = one;
-						}
-						else if(score_noprob(score_hm) || score_noprob(score_gh) || (g>=h && g<=one) || score_noprob(scores_o1_filter[get_index2(length,h,one)]))
-						{}
-						else{
-							feat_gen->fill_one(assign_wrong,x,h,one,m,g);assign_wrong += idim;
+							feat_gen->fill_one(assign_wrong,x,h,m,mid,g);assign_wrong += idim;
 						}
 					}
 				}
@@ -271,6 +241,7 @@ void Method9_O3g::each_prepare_data_oneiter()
 		delete [](all_scores_o1[i]);
 	}
 	delete []all_scores_o1;
+	time(&now);cout << "#Finish data-gen at " << ctime(&now) << flush;
 	}
 
 	//then considering CONF_NN_resample and copy them to finish data
