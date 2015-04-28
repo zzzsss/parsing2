@@ -15,8 +15,11 @@
 #include "process_graph/Method9_O3g.h"
 #include "parts/Parameters.h"
 
-//usage: command conf_file ...
-
+/* <Version 1.5>usage:
+ * 	1.training: <exe-file> conf
+ * 	2.testing: <exe-file> conf best-machine-name
+ * 	3.check-o1-filter: <exe-file> conf best-machine-name cut-point
+ */
 int main(int argc,char **argv)
 {
 	if(argc < 2){
