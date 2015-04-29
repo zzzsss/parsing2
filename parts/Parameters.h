@@ -69,6 +69,9 @@ int CONF_NN_highO_score_combine_o3g_self;	//maybe no gsib score in o3g(in fact n
 string CONF_NN_WL;
 string CONF_NN_EM;
 double CONF_NN_ISCALE;
+//pre-calculation options
+int CONF_NN_PRECALC;				//whether perform pre-calculation for the best machine
+
 //1.4-for parsing basis
 int CONF_x_window;	//word and pos window size
 int CONF_add_distance;	//whether add distance --- and for different ways
@@ -127,6 +130,8 @@ parsing_conf(string conf_file)
 	CONF_NN_highO_score_combine_o2sib = 1;
 	CONF_NN_highO_score_combine_o2g = 1;
 	CONF_NN_highO_score_combine_o3g_self = 1;
+	//pre-calc
+	CONF_NN_PRECALC = 0;
 	//read in conf-file
 #define DATA_LINE_LEN 10000
 	ifstream fin(conf_file.c_str());
@@ -213,6 +218,8 @@ parsing_conf(string conf_file)
 		else if(buf=="o_srand") fin >> CONF_random_seed;
 		//1.6
 		else if(buf=="s_prob") fin >> CONF_score_prob;
+		//precalc
+		else if(buf=="nn_precalc") fin >> CONF_NN_PRECALC;
 		else
 			cout << "Unknown conf " << buf << endl;
 	}

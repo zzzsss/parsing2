@@ -39,6 +39,13 @@ void Process::train()
 		cur_iter++;
 	}
 
+	//if pre-calc
+	if(parameters->CONF_NN_PRECALC){
+		NNInterface * best_one = NNInterface::Read(mach_best_name);
+		best_one->pre_calc();
+		best_one->Write(mach_best_name);
+	}
+
 	//6.results
 	cout << "6.training finished with dev results: best " << best_result << "|" << best_iter << endl;
 	cout << "zzzzz ";
@@ -58,13 +65,13 @@ void Process::test(string m_name)
 double Process::nn_dev_test(string to_test,string output,string gold)
 {
 	time_t now;
-	time(&now); //ctime is not rentrant ! use ctime_r() instead if needed
-	cout << "#--Test at " << ctime(&now) << std::flush;
 	//also assuming test-file itself is gold file(this must be true with dev file)
 	dev_test_corpus = read_corpus(to_test);
 	each_get_featgen(1);	/*************virtual****************/
 	int token_num = 0;	//token number
 	int miss_count = 0;
+	time(&now);
+	cout << "#--Test at " << ctime(&now) << std::flush;
 	for(int i=0;i<dev_test_corpus->size();i++){
 		DependencyInstance* t = dev_test_corpus->at(i);
 		int length = t->forms->size();
@@ -77,6 +84,8 @@ double Process::nn_dev_test(string to_test,string output,string gold)
 		delete t->heads;
 		t->heads = ret;
 	}
+	time(&now);
+	cout << "#--Finish at " << ctime(&now) << std::flush;
 	write_corpus(dev_test_corpus,output);
 	string ttt;
 	double rate = (double)(token_num-miss_count) / token_num;

@@ -21,6 +21,7 @@ using namespace std;
 
 #define NNERROR_NotImplemented "NNERROR_NotImplemented"
 #define NNERROR_WiderThanWidth "NNERROR_WiderThanWidth"
+#define NNERROR_InternalError "NNERROR_InternalError"
 
 #define ACT_TANH 0
 #define ACT_HTANH 1
@@ -48,12 +49,15 @@ public:
 	//specail-backws
 	virtual void Backw_store(const float lrate, const float wdecay, int bs)=0;	//don't update --- batch mode
 	virtual void Backw_update()=0;
-	//test-time
+	//test-time --> should perform fast calculating using pre-calculated info if possible
 	virtual REAL* mach_forward(REAL* assign,int all)=0;	//allocated here
 	//tabs
 	virtual REAL* get_tab()=0;
 	virtual void set_tab(REAL* x)=0;
 	virtual void clone_tab(REAL* x,int all)=0;
+	//precalc
+	virtual void pre_calc()=0;
+	virtual void DEBUG_pre_calc()=0;
 	//others
 	virtual void Write(string name)=0;
 	static NNInterface* Read(string name);

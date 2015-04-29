@@ -19,13 +19,32 @@
  * 	1.training: <exe-file> conf
  * 	2.testing: <exe-file> conf best-machine-name
  * 	3.check-o1-filter: <exe-file> conf best-machine-name cut-point
+ * 	4.pre-calc one: <exe-file> '/' mach-name [debug]
  */
+
+static void pre_calc_one(string mach)
+{
+
+}
+
 int main(int argc,char **argv)
 {
 	if(argc < 2){
 		Error("Not enough parameters for cmd.");
 	}
 	string conf(argv[1]);
+	if(conf == "/"){
+		//spcecial token which can't be conf name
+		string mname(argv[2]);
+		NNInterface * m = NNInterface::Read(mname);
+		m->pre_calc();
+		if(argc == 4){
+			//debug
+			m->DEBUG_pre_calc();
+		}
+		m->Write(mname);
+		return 0;
+	}
 	parsing_conf par(conf);
 	srand(par.CONF_random_seed);
 	Process *x;

@@ -13,11 +13,20 @@
 #include "../cslm/MachConfig.h"
 #include <fstream>
 #include <cstring>
+#include <cstdlib>
 using namespace std;
+
+#define CSLM_MACHINE_DESCRIBE_SUFFIX ".precalc"	//for pre-calculation
 
 class CslmInterface: public NNInterface{
 protected:
 	Mach *mach;
+	//for pre-calculation
+	int embed_dim;
+	int embed_layer_num;
+	int dict_num;
+	int second_layer_dim;
+	REAL* pre_calc_table;	//pre-calculation table
 	void mach_split_share();
 public:
 	virtual void SetDataIn(REAL *data)		{mach->SetDataIn(data);}
@@ -36,13 +45,7 @@ public:
 	virtual void Backw_update(){nnError(NNERROR_NotImplemented);}
 
 	virtual REAL* mach_forward(REAL* assign,int all);	//allocated here
-
-	virtual void Write(string name){
-		ofstream fs;
-		fs.open(name.c_str(),ios::binary);
-		mach->Write(fs);
-		fs.close();
-	}
+	virtual void Write(string name);
 
 	virtual REAL* get_tab(){
 		MachMulti* m = (MachMulti*)mach;
@@ -65,19 +68,18 @@ public:
 		memcpy(tab,x,sizeof(REAL)*all);
 	}
 
-	CslmInterface(Mach* m){
+	virtual void pre_calc();
+	virtual void DEBUG_pre_calc();
+
+	CslmInterface(Mach* m,int e_dim,int e_num,int d_num,int s_dim,REAL* t=0){
 		mach = m;
+		embed_dim = e_dim;
+		embed_layer_num = e_num;
+		dict_num = d_num;
+		second_layer_dim = s_dim;
+		pre_calc_table = t;
 	}
-	static CslmInterface* Read(string name){
-		ifstream ifs;
-		ifs.open(name.c_str(),ios::binary);
-		Mach* m = Mach::Read(ifs);
-		ifs.close();
-		if(m)
-			return new CslmInterface(m);
-		else
-			return 0;
-	}
+	static CslmInterface* Read(string name);
 	static CslmInterface* create_one(parsing_conf* p,FeatureGen* f,int outdim);
 };
 
