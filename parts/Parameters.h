@@ -150,6 +150,8 @@ parsing_conf(string conf_file)
 		else if(buf=="test")	fin >> CONF_test_file;
 		else if(buf=="output")	fin >> CONF_output_file;
 		else if(buf=="gold")	fin >> CONF_gold_file;
+		else if(buf=="dict")	fin >> CONF_dict_file;
+		else if(buf=="mach-prefix") fin >> CONF_mach_name;
 		//1.2
 		else if(buf=="nn_tool") fin >> CONF_NN_toolkit;
 		//1.3
