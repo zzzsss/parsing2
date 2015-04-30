@@ -14,18 +14,14 @@
 #include "process_graph/Method8_O2g.h"
 #include "process_graph/Method9_O3g.h"
 #include "parts/Parameters.h"
+#include "nn/CslmInterface.h"
 
-/* <Version 1.5>usage:
+/* <Version 1.6>usage:	(mode 3 and 4 are for debugging)
  * 	1.training: <exe-file> conf
  * 	2.testing: <exe-file> conf best-machine-name
  * 	3.check-o1-filter: <exe-file> conf best-machine-name cut-point
  * 	4.pre-calc one: <exe-file> '/' mach-name [debug]
  */
-
-static void pre_calc_one(string mach)
-{
-
-}
 
 int main(int argc,char **argv)
 {
@@ -47,6 +43,8 @@ int main(int argc,char **argv)
 	}
 	parsing_conf par(conf);
 	srand(par.CONF_random_seed);
+	//if(par.CONF_NN_PRECALC)
+	CslmInterface::set_tanh_table();
 	Process *x;
 	switch(par.CONF_method){
 	case 1:

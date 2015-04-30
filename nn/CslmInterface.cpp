@@ -10,6 +10,29 @@
 #include <ctime>
 #include "../cslm/MachSeq.h"
 
+//tanh table for speedup
+REAL* CslmInterface::tanh_table = 0;
+int CslmInterface::tanh_table_slots = 100000;	//step 0.0001
+void CslmInterface::set_tanh_table()
+{
+	//[-5,+5], with slots
+	REAL start = -5;
+	tanh_table = new REAL[tanh_table_slots];
+	for(int i=0;i<tanh_table_slots;i++,start += 10.0/tanh_table_slots)
+		tanh_table[i] = tanh(start);
+}
+REAL CslmInterface::tanh_table_tanh(REAL nn)
+{
+	nn = (nn+5)*tanh_table_slots/10;
+	int n = nn;
+	if(n<0)
+		return -1;
+	else if(n>=tanh_table_slots)
+		return 1;
+	else
+		return tanh_table[n];
+}
+
 const char* cslm_activations[] = {"Tanh","Nope"};
 #define WRITE_CONF_ONE(a1,a2) \
 	fout << cslm_activations[parameters->CONF_NN_act] << " = " << (int)(a1) << "x" << (int)(a2) << " fanio-init-weights=1.0\n";
@@ -112,7 +135,7 @@ CslmInterface* CslmInterface::create_one(parsing_conf* parameters,FeatureGen* f,
     Mach* mach = mach_config.get_machine();
     if(mach == 0)
     	Error(mach_config.get_error_string().c_str());
-    CslmInterface* ret = new CslmInterface(mach,parameters->CONF_NN_we,f->get_xdim(),f->get_dict()->get_count(),parameters->CONF_NN_h_size[0]);
+    CslmInterface* ret = new CslmInterface(mach);
     //3.split??
     if(parameters->CONF_NN_split && parameters->CONF_NN_split_share)
     	ret->mach_split_share();
@@ -126,28 +149,16 @@ CslmInterface* CslmInterface::Read(string name){
 	ifs.close();
 	string file2 = name + CSLM_MACHINE_DESCRIBE_SUFFIX;
 	ifs.open(file2.c_str(),ios::binary);
-	//first must be 4 int + 1 pointer
-	int embed_dim=0;
-	int embed_layer_num=0;
-	int dict_num=0;
-	int second_layer_dim=0;	//do not support split layer here
 	REAL* pre_calc_table=0;
-	if(ifs){
-	ifs.read((char*)&embed_dim,sizeof(int));
-	ifs.read((char*)&embed_layer_num,sizeof(int));
-	ifs.read((char*)&dict_num,sizeof(int));
-	ifs.read((char*)&second_layer_dim,sizeof(int));
-	ifs.read((char*)&pre_calc_table,sizeof(REAL*));
-	if(pre_calc_table){ //not zero
-		//continue reading
-		long size = embed_layer_num*second_layer_dim*dict_num;
+	if(ifs){	//if pre_calc file exists
+		long size = 0;
+		ifs.read((char*)&size,sizeof(long));
 		pre_calc_table = new REAL[size];
 		ifs.read((char*)pre_calc_table,size*sizeof(REAL));
-	}
-	ifs.close();
+		ifs.close();
 	}
 	if(m)
-		return new CslmInterface(m,embed_dim,embed_layer_num,dict_num,second_layer_dim,pre_calc_table);
+		return new CslmInterface(m,pre_calc_table);
 	else
 		return 0;
 }
@@ -157,23 +168,14 @@ void CslmInterface::Write(string name){
 	fs.open(name.c_str(),ios::binary);
 	mach->Write(fs);
 	fs.close();
-	string file2 = name + CSLM_MACHINE_DESCRIBE_SUFFIX;
-	fs.open(file2.c_str(),ios::binary);
-	fs.write((char*)&embed_dim,sizeof(int));
-	fs.write((char*)&embed_layer_num,sizeof(int));
-	fs.write((char*)&dict_num,sizeof(int));
-	fs.write((char*)&second_layer_dim,sizeof(int));
 	if(pre_calc_table){ //not zero
+		string file2 = name + CSLM_MACHINE_DESCRIBE_SUFFIX;
+		fs.open(file2.c_str(),ios::binary);
 		//continue reading
-		long size = embed_layer_num*second_layer_dim*dict_num;
-		fs.write((char*)&pre_calc_table,sizeof(REAL*));
-		fs.write((char*)pre_calc_table,size*sizeof(REAL));
+		fs.write((char*)&pre_calc_size,sizeof(long));
+		fs.write((char*)pre_calc_table,pre_calc_size*sizeof(REAL));
+		fs.close();
 	}
-	else{
-		REAL* tmp = 0;
-		fs.write((char*)&tmp,sizeof(REAL*));
-	}
-	fs.close();
 }
 
 REAL* CslmInterface::mach_forward(REAL* assign,int all)
@@ -220,7 +222,8 @@ REAL* CslmInterface::mach_forward(REAL* assign,int all)
 			}
 			//tanh --- currently only support tanh
 			for(int i=0;i<n*second_layer_dim;i++){
-				data_in[i] = tanh(data_in[i]);
+				//data_in[i] = tanh(data_in[i]);
+				data_in[i] = tanh_table_tanh(data_in[i]);
 			}
 			//forward
 			for(int i=2;i<m1->MachGetNb();i++){

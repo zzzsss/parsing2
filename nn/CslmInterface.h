@@ -26,6 +26,7 @@ protected:
 	int embed_layer_num;
 	int dict_num;
 	int second_layer_dim;
+	long pre_calc_size;		//maybe only 64-bit should be enough
 	REAL* pre_calc_table;	//pre-calculation table
 	void mach_split_share();
 public:
@@ -71,16 +72,27 @@ public:
 	virtual void pre_calc();
 	virtual void DEBUG_pre_calc();
 
-	CslmInterface(Mach* m,int e_dim,int e_num,int d_num,int s_dim,REAL* t=0){
+	CslmInterface(Mach* m,REAL* t=0){
 		mach = m;
-		embed_dim = e_dim;
-		embed_layer_num = e_num;
-		dict_num = d_num;
-		second_layer_dim = s_dim;
 		pre_calc_table = t;
+		//get from mach	--- special one (no support for split here)
+		MachMulti* m0 = (MachMulti*)mach;
+		MachMulti* m10 = (MachMulti*)m0->MachGet(0);
+		MachLin* mlin = (MachLin*)m0->MachGet(2);
+		MachTab* mtab = (MachTab*)(m10->MachGet(0));
+		embed_dim = mtab->GetOdim();
+		embed_layer_num = m10->MachGetNb();
+		dict_num = mtab->GetMaxInpVal();
+		second_layer_dim = mlin->GetIdim();
+		pre_calc_size = embed_layer_num*second_layer_dim*dict_num;
 	}
 	static CslmInterface* Read(string name);
 	static CslmInterface* create_one(parsing_conf* p,FeatureGen* f,int outdim);
+
+	static void set_tanh_table();
+	static REAL* tanh_table;
+	static int tanh_table_slots;
+	static REAL tanh_table_tanh(REAL n);
 };
 
 
