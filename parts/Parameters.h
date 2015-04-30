@@ -13,7 +13,7 @@
 #include <cstdio>
 
 #define DOUBLE_LARGENEG -10000000.0		//maybe it is enough
-#define INIT_EM_MAX_SIZE 1000000	//maybe enough
+#define INIT_EM_MAX_SIZE 2000000	//maybe enough
 
 class  parsing_conf{
 public:

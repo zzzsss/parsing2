@@ -16,7 +16,8 @@
 #include "parts/Parameters.h"
 #include "nn/CslmInterface.h"
 
-/* <Version 1.6>usage:	(mode 3 and 4 are for debugging)
+/* <Version 1.6>
+ * 		-- usage:	(mode 3 and 4 are for debugging)
  * 	1.training: <exe-file> conf
  * 	2.testing: <exe-file> conf best-machine-name
  * 	3.check-o1-filter: <exe-file> conf best-machine-name cut-point
