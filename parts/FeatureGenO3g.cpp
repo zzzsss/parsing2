@@ -139,7 +139,7 @@ int FeatureGenO3g::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int m
 	}
 	}
 	if(distance){
-		*to_fill = dictionary->get_index(head-g);
+		*to_fill = dictionary->get_index(g-head);
 		to_fill ++;
 	}
 
