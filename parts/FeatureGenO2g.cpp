@@ -13,9 +13,7 @@ FeatureGenO2g::FeatureGenO2g(Dict* d,int w,int di,int apos,int d_sys):FeatureGen
 	if(apos)
 		xdim *= 2;
 	if(di){
-		xdim += 2;	//2 for distance
-		if(d_sys)
-			xdim += 1;
+		xdim += 3;
 	}
 }
 
@@ -41,8 +39,8 @@ int FeatureGenO2g::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int m
 			to_fill ++;
 		}
 	}
-	if(distance && distance_parent){
-		*to_fill = dictionary->get_index(0);		//dummy node only for symmetric
+	if(distance){
+		*to_fill = dictionary->get_index(g-head);
 		to_fill ++;
 	}
 
@@ -96,7 +94,7 @@ int FeatureGenO2g::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int m
 	}
 	}
 	if(distance){
-		*to_fill = dictionary->get_index(g-head);
+		*to_fill = dictionary->get_index(mod,head,g);
 		to_fill ++;
 	}
 

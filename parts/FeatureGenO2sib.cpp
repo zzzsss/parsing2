@@ -13,9 +13,8 @@ FeatureGenO2sib::FeatureGenO2sib(Dict* d,int w,int di,int apos,int d_sys):Featur
 	if(apos)
 		xdim *= 2;
 	if(di){
-		xdim += 2;	//2 for distance
-		if(d_sys)
-			xdim += 1;
+		xdim += 2;
+		//xdim += 3;
 	}
 }
 
@@ -41,10 +40,11 @@ int FeatureGenO2sib::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int
 			to_fill ++;
 		}
 	}
-	if(distance && distance_parent){
-		*to_fill = dictionary->get_index(0);		//dummy node only for symmetric
+	/*
+	if(distance){
+		*to_fill = dictionary->get_index(mod,head);
 		to_fill ++;
-	}
+	}*/
 
 	//2.center
 	if(mod_center<0){	//use dummy

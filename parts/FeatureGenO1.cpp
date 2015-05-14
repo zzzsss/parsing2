@@ -14,8 +14,10 @@ FeatureGenO1::FeatureGenO1(Dict* d,int w,int di,int apos,int d_sys):FeatureGen(d
 		xdim *= 2;
 	if(di){
 		xdim += 1;
+		//xdim += 2;
+		/* @deprecated
 		if(d_sys)		//symmetric dummy node
-			xdim += 1;
+			xdim += 1;*/
 	}
 }
 
@@ -40,10 +42,16 @@ int FeatureGenO1::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mo
 			to_fill ++;
 		}
 	}
+	/* @deprecated
 	if(distance && distance_parent){
 		*to_fill = dictionary->get_index(0);		//dummy node only for symmetric
 		to_fill ++;
-	}
+	}*/
+	/*
+	if(distance){
+		*to_fill = dictionary->get_index(mod,head);
+		to_fill ++;
+	}*/
 
 	//2.modifier
 	for(int i=mod-backward;i<=mod+backward;i++){

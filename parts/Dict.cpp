@@ -23,6 +23,13 @@ string Dict::WORD_DUMMY_R = "<w-dr>";
 string Dict::POS_DUMMY_L = "<pos-dl>";
 string Dict::POS_DUMMY_R = "<pos-dr>";
 string Dict::DISTANCE_DUMMY = "_distance_dummy_";
+string Dict::DISTANCE_ROOT_RIGHT = "_distance_rootr_";
+string Dict::DISTANCE_RIGHT = "_distance_r_";
+string Dict::DISTANCE_LEFT = "_distance_l_";
+string Dict::DISTANCE_RR = "_distance_rr_";
+string Dict::DISTANCE_RL = "_distance_rl_";
+string Dict::DISTANCE_LR = "_distance_lr_";
+string Dict::DISTANCE_LL = "_distance_ll_";
 
 Dict::Dict(int remove,int distance_way,int oov_back,int allaz,int dsize){
 	maps = new HashMap(CONS_dict_map_size);
@@ -66,6 +73,27 @@ int Dict::get_index(int d)
 	int x = maps->find(temp)->second;	//must exist
 	delete temp;
 	return x;
+}
+
+int Dict::get_index(int m,int h,int g)	//for distance direction
+{
+	int temp = 0;
+	if(g<0){	//o1 and o2sib
+		if(h<m)	temp = maps->find(&DISTANCE_RIGHT)->second;
+		else	temp = maps->find(&DISTANCE_LEFT)->second;
+	}else{		//o2g and o3g
+		if(g==h){	//must be both 0
+			temp = maps->find(&DISTANCE_ROOT_RIGHT)->second;
+		}
+		else if(g<h){
+			if(h<m)	temp = maps->find(&DISTANCE_RR)->second;
+			else	temp = maps->find(&DISTANCE_RL)->second;
+		}else{
+			if(h<m)	temp = maps->find(&DISTANCE_LR)->second;
+			else	temp = maps->find(&DISTANCE_LL)->second;
+		}
+	}
+	return temp;
 }
 
 int Dict::get_index(string* word,string* backoff_pos)
@@ -120,7 +148,14 @@ void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
 	int num_distance=0,num_pos=0,num_words=0;
 	//1.first add distance words
 	maps->insert(pair<string*, int>(&DISTANCE_DUMMY,dict_num++));
-	num_distance++;
+	maps->insert(pair<string*, int>(&DISTANCE_ROOT_RIGHT,dict_num++));
+	maps->insert(pair<string*, int>(&DISTANCE_RIGHT,dict_num++));
+	maps->insert(pair<string*, int>(&DISTANCE_LEFT,dict_num++));
+	maps->insert(pair<string*, int>(&DISTANCE_LL,dict_num++));
+	maps->insert(pair<string*, int>(&DISTANCE_LR,dict_num++));
+	maps->insert(pair<string*, int>(&DISTANCE_RL,dict_num++));
+	maps->insert(pair<string*, int>(&DISTANCE_RR,dict_num++));
+	num_distance += 8;
 	for(int i=-1*distance_max;i<=distance_max;i++){
 		string * dis = get_distance_str(i);
 		maps->insert(pair<string*, int>(dis,dict_num++));

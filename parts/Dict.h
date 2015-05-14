@@ -44,6 +44,10 @@ public:
 	// -- this is: h-dl-c(right-arc) or h-dr-c(left-arc)
 	static string WORD_DUMMY_L,WORD_DUMMY_R,POS_DUMMY_L,POS_DUMMY_R;
 	static string DISTANCE_DUMMY;
+	//distance -- direction
+	static string DISTANCE_ROOT_RIGHT;
+	static string DISTANCE_RIGHT,DISTANCE_LEFT;
+	static string DISTANCE_RR,DISTANCE_RL,DISTANCE_LR,DISTANCE_LL;
 
 	static string* tmpfunc_toa2z(string* x){
 		int s = x->length();
@@ -58,6 +62,7 @@ public:
 	string* get_distance_str(int n,int way=1);
 	int get_index(string* word,string* backoff_pos);	//word or pos
 	int get_index(int distance);						//distance
+	int get_index(int m,int h,int g=-1);				//distance direction
 	int get_word_index(string* word);	//for outer use
 
 	void write(string file);

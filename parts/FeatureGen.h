@@ -22,7 +22,10 @@ protected:
 	int window_size;
 	int distance;	//whether add distance feature
 	int pos_add;	//whether add pos
+
+	//@deprecated
 	int distance_parent;	//whether add a dummy distance_0 for parent(to be symmetric)
+
 public:
 	int get_xdim()		{return xdim;}
 	int has_filter()	{return filter_map != 0;}
