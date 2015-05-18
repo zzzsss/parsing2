@@ -7,14 +7,16 @@
 
 #include "FeatureGenO3g.h"
 
-FeatureGenO3g::FeatureGenO3g(Dict* d,int w,int di,int apos,int d_sys):FeatureGen(d,w,di,apos,d_sys)
+FeatureGenO3g::FeatureGenO3g(Dict* d,int w,int di,int apos,int dir):FeatureGen(d,w,di,apos,dir)
 {
 	xdim = 4*w;
 	if(apos)
 		xdim *= 2;
 	if(di){
-		xdim += 4;
+		xdim += 3;
 	}
+	if(dir)
+		xdim ++;
 }
 
 int FeatureGenO3g::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int mod,int mod_center,int g)
@@ -136,7 +138,7 @@ int FeatureGenO3g::fill_one(REAL* to_fill,DependencyInstance* ins,int head,int m
 		}
 	}
 	}
-	if(distance){
+	if(dir_add){
 		*to_fill = dictionary->get_index(mod,head,g);
 		to_fill ++;
 	}

@@ -7,14 +7,13 @@
 
 #include "FeatureGenO2sib.h"
 
-FeatureGenO2sib::FeatureGenO2sib(Dict* d,int w,int di,int apos,int d_sys):FeatureGen(d,w,di,apos,d_sys)
+FeatureGenO2sib::FeatureGenO2sib(Dict* d,int w,int di,int apos,int dir):FeatureGen(d,w,di,apos,dir)
 {
 	xdim = 3*w;
 	if(apos)
 		xdim *= 2;
 	if(di){
 		xdim += 2;
-		//xdim += 3;
 	}
 }
 

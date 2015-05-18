@@ -7,17 +7,13 @@
 
 #include "FeatureGenO1.h"
 
-FeatureGenO1::FeatureGenO1(Dict* d,int w,int di,int apos,int d_sys):FeatureGen(d,w,di,apos,d_sys)
+FeatureGenO1::FeatureGenO1(Dict* d,int w,int di,int apos,int dir):FeatureGen(d,w,di,apos,dir)
 {
 	xdim = 2*w;
 	if(apos)
 		xdim *= 2;
 	if(di){
 		xdim += 1;
-		//xdim += 2;
-		/* @deprecated
-		if(d_sys)		//symmetric dummy node
-			xdim += 1;*/
 	}
 }
 
