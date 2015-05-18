@@ -44,19 +44,21 @@ void Method8_O2g::each_prepare_data_oneiter()
 	//sweep all once and count
 	FeatureGenO1* feat_temp_o1 = new FeatureGenO1(dict,parameters->CONF_x_window,
 					parameters->CONF_add_distance,parameters->CONF_add_pos,parameters->CONF_add_direction);
-	double** all_scores_o1 = new double*[sentences];
+	bool** all_noprob_o1 = new bool*[sentences];
 	int all_tokens_train=0,all_token_filter_wrong=0;
 	for(int i=0;i<sentences;i++){
-		all_scores_o1[i] = 0;
+		all_noprob_o1[i] = 0;
 		if(whether_o1_filter){
 			DependencyInstance* x = training_corpus->at(i);
-			all_scores_o1[i] = get_scores_o1(x,parameters,mach_o1,feat_temp_o1);
-			double* scores_o1_filter = all_scores_o1[i];
-			all_tokens_train += x->length();
-			for(int i2=1;i2<x->length();i2++){	//ignore root
-				if(score_noprob(scores_o1_filter[get_index2(x->length(),x->heads->at(i2),i2)]))
+			int len = x->length();
+			double* scores_o1_filter = get_scores_o1(x,parameters,mach_o1,feat_temp_o1);
+			all_tokens_train += len;
+			all_noprob_o1[i] = get_noprob_o1(len,scores_o1_filter);
+			for(int m=1;m<len;m++){
+				if(all_noprob_o1[i][get_index2(len,x->heads->at(m),m)])
 					all_token_filter_wrong ++;
 			}
+			delete []scores_o1_filter;
 		}
 	}
 	if(whether_o1_filter)
@@ -67,7 +69,7 @@ void Method8_O2g::each_prepare_data_oneiter()
 	int length_sofar_fordebugging = 0;
 	for(int i=0;i<sentences;i++){
 		DependencyInstance* x = training_corpus->at(i);
-		double* scores_o1_filter = all_scores_o1[i];
+		bool* o1_noprob = all_noprob_o1[i];
 		int length = x->length();
 		/*
 		//------debugging------ ###tmpall_becauseof_unprojective###
@@ -80,7 +82,7 @@ void Method8_O2g::each_prepare_data_oneiter()
 			//first special (0,0,m)
 			if(x->heads->at(m) == 0)
 				tmpall_right++;
-			else if(score_noprob(scores_o1_filter[get_index2(length,0,m)]))
+			else if(o1_noprob[get_index2(length,0,m)])
 				tmpall_bad++;
 			else
 				tmpall_wrong++;
@@ -88,7 +90,7 @@ void Method8_O2g::each_prepare_data_oneiter()
 			for(int h=1;h<length;h++){
 				if(m==h)
 					continue;
-				int nope_hm = score_noprob(scores_o1_filter[get_index2(length,h,m)]);
+				int nope_hm = o1_noprob[get_index2(length,h,m)];
 				int link_hm = (x->heads->at(m)==h);
 				int small = GET_MIN_ONE(m,h);
 				int large = GET_MAX_ONE(m,h);
@@ -96,7 +98,7 @@ void Method8_O2g::each_prepare_data_oneiter()
 					if(g==h || g==m)
 						continue;
 					//if(g>=s && g<=t)continue;	###allow non-projective here###
-					int nope_gh = score_noprob(scores_o1_filter[get_index2(length,g,h)]);
+					int nope_gh = o1_noprob[get_index2(length,g,h)];
 					if(link_hm && x->heads->at(h)==g)
 						tmpall_right++;
 					else if(nope_hm || nope_gh || (g>=small && g<=large))	//no non-projective
@@ -127,13 +129,13 @@ void Method8_O2g::each_prepare_data_oneiter()
 	for(int i=0;i<sentences;i++){
 		DependencyInstance* x = training_corpus->at(i);
 		int length = x->length();
-		double* scores_o1_filter = all_scores_o1[i];
+		bool* o1_noprob = all_noprob_o1[i];
 		for(int m=1;m<length;m++){
 			//first special (0,0,m)
 			if(x->heads->at(m) == 0){
 				feat_gen->fill_one(assign_right,x,0,m,0);assign_right += idim;
 			}
-			else if(score_noprob(scores_o1_filter[get_index2(length,0,m)])){}
+			else if(o1_noprob[get_index2(length,0,m)]){}
 			else{
 				feat_gen->fill_one(assign_wrong,x,0,m,0);assign_wrong += idim;
 			}
@@ -141,7 +143,7 @@ void Method8_O2g::each_prepare_data_oneiter()
 			for(int h=1;h<length;h++){
 				if(m==h)
 					continue;
-				int nope_hm = score_noprob(scores_o1_filter[get_index2(length,h,m)]);
+				int nope_hm = o1_noprob[get_index2(length,h,m)];
 				int link_hm = (x->heads->at(m)==h);
 				int small = GET_MIN_ONE(m,h);
 				int large = GET_MAX_ONE(m,h);
@@ -149,7 +151,7 @@ void Method8_O2g::each_prepare_data_oneiter()
 					if(g==h || g==m)
 						continue;
 					//if(g>=s && g<=t)continue;	###allow non-projective here###
-					int nope_gh = score_noprob(scores_o1_filter[get_index2(length,g,h)]);
+					int nope_gh = o1_noprob[get_index2(length,g,h)];
 					if(link_hm && x->heads->at(h)==g){
 						feat_gen->fill_one(assign_right,x,h,m,g);assign_right += idim;
 					}
@@ -164,9 +166,9 @@ void Method8_O2g::each_prepare_data_oneiter()
 	}
 
 	for(int i=0;i<sentences;i++){
-		delete [](all_scores_o1[i]);
+		delete [](all_noprob_o1[i]);
 	}
-	delete []all_scores_o1;
+	delete []all_noprob_o1;
 	time(&now);cout << "#Finish data-gen at " << ctime(&now) << flush;
 	}
 

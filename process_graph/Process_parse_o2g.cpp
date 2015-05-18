@@ -100,10 +100,7 @@ vector<int>* Process::parse_o2g(DependencyInstance* x,double* score_of_o1)
 	int length = x->length();
 	bool *whether_cut_o1 = 0;
 	if(score_of_o1 && parameters->CONF_NN_highO_o1filter){
-		whether_cut_o1 = new bool[length*length];
-		for(int i=0;i<length*length;i++){
-			whether_cut_o1[i] = (score_noprob(score_of_o1[i])) ? true : false;
-		}
+		whether_cut_o1 = get_noprob_o1(length,score_of_o1);
 	}
 	double *tmp_scores = get_scores_o2g(x,parameters,mach,feat_gen,whether_cut_o1);
 	delete []whether_cut_o1;

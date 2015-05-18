@@ -58,7 +58,7 @@ int CONF_NN_highO_score_combine;	//combine score with o1 mach
 string CONF_NN_highO_o1mach;
 //o1-mach as filter --- only 0-1 models(thus M7)
 int CONF_NN_highO_o1filter;
-double CONF_NN_highO_o1filter_cut;	//filter out when < this
+double CONF_NN_highO_o1filter_cut;	//filter out when < this or special when this value itself <0
 //**high-order machines(used in o3g)
 string CONF_NN_highO_o2sibmach;
 string CONF_NN_highO_o2gmach;
@@ -103,7 +103,7 @@ parsing_conf(string conf_file)
 	CONF_NN_split_share = 0;		//when splitting, whether share parameters(w and b)
 	CONF_NN_LRATE=0.1;
 	CONF_NN_ITER=10;
-	CONF_NN_ITER_decrease=2;		//cut two times
+	CONF_NN_ITER_decrease=1;		//cut times
 	CONF_NN_LMULT=-0.5;	//when >=0:as mult ; -1~0: schedule rate
 	CONF_NN_WD=3e-5;
 	CONF_NN_we=50;						//word-embedding size
@@ -120,18 +120,18 @@ parsing_conf(string conf_file)
 	CONF_x_window=7;	//word and pos window size
 	CONF_add_distance=1;	//whether add distance --- and for different ways
 	CONF_add_direction=0;
-	CONF_dict_remove=0;	//remove words appears only less than this times
+	CONF_dict_remove=3;	//remove words appears only less than this times
 	CONF_add_pos=1;		//whether add pos
 	CONF_oov_backoff=1;	//whether backoff to pos with oov
 	CONF_dict_tolower=0;
-	CONF_random_seed=12345;
+	CONF_random_seed=22222;
 	CONF_score_prob=1;
 	//for o3g
 	CONF_NN_highO_score_combine_o2sib = 1;
 	CONF_NN_highO_score_combine_o2g = 1;
 	CONF_NN_highO_score_combine_o3g_self = 1;
 	//pre-calc
-	CONF_NN_PRECALC = 0;
+	CONF_NN_PRECALC = 1;
 	//read in conf-file
 #define DATA_LINE_LEN 10000
 	ifstream fin(conf_file.c_str());

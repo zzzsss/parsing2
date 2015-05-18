@@ -15,6 +15,7 @@
 #include "../parts/Dict.h"
 #include "../tools/CONLLReader.h"
 #include "../tools/DependencyEvaluator.h"
+#include "../algorithms/Eisner.h"
 #include "../nn/NNInterface.h"
 #include <cstdlib>
 #include <cstring>
@@ -55,6 +56,7 @@ protected:
 
 	//help
 	static void shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int times);
+	static void shuffle_data(REAL* x,int xs,long xall,int times);
 	static void set_softmax_gradient(const REAL* s_target,const REAL* s_output,REAL* s_gradient,int bsize,int c);
 	static void set_pair_gradient(const REAL* s_output,REAL* s_gradient,int bsize);
 	//parse
@@ -66,9 +68,33 @@ protected:
 	vector<int>* parse_o2sib(DependencyInstance* x,double* score_of_o1=0);
 	vector<int>* parse_o2g(DependencyInstance* x,double* score_of_o1=0);
 	vector<int>* parse_o3g(DependencyInstance* x,double* score_of_o1,double* score_of_o2sib,double* score_of_o2g);
-	int score_noprob(double score){
+	int score_noprob(double score,double max_one){
 		//impossible scores-prob for o2-o1-pruning
-		return score < parameters->CONF_NN_highO_o1filter_cut;
+		double cut = parameters->CONF_NN_highO_o1filter_cut;
+		if(cut > 0)
+			return score < cut;
+		else
+			return score < (max_one * -1 * cut);
+	}
+	bool* get_noprob_o1(int len,double* scores){
+		double* scores_max = new double[len];
+		for(int m=1;m<len;m++){	//each token's max-score head
+			scores_max[m] = scores[get_index2(len,0,m)];
+			for(int h=1;h<len;h++){
+				if(h==m) continue;
+				double tmp_s = scores[get_index2(len,h,m)];
+				if(tmp_s > scores_max[m])
+					scores_max[m] = tmp_s;
+			}
+		}
+		bool* ret = new bool[len*len];
+		for(int m=1;m<len;m++){
+			for(int h=0;h<len;h++){
+				if(h==m) continue;
+				ret[get_index2(len,h,m)] = score_noprob(scores[get_index2(len,h,m)],scores_max[m]);
+			}
+		}
+		return ret;
 	}
 
 	//train and test

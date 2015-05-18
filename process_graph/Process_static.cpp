@@ -42,6 +42,31 @@ void Process::shuffle_data(REAL* x,REAL* y,int xs,int ys,int xall,int yall,int t
 	cout << " -- Done." << endl;
 }
 
+void Process::shuffle_data(REAL* x,int xs,long xall,int times)
+{
+	//shuffle one
+	long num = xall / xs;
+	//shuffle 10 times
+	cout << "--shuffle data " << times << " times.";
+	REAL* tx = new REAL[xs];
+	int xcopy_size = xs*sizeof(REAL);
+	for(int i=0;i<times;i++){
+		for(long t=0;t<num;t++){
+			long which = t+(rand()%(num-t));
+			if(which==t)
+				continue;
+			//t->temp
+			memcpy(tx,x+t*xs,xcopy_size);
+			//which->t
+			memcpy(x+t*xs,x+which*xs,xcopy_size);
+			//temp->which
+			memcpy(x+which*xs,tx,xcopy_size);
+		}
+	}
+	delete [] tx;
+	cout << " -- Done." << endl;
+}
+
 //error function(mininize); get -1 * gradient
 // -d(E)/d(zi) = (if i is target) ? 1-zi : -zi
 void Process::set_softmax_gradient(const REAL* s_target,const REAL* s_output,REAL* s_gradient,int bsize,int c)

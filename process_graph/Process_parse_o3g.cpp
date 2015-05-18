@@ -145,10 +145,7 @@ vector<int>* Process::parse_o3g(DependencyInstance* x,double* score_of_o1,double
 	int length = x->length();
 	bool *whether_cut_o1 = 0;
 	if(score_of_o1 && parameters->CONF_NN_highO_o1filter){
-		whether_cut_o1 = new bool[length*length];
-		for(int i=0;i<length*length;i++){
-			whether_cut_o1[i] = (score_noprob(score_of_o1[i])) ? true : false;
-		}
+		whether_cut_o1 = get_noprob_o1(length,score_of_o1);
 	}
 	//1. o3g score
 	double *tmp_scores = 0;
