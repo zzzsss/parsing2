@@ -253,7 +253,7 @@ void Method9_O3g::each_prepare_data_oneiter()
 		//get part of the wrong ones --- but first shuffle them
 		shuffle_data(data_wrong,idim,tmpall_wrong*idim,10);
 	}
-	int tmp_sumup = tmpall_wrong*parameters->CONF_NN_resample + tmpall_right;
+	long tmp_sumup = tmpall_wrong*parameters->CONF_NN_resample + tmpall_right;
 	data = new REAL[tmp_sumup*idim];
 	target = new REAL[tmp_sumup];
 	memcpy(data,data_right,tmpall_right*idim*sizeof(REAL));

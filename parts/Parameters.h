@@ -42,6 +42,7 @@ int CONF_NN_split_share;		//when splitting, whether share parameters(w and b)
 double CONF_NN_LRATE;
 int CONF_NN_ITER;
 int CONF_NN_ITER_decrease;		//at lease cut lrate this times when stopping(so real iters maybe more than iter)
+int CONF_NN_ITER_force_half;	//force cut half if no cutting before --- only when lmult < 0
 double CONF_NN_LMULT;	//when >=0:as mult ; -1~0: schedule rate
 double CONF_NN_WD;
 int CONF_NN_we;						//word-embedding size
@@ -104,6 +105,7 @@ parsing_conf(string conf_file)
 	CONF_NN_LRATE=0.1;
 	CONF_NN_ITER=10;
 	CONF_NN_ITER_decrease=1;		//cut times
+	CONF_NN_ITER_force_half=0;
 	CONF_NN_LMULT=-0.5;	//when >=0:as mult ; -1~0: schedule rate
 	CONF_NN_WD=3e-5;
 	CONF_NN_we=50;						//word-embedding size
@@ -166,6 +168,7 @@ parsing_conf(string conf_file)
 		else if(buf=="nn_lrate") fin >> CONF_NN_LRATE;
 		else if(buf=="nn_iters") fin >> CONF_NN_ITER;
 		else if(buf=="nn_iters_dec") fin >> CONF_NN_ITER_decrease;
+		else if(buf=="nn_iters_force") fin >> CONF_NN_ITER_force_half;
 		else if(buf=="nn_lmult") fin >> CONF_NN_LMULT;
 		else if(buf=="nn_wd")	 fin >> CONF_NN_WD;
 		else if(buf=="nn_we")	fin >> CONF_NN_we;

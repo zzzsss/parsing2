@@ -117,6 +117,10 @@ int Process::set_lrate_one_iter()
 				cur_lrate *= (-1 * parameters->CONF_NN_LMULT);
 				lrate_cut_times++;
 			}
+			if(lrate_cut_times==0 && parameters->CONF_NN_ITER_force_half && cur_iter==(parameters->CONF_NN_ITER/2-1)){
+				//force cut, but don't count as cut-time
+				cur_lrate *= (-1 * parameters->CONF_NN_LMULT);
+			}
 		}
 	}
 	return 1;
@@ -124,6 +128,6 @@ int Process::set_lrate_one_iter()
 
 int Process::whether_keep_trainning()
 {
-	return lrate_cut_times < parameters->CONF_NN_ITER_decrease;
+	return (parameters->CONF_NN_LMULT<0) && (lrate_cut_times < parameters->CONF_NN_ITER_decrease);
 }
 
