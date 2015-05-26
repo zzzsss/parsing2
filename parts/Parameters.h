@@ -42,7 +42,7 @@ int CONF_NN_split_share;		//when splitting, whether share parameters(w and b)
 double CONF_NN_LRATE;
 int CONF_NN_ITER;
 int CONF_NN_ITER_decrease;		//at lease cut lrate this times when stopping(so real iters maybe more than iter)
-int CONF_NN_ITER_force_half;	//force cut half if no cutting before --- only when lmult < 0
+int CONF_NN_ITER_force_half;	//force cut half if no cutting for how many iters
 double CONF_NN_LMULT;	//when >=0:as mult ; -1~0: schedule rate
 double CONF_NN_WD;
 int CONF_NN_we;						//word-embedding size
@@ -105,7 +105,7 @@ parsing_conf(string conf_file)
 	CONF_NN_LRATE=0.1;
 	CONF_NN_ITER=10;
 	CONF_NN_ITER_decrease=1;		//cut times
-	CONF_NN_ITER_force_half=0;
+	CONF_NN_ITER_force_half=100;
 	CONF_NN_LMULT=-0.5;	//when >=0:as mult ; -1~0: schedule rate
 	CONF_NN_WD=3e-5;
 	CONF_NN_we=50;						//word-embedding size
@@ -126,7 +126,7 @@ parsing_conf(string conf_file)
 	CONF_add_pos=1;		//whether add pos
 	CONF_oov_backoff=1;	//whether backoff to pos with oov
 	CONF_dict_tolower=0;
-	CONF_random_seed=22222;
+	CONF_random_seed=12345;
 	CONF_score_prob=1;
 	//for o3g
 	CONF_NN_highO_score_combine_o2sib = 1;

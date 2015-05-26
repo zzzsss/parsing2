@@ -13,7 +13,8 @@ Process::Process(string conf)
 	cout << "1.configuration:" << endl;
 	parameters = new parsing_conf(conf);
 	feat_gen = 0;
-	lrate_cut_times = 0;
+	lrate_cut_times = lrate_force_cut_times = 0;
+	last_cut_iter = -1;
 }
 
 //init --- right after construction, but here use some virtual functions
@@ -35,7 +36,11 @@ void Process::nn_train_prepare()
 	else{
 		cout << "3.get dict from scratch:" << endl;
 		dict = new Dict(parameters->CONF_dict_remove,parameters->CONF_add_distance,parameters->CONF_oov_backoff,parameters->CONF_dict_tolower);
-		dict->construct_dictionary(training_corpus);
+		//this is not good, but...	/*****************NOT GOOD*******************/
+		if(parameters->CONF_add_direction)
+			dict->construct_dictionary(training_corpus,(void*)1);
+		else
+			dict->construct_dictionary(training_corpus);
 		dict->write(parameters->CONF_dict_file);
 	}
 	//3.5 get the feature generator
@@ -116,10 +121,13 @@ int Process::set_lrate_one_iter()
 			if(dev_results[cur_iter] < dev_results[cur_iter-1]){
 				cur_lrate *= (-1 * parameters->CONF_NN_LMULT);
 				lrate_cut_times++;
+				last_cut_iter = cur_iter;
 			}
-			if(lrate_cut_times==0 && parameters->CONF_NN_ITER_force_half && cur_iter==(parameters->CONF_NN_ITER/2-1)){
-				//force cut, but don't count as cut-time
+			else if((cur_iter-last_cut_iter) >= parameters->CONF_NN_ITER_force_half){
+				//force cut
 				cur_lrate *= (-1 * parameters->CONF_NN_LMULT);
+				lrate_force_cut_times++;
+				last_cut_iter = cur_iter;
 			}
 		}
 	}
@@ -128,6 +136,6 @@ int Process::set_lrate_one_iter()
 
 int Process::whether_keep_trainning()
 {
-	return (parameters->CONF_NN_LMULT<0) && (lrate_cut_times < parameters->CONF_NN_ITER_decrease);
+	return (parameters->CONF_NN_LMULT<0) && ((lrate_cut_times+lrate_force_cut_times) < parameters->CONF_NN_ITER_decrease);
 }
 

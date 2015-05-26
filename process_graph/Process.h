@@ -40,7 +40,10 @@ protected:
 	int cur_iter;
 	int CTL_continue;	//if continue training
 	double * dev_results;	//the results of dev-data
+	//--lrate schedule
 	int lrate_cut_times;	//number of times of lrate cut
+	int lrate_force_cut_times;
+	int last_cut_iter;	//last cutting time (after the iter)
 	NNInterface *mach;
 	//init embedings	--- here for convenience(should be put to NNInterface)
 	virtual void init_embed();

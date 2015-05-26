@@ -142,20 +142,24 @@ int Dict::get_word_index(string* word)
 	return ret;
 }
 
-void Dict::construct_dictionary(vector<DependencyInstance*>* corpus){
+void Dict::construct_dictionary(vector<DependencyInstance*>* corpus,void* construct_info){
 	printf("-Start to build dictionary\n");
 	// !!When constructing the dictionary, includes all the features (no harm) ...
 	int num_distance=0,num_pos=0,num_words=0;
 	//1.first add distance words
 	maps->insert(pair<string*, int>(&DISTANCE_DUMMY,dict_num++));
-	maps->insert(pair<string*, int>(&DISTANCE_ROOT_RIGHT,dict_num++));
-	maps->insert(pair<string*, int>(&DISTANCE_RIGHT,dict_num++));
-	maps->insert(pair<string*, int>(&DISTANCE_LEFT,dict_num++));
-	maps->insert(pair<string*, int>(&DISTANCE_LL,dict_num++));
-	maps->insert(pair<string*, int>(&DISTANCE_LR,dict_num++));
-	maps->insert(pair<string*, int>(&DISTANCE_RL,dict_num++));
-	maps->insert(pair<string*, int>(&DISTANCE_RR,dict_num++));
-	num_distance += 8;
+	if(construct_info){
+		maps->insert(pair<string*, int>(&DISTANCE_ROOT_RIGHT,dict_num++));
+		maps->insert(pair<string*, int>(&DISTANCE_RIGHT,dict_num++));
+		maps->insert(pair<string*, int>(&DISTANCE_LEFT,dict_num++));
+		maps->insert(pair<string*, int>(&DISTANCE_LL,dict_num++));
+		maps->insert(pair<string*, int>(&DISTANCE_LR,dict_num++));
+		maps->insert(pair<string*, int>(&DISTANCE_RL,dict_num++));
+		maps->insert(pair<string*, int>(&DISTANCE_RR,dict_num++));
+		num_distance += 8;
+	}
+	else
+		num_distance += 1;
 	for(int i=-1*distance_max;i<=distance_max;i++){
 		string * dis = get_distance_str(i);
 		maps->insert(pair<string*, int>(dis,dict_num++));

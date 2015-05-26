@@ -82,7 +82,7 @@ public:
 	~Dict(){
 		delete maps;	//leak some memory, but that's alright
 	}
-	void construct_dictionary(vector<DependencyInstance*>*);
+	void construct_dictionary(vector<DependencyInstance*>*,void* construct_info=0);
 };
 
 
